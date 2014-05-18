@@ -52,10 +52,9 @@ class IndexHandler(BaseHandler):
       self.response.write('<a href="%s">logout</a><br/>' % self.logout_link)
       self.response.write(str(self.current_user))
     else:
-      self.response.write('<a href="%s">log in via facebook</a><br/>' %
-                          self.login_links["facebook"])
-      self.response.write('<a href="%s">log in via google</a><br/>' %
-                          self.login_links["google"])
+      for service in self.login_links:
+        self.response.write('<a href="%s">log in via %s</a><br/>' %
+                            (self.login_links[service], service))
 
 
 app = webapp2.WSGIApplication([
