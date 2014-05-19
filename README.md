@@ -23,9 +23,9 @@ its IP address by running
 
     docker inspect -f "{{.NetworkSettings.IPAddress}}" container_id
 
-Finally, add the container's IP and `teams.mayone.us` to your `/etc/hosts` file.
+Finally, add the container's IP and `my.mayone.us` to your `/etc/hosts` file.
 
-Now, `https://teams.mayone.us` should resolve and display the information in
+Now, `https://my.mayone.us` should resolve and display the information in
 `markup/index.jade` automatically on change.
 
 For any of the login stuff in backend/ to work, you'll need to set up
