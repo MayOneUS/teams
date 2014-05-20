@@ -17,6 +17,21 @@ html
           if team.image
             img= team.image
         p= team.description
-
+    
+      .sidebar
+        p.pledges= team.pledges
+        p.raised= team.raised
+        p.goal= team.goal
+        div.progress= team.progress
+        div.pledge
+          a.pledge Pledge Now!
+        if team.stats
+          p.stats= team.stats out of team.total
+        div.social
+          a.facebook  
+          a.twitter
+          a.email
+        div.recent_pledges
+          p.recent= team.recent
 
     include includes/footer
