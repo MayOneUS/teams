@@ -9,4 +9,14 @@ html
       .page-header
         h1= team.name
 
+    .container
+      .main-content
+        if team.video
+          iframe.embed= team.video
+        else
+          if team.image
+            img= team.image
+        p= team.description
+
+
     include includes/footer
