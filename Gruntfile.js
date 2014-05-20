@@ -25,16 +25,19 @@ module.exports = function(grunt) {
         },
 
         jade: {
-            compile: {
-                options: {
-                    data: {
-                        debug: false
-                    }
-                },
-                files: {
-                    "build/static/index.html": "markup/index.jade",
-                }
-            }
+          compile: {
+            options: {
+              data: {
+                debug: false
+              }
+            },
+            files: [
+              {cwd: 'markup/', src: '*.jade.j2', dest: 'build/templates/',
+               expand: true, ext: '.html'},
+              {cwd: 'markup/', src: '*.jade', dest: 'build/static/', expand: true,
+               ext: '.html'},
+            ]
+          }
         },
 
         autoprefixer: {
