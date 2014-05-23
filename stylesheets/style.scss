@@ -1,10 +1,130 @@
+@import "_entypo";
+
 html, body {
-  font-family: arial, sans-serif;
-  margin: 0;
-  -webkit-font-smoothing: antialiased;
-  box-sizing: border-box;
+    font-family: "Oswald", arial, sans-serif;
+    margin: 0;
+    -webkit-font-smoothing: antialiased;
+    box-sizing: border-box;
 }
 
-div#header, div#footer {
-  background: lightgrey;
+h1, h2, h3, h4, h5, h6 {
+    font-family: "Oswald", arial, sans-serif;
 }
+p, div {
+    font-family: "Lato", arial, sans-serif;
+    font-size: 17px;
+}
+
+.spacing {
+    height: 200px;
+}
+
+#header {
+    background: linear-gradient(to bottom, #000000 0%,#646373 100%);
+    height: auto;
+    overflow: hidden;
+    line-height: 120px;
+    .logo {
+        display: inline-block;
+        img {
+            padding: 20px 0;
+        }
+    }
+    .links {
+        text-align: right;
+        a {
+            color: white;
+            margin-left: 30px;
+        }
+    }
+    #primary-menu-toggle {
+        display: none;
+        & + label {
+            position: absolute;
+            top: 2px;
+            right: 40px;
+            float: right;
+            display: none;
+            &:hover {
+                cursor: pointer;
+            }
+            &:before {
+                font-size: 80px;
+                font-family: 'EntypoRegular';
+                font-style: normal;
+                font-weight: normal;
+                color: white;
+                content: '\2630';
+            }
+            & + .mobile-links {
+                max-height: 0px;
+                transition: max-height 1s;
+                -moz-transition: max-height 1s; // Firefox
+                -webkit-transition: max-height 1s; // Safari and Chrome
+                -o-transition: max-height 1s; // Opera
+                background: black;
+
+                a {
+                    color: white;
+                    clear: both;
+                    display: block;
+                    text-align: center;
+                    font-weight: bold;
+                    line-height: normal;
+                    height: 50px;
+                    &:first-child {
+                        border-top: solid 20px white;
+                        padding-top: 20px;
+                        height: 90px;
+                    }
+                    &:last-child {
+                        border-bottom: solid 20px white;
+                        height: 70px;
+                    }
+                }
+            }
+        }
+        &:checked + label + .mobile-links {
+            max-height: 500px;
+        }
+    }
+}
+
+#footer {
+    font-family: "Oswald", arial, sans-serif;
+    text-align: center;
+    color: #adadad;
+    .social {
+        background: rgb(60, 60, 60);
+        height: 110px;
+
+        span.entypo-social {
+            margin: 0 15px;
+            font-size: 50pt;
+            line-height: 110px;
+            color: yellow;
+        }
+        a:hover {
+            text-decoration: none;
+        }
+    }
+
+    .notices {
+        padding: 10px;
+        background: rgb(43, 43, 43);
+
+        .pac_disclaimer {
+            width: 600px;
+            margin: auto;
+            border: 1px solid white;
+            color: white;
+            font-variant: small-caps;
+            font-size: 22px;
+            line-height: 22px;
+            padding: 5px;
+            margin-bottom: 10px;
+        }
+    }
+}
+
+@import "responsive";

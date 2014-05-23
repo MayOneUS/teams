@@ -1,0 +1,10 @@
+a(href="/") Home
+
+{% if logged_in %}
+a(href="/dashboard") Dashboard
+a(href="{{logout_link}}") Logout
+{% else %}
+{% for service, service_link in login_links.iteritems() %}
+a(href="{{service_link}}") Login with {{service}}
+{% endfor %}
+{% endif %}

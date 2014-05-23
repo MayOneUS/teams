@@ -4,15 +4,19 @@ html
     include includes/head
   body
     include includes/header
+    .container
+      .page-header
+        h1 My Super Pac
 
-    p Hello, world!
+      .page-body
+        h2 Leading teams
 
-    ul
-      {% for team in teams %}
-      {% if team.primary_slug %}
-      li
-        a(href="/t/{{team.primary_slug}}/") {{team.title}}
-      {% endif %}
-      {% endfor %}
+        ul
+          {% for team in teams %}
+          {% if team.primary_slug %}
+          li
+            a(href="/t/{{team.primary_slug}}/") {{team.title}}
+          {% endif %}
+          {% endfor %}
 
     include includes/footer
