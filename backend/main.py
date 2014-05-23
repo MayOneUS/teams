@@ -86,7 +86,6 @@ class Team(db.Model):
   description = db.TextProperty(required=True)
 
   goal_dollars = db.IntegerProperty()
-  website = db.LinkProperty()
   youtube_id = db.StringProperty()
   zip_code = db.StringProperty()
 
@@ -139,7 +138,8 @@ def require_login(fn):
 
 class IndexHandler(BaseHandler):
   def get(self):
-    self.render_template("index.html")
+    # TODO: shouldn't return all teams, should get list of top n
+    self.render_template("index.html", teams=list(Team.all()))
 
 
 class NotFoundHandler(BaseHandler):
@@ -163,7 +163,7 @@ class TeamBaseHandler(BaseHandler):
     is_admin = False
     if self.logged_in:
       if AdminToTeam.all().filter("team =", team).filter(
-          "user =", str(self.current_user["user_id"])).get() is not None:
+          "user =", self.current_user["user_id"]).get() is not None:
         is_admin = True
     return team, primary, is_admin
 
@@ -187,7 +187,7 @@ class DashboardHandler(BaseHandler):
   def get(self):
     teams = [a.team for a in
              AdminToTeam.all().filter('user =',
-                str(self.current_user["user_id"]))]
+                self.current_user["user_id"])]
     self.render_template("dashboard.html", teams=teams)
 
 
@@ -205,7 +205,6 @@ class NewTeamHandler(BaseHandler):
     goal_dollars = self.request.get("goal_dollars") or None
     if goal_dollars:
       goal_dollars = int(goal_dollars)
-    website = self.request.get("website") or None
     youtube_id = self.request.get("youtube_id") or None
     if youtube_id and not YOUTUBE_ID_VALIDATOR.match(youtube_id):
       raise Exception("invalid youtube id")
@@ -213,12 +212,12 @@ class NewTeamHandler(BaseHandler):
     if zip_code and not INTEGER_VALIDATOR.match(zip_code):
       raise Exception("invalid zip_code")
     team = Team(title=title, description=description,
-                goal_dollars=goal_dollars * 100, website=website,
-                youtube_id=youtube_id, zip_code=zip_code)
+                goal_dollars=goal_dollars * 100, youtube_id=youtube_id,
+                zip_code=zip_code)
     team.put()
     # TODO: can i reference a team before putting it in other reference
     # properties? should check
-    AdminToTeam(user=str(self.current_user["user_id"]), team=team).put()
+    AdminToTeam(user=self.current_user["user_id"], team=team).put()
     team.primary_slug = Slug.new(team)
     team.put()
     self.redirect("/t/%s" % team.primary_slug)
@@ -254,7 +253,6 @@ class EditTeamHandler(TeamBaseHandler):
       team.goal_dollars = int(goal_dollars)
     else:
       team.goal_dollars = None
-    team.website = self.request.get("website") or None
     youtube_id = self.request.get("youtube_id") or None
     if youtube_id and not YOUTUBE_ID_VALIDATOR.match(youtube_id):
       raise Exception("invalid youtube id")
