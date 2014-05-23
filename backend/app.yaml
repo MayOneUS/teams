@@ -9,16 +9,15 @@ handlers:
   static_files: static/favicon.ico
   upload: static/*
 
-- url: /
-  static_files: static/index.html
-  upload: static/*
-
 - url: /static/
   static_dir: static/
 
 - url: .*
   script: main.app
+  secure: always
 
 libraries:
 - name: webapp2
+  version: latest
+- name: jinja2
   version: latest

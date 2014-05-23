@@ -1,0 +1,42 @@
+doctype html
+html
+  head
+    include includes/head
+  body
+    include includes/header
+
+    .container
+      .page-header
+        h1 {{team.title}}
+
+        {% if edit_url %}
+        p
+          a(href="{{edit_url}}") Edit
+        {% endif %}
+
+    .container
+      .main-content
+        {% if team.youtube_id %}
+        iframe(src="//www.youtube.com/embed/{{team.youtube_id}}",
+               frameborder="0", allowfullscreen, width="420", height="315")
+        {% elif team.image_url %}
+        img(src="{{team.image_url}}")
+        {% endif %}
+        p {{team.description}}
+
+      .sidebar
+        p.pledges pledges
+        p.raised raised
+        p.goal {{team.goal}}
+        div.progress progress
+        div.pledge
+          a.pledge Pledge Now!
+        p.stats stats out of total
+        div.social
+          a.facebook
+          a.twitter
+          a.email
+        div.recent_pledges
+          p.recent recent
+
+    include includes/footer

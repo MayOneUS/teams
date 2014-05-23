@@ -1,0 +1,32 @@
+doctype html
+html
+  head
+    include includes/head
+  body
+    include includes/header
+
+    .container
+      .page-header
+        h1 Edit your team
+
+      .page-body
+        form(method="post")
+          h2 Required:
+          p Team Title:
+          input.title(name="title", value="{{team.title}}")
+          p Description:
+          textarea.description(name="description") {{team.description}}
+
+          h2 Optional:
+          p Goal:
+          input.goal_dollars(name="goal_dollars",
+              value="{{team.goal_dollars or ''}}")
+          p Youtube Video Id:
+          input.youtube_id(name="youtube_id", value="{{team.youtube_id or ''}}")
+          p Zip code:
+          input.zip_code(name="zip_code", value="{{team.zip_code or ''}}")
+
+          div.create_team
+            input(type="submit", value="Edit my team!")
+
+    include includes/footer

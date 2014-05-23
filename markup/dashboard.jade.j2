@@ -1,0 +1,20 @@
+doctype html
+html
+  head
+    include includes/head
+  body
+    include includes/header
+
+    h2 My Teams
+
+    ul
+      {% for team in teams %}
+      {% if team.primary_slug %}
+      li
+        a(href="/t/{{team.primary_slug}}/") {{team.title}}
+      {% endif %}
+      {% endfor %}
+      li
+        a(href="/dashboard/new") Create new
+
+    include includes/footer

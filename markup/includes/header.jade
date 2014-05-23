@@ -1,2 +1,17 @@
-header
-  p Header goes here
+div#header
+  div.login
+    {% if logged_in %}
+    div.msg Welcome {{current_user.name}}
+    ul.nav
+      li
+        a(href="/dashboard") Dashboard
+      li
+        a(href="{{logout_link}}") Logout
+    {% else %}
+    div.msg Log in with:
+    ul.login_services
+      {% for service, service_link in login_links.iteritems() %}
+      li
+        a(href="{{service_link}}") {{service}}
+      {% endfor %}
+    {% endif %}
