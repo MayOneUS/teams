@@ -10,22 +10,6 @@ html
         h1 Create a new team
 
       .page-body
-        form(method="post")
-          h2 Required:
-          p Team Title:
-          input.title(name="title")
-          p Description:
-          textarea.description(name="description")
-
-          h2 Optional:
-          p Goal:
-          input.goal_dollars(name="goal_dollars")
-          p Youtube Video Id:
-          input.youtube_id(name="youtube_id")
-          p Zip code:
-          input.zip_code(name="zip_code")
-
-          div.create_team
-            input(type="submit", value="Create my team!")
+        include includes/team-form
 
     include includes/footer

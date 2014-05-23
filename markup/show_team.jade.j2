@@ -7,24 +7,30 @@ html
 
     .container
       .page-header
-        h1 {{team.title}}
+        .col-md-2
+        .col-md-5
+          h1 {{team.title}}
 
-        {% if edit_url %}
-        p
+        .col-md-3(style="text-align:right;")
+          {% if edit_url %}
           a(href="{{edit_url}}") Edit
-        {% endif %}
+          {% endif %}
+        .col-md-2
 
     .container
-      .main-content
+      .col-md-2
+      .main-content.col-md-5
         {% if team.youtube_id %}
         iframe(src="//www.youtube.com/embed/{{team.youtube_id}}",
                frameborder="0", allowfullscreen, width="420", height="315")
         {% elif team.image_url %}
         img(src="{{team.image_url}}")
         {% endif %}
-        p {{team.description}}
+        {% autoescape false %}
+        div.description {{description_rendered}}
+        {% endautoescape %}
 
-      .sidebar
+      .sidebar.col-md-3
         p.pledges pledges
         p.raised raised
         p.goal {{team.goal}}
@@ -38,5 +44,6 @@ html
           a.email
         div.recent_pledges
           p.recent recent
+      .col-md-2
 
     include includes/footer

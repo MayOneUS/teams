@@ -1,0 +1,21 @@
+form(method="post")
+  .container
+    .col-md-6
+      h2 Required:
+      p Team Title:
+      input.title(name="title", value="{{team and team.title or ''}}")
+      p Description:
+      textarea.description(name="description", rows=10, style="width:100%") {{team and team.description or ''}}
+      div.create_team(style="text-align: right;")
+        input(type="submit", value="Publish")
+
+    .col-md-1
+    .col-md-5
+      h2 Optional:
+      p Goal:
+      input.goal_dollars(name="goal_dollars",
+          value="{{team and team.goal_dollars or ''}}")
+      p Youtube Video Id:
+      input.youtube_id(name="youtube_id", value="{{team and team.youtube_id or ''}}")
+      p Zip code:
+      input.zip_code(name="zip_code", value="{{team and team.zip_code or ''}}")

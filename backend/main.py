@@ -7,6 +7,7 @@ import re
 import urllib
 
 import jinja2
+import markdown
 import webapp2
 
 from google.appengine.api import urlfetch
@@ -179,7 +180,10 @@ class TeamHandler(TeamBaseHandler):
       edit_url = "/t/%s/edit" % team.primary_slug
     else:
       edit_url = None
-    self.render_template("show_team.html", team=team, edit_url=edit_url)
+    self.render_template(
+        "show_team.html", team=team, edit_url=edit_url,
+        description_rendered=markdown.markdown(
+            jinja2.escape(team.description)))
 
 
 class DashboardHandler(BaseHandler):
