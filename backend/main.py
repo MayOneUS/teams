@@ -220,7 +220,7 @@ class NewTeamHandler(BaseHandler):
     if zip_code and not INTEGER_VALIDATOR.match(zip_code):
       raise Exception("invalid zip_code")
     team = Team(title=title, description=description,
-                goal_dollars=goal_dollars * 100, youtube_id=youtube_id,
+                goal_dollars=goal_dollars, youtube_id=youtube_id,
                 zip_code=zip_code)
     team.put()
     # TODO: can i reference a team before putting it in other reference
@@ -232,8 +232,7 @@ class NewTeamHandler(BaseHandler):
 
 
 class EditTeamHandler(TeamBaseHandler):
-
-  @require_login
+  # require_login unneeded because we do the checking ourselves with validate
   def get(self, slug):
     team, primary, is_admin = self.validate(slug)
     if team is None:
@@ -244,7 +243,7 @@ class EditTeamHandler(TeamBaseHandler):
       return self.redirect("/t/%s" % team.primary_slug)
     self.render_template("edit_team.html", team=team)
 
-  @require_login
+  # require_login unneeded because we do the checking ourselves with validate
   def post(self, slug):
     team, _, is_admin = self.validate(slug)
     if team is None:

@@ -31,6 +31,9 @@ html
         {% endautoescape %}
 
       .sidebar.col-md-3
+        iframe(src="https://pledge.mayone.us/embed.html",
+               width="260px", height="260px", frameborder="0",
+               scrolling="no")
         p.pledges pledges
         p.raised raised
         p.goal {{team.goal}}
