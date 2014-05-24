@@ -14,7 +14,7 @@ from google.appengine.api import urlfetch
 from google.appengine.ext import db
 
 AUTH_SERVICE_PUB = "https://auth.mayone.us"
-AUTH_SERVICE_REQ = "http://172.17.0.2"
+AUTH_SERVICE_REQ = AUTH_SERVICE_PUB  # "http://172.17.0.2"
 
 JINJA = jinja2.Environment(
   loader=jinja2.FileSystemLoader('templates/'),
