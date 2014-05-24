@@ -212,6 +212,13 @@ class NewTeamHandler(BaseHandler):
     description = self.request.get("description")
     goal_dollars = self.request.get("goal_dollars") or None
     if goal_dollars:
+      # Strip out any dollar signs
+      goal_dollars = goal_dollars.replace('$', '')
+      # Strip out any commas before converting to an int, so that an input like "1,000" is handled properly
+      goal_dollars = goal_dollars.replace(',', '')
+      # Strip out anything after a period, since we're not taking cents into account (allowing us to handle "100.00")
+      goal_dollars = goal_dollars.partition('.')[0]
+      # TODO: Support Europeans
       goal_dollars = int(goal_dollars)
     youtube_id = self.request.get("youtube_id") or None
     if youtube_id and not YOUTUBE_ID_VALIDATOR.match(youtube_id):
