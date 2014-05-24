@@ -35,15 +35,19 @@ class BaseHandler(webapp2.RequestHandler):
     c = Cookie.SimpleCookie()
     c["auth"] = self.request.cookies.get("auth", "")
     self.request.scheme = "https"
-    resp = urlfetch.fetch(
-        "%s/v1/current_user?%s" % (AUTH_SERVICE_REQ, urllib.urlencode({
-            "return_to": self.request.url})),
-        headers={"Cookie": c["auth"].OutputString()},
-        follow_redirects=False,
-        validate_certificate=True)
-    if resp.status_code != 200:
-      raise Exception("Unexpected authentication error: %s", resp.content)
-    return json.loads(resp.content)
+    try:
+      resp = urlfetch.fetch(
+          "%s/v1/current_user?%s" % (AUTH_SERVICE_REQ, urllib.urlencode({
+              "return_to": self.request.url})),
+          headers={"Cookie": c["auth"].OutputString()},
+          follow_redirects=False,
+          validate_certificate=True)
+      if resp.status_code != 200:
+        raise Exception("Unexpected authentication error: %s", resp.content)
+      return json.loads(resp.content)
+    except Exception:
+      logging.exception("failed getting current user, assuming logged out")
+      return {"logged_in": False, "login_links": {}}
 
   @property
   def logged_in(self):
@@ -55,7 +59,7 @@ class BaseHandler(webapp2.RequestHandler):
 
   @property
   def login_links(self):
-    return self.auth_response.get("login_links")
+    return self.auth_response.get("login_links") or {}
 
   @property
   def logout_link(self):
