@@ -235,7 +235,7 @@ def require_login(fn):
   @functools.wraps(fn)
   def new_handler(self, *args, **kwargs):
     if not self.logged_in:
-      self.redirect("/login")
+      self.redirect("/")
       return
     return fn(self, *args, **kwargs)
   return new_handler
