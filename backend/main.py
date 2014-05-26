@@ -30,6 +30,36 @@ INVALID_SLUG_CHARS = re.compile(r'[^\w-]')
 MULTIDASH_RE = re.compile(r'-+')
 SLUG_TOKEN_AMOUNT = 2
 
+DEFAULT_DESC = u"""\
+Giving money to a super PAC is one of the last things I thought I'd ever \
+do... but I just did.
+
+I recently joined Lawrence Lessig's citizen-funded Mayday PAC, an ambitious \
+campaign to win a Congress committed to ending corruption in 2016, and we did \
+something amazing: we raised $1 million dollars in 12 days. That's a ton of \
+money, but it's not enough.
+
+We're raising $5 million more, and I'm writing to my friends and family to \
+ask if you can help us get the rest of the way there. If all of us who have \
+supported the Mayday PAC so far each recruit just five matching donation, \
+we'd easily hit that goal. But I'd like to see if I can recruit ten of my \
+friends to donate. So my question is: will you be one of those ten?
+
+I don't have to tell you why this is important. We all know our government is \
+dismally dysfunctional because politicians spend all their time raising money \
+instead of doing the jobs they were elected to do. So our plan is to fight \
+firewith fire: raise the money needed to elect representatives that are \
+committed to the reform we so desperately need.
+
+You can read all about the Mayday PAC from the links on this page, but once \
+you do, please consider joining me in making a pledge through my personalized \
+page here. This is a totally crazy plan, but now that we've raised $1 million \
+I'm beginning to think it's so crazy that it just might work. It'd mean the \
+world to have your support.
+
+Thank you!
+"""
+
 
 class BaseHandler(webapp2.RequestHandler):
 
@@ -158,9 +188,9 @@ class ZipcodeField(wtforms.Field):
 
 class TeamForm(wtforms.Form):
   title = wtforms.StringField("Title", [
-      wtforms.validators.Length(min=1, max=500)])
+      wtforms.validators.Length(min=1, max=500)], default=u'My Pledge Page')
   description = wtforms.TextAreaField("Description", [
-      wtforms.validators.Length(min=1)])
+      wtforms.validators.Length(min=1)], default=DEFAULT_DESC)
 
   goal_dollars = IntegerField("Goal", [wtforms.validators.optional()])
   youtube_id = YoutubeIdField("Youtube Video URL", [
