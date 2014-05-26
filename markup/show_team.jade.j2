@@ -25,6 +25,10 @@ html
                frameborder="0", allowfullscreen, width="420", height="315")
         {% elif team.image_url %}
         img(src="{{team.image_url}}")
+        {% else %}
+        iframe(src="//player.vimeo.com/video/93299391", width="420",
+               height="236", frameborder="0", webkitallowfullscreen,
+               mozallowfullscreen, allowfullscreen)
         {% endif %}
         {% autoescape false %}
         div.description {{description_rendered}}
@@ -34,19 +38,10 @@ html
         iframe(src="https://pledge.mayone.us/embed.html",
                width="260px", height="260px", frameborder="0",
                scrolling="no")
-        p.pledges pledges
-        p.raised raised
-        p.goal {{team.goal}}
-        div.progress progress
-        div.pledge
-          a.pledge Pledge Now!
-        p.stats stats out of total
         div.social
           a.facebook
           a.twitter
           a.email
-        div.recent_pledges
-          p.recent recent
       .col-md-2
 
     include includes/footer

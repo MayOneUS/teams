@@ -5,10 +5,14 @@ import logging
 import os
 import re
 import urllib
+import urlparse
 
 import jinja2
 import markdown
 import webapp2
+import wtforms
+from wtforms.fields.html5 import IntegerField
+from wtforms.widgets.html5 import URLInput
 
 from google.appengine.api import urlfetch
 from google.appengine.ext import db
@@ -22,10 +26,39 @@ JINJA = jinja2.Environment(
   autoescape=True)
 
 YOUTUBE_ID_VALIDATOR = re.compile(r'^[\w\-]+$')
-INTEGER_VALIDATOR = re.compile(r'^[0-9]+$')
 INVALID_SLUG_CHARS = re.compile(r'[^\w-]')
 MULTIDASH_RE = re.compile(r'-+')
 SLUG_TOKEN_AMOUNT = 2
+
+DEFAULT_DESC = u"""\
+Giving money to a super PAC is one of the last things I thought I'd ever \
+do... but I just did.
+
+I recently joined Lawrence Lessig's citizen-funded Mayday PAC, an ambitious \
+campaign to win a Congress committed to ending corruption in 2016, and we did \
+something amazing: we raised $1 million dollars in 12 days. That's a ton of \
+money, but it's not enough.
+
+We're raising $5 million more, and I'm writing to my friends and family to \
+ask if you can help us get the rest of the way there. If all of us who have \
+supported the Mayday PAC so far each recruit just five matching donation, \
+we'd easily hit that goal. But I'd like to see if I can recruit ten of my \
+friends to donate. So my question is: will you be one of those ten?
+
+I don't have to tell you why this is important. We all know our government is \
+dismally dysfunctional because politicians spend all their time raising money \
+instead of doing the jobs they were elected to do. So our plan is to fight \
+firewith fire: raise the money needed to elect representatives that are \
+committed to the reform we so desperately need.
+
+You can read all about the Mayday PAC from the links on this page, but once \
+you do, please consider joining me in making a pledge through my personalized \
+page here. This is a totally crazy plan, but now that we've raised $1 million \
+I'm beginning to think it's so crazy that it just might work. It'd mean the \
+world to have your support.
+
+Thank you!
+"""
 
 
 class BaseHandler(webapp2.RequestHandler):
@@ -96,6 +129,75 @@ class Team(db.Model):
 
   # for use with google.appengine.api.imagesget_serving_url
   image = db.BlobProperty()
+
+  user_token = db.StringProperty()
+
+
+class YoutubeIdField(wtforms.Field):
+  widget = URLInput()
+
+  def __init__(self, label=None, validators=None, **kwargs):
+    wtforms.Field.__init__(self, label, validators, **kwargs)
+
+  def _value(self):
+    if self.data is not None:
+      return u"https://www.youtube.com/watch?v=%s" % unicode(self.data)
+    else:
+      return ''
+
+  def process_formdata(self, valuelist):
+    self.data = None
+    if valuelist:
+      parsed = urlparse.urlparse(valuelist[0])
+      if "youtube.com" not in parsed.netloc:
+        raise ValueError(self.gettext("Not a valid Youtube URL"))
+      video_args = urlparse.parse_qs(parsed.query).get("v")
+      if len(video_args) != 1:
+        raise ValueError(self.gettext("Not a valid Youtube URL"))
+      youtube_id = video_args[0]
+      if not YOUTUBE_ID_VALIDATOR.match(youtube_id):
+        raise ValueError(self.gettext("Not a valid Youtube URL"))
+      self.data = youtube_id
+
+
+class ZipcodeField(wtforms.Field):
+  """
+  A text field, except all input is coerced to an integer.  Erroneous input
+  is ignored and will not be accepted as a value.
+  """
+  widget = wtforms.widgets.TextInput()
+
+  def __init__(self, label=None, validators=None, **kwargs):
+    wtforms.Field.__init__(self, label, validators, **kwargs)
+
+  def _value(self):
+    if self.data is not None:
+      return unicode(self.data)
+    else:
+      return ''
+
+  def process_formdata(self, valuelist):
+    self.data = None
+    if valuelist:
+      try:
+        int(valuelist[0])
+      except ValueError:
+        self.data = None
+        raise ValueError(self.gettext('Not a valid integer value'))
+      else:
+        self.data = valuelist[0]
+
+
+class TeamForm(wtforms.Form):
+  title = wtforms.StringField("Title", [
+      wtforms.validators.Length(min=1, max=500)], default=u'My Pledge Page')
+  description = wtforms.TextAreaField("Description", [
+      wtforms.validators.Length(min=1)], default=DEFAULT_DESC)
+
+  goal_dollars = IntegerField("Goal", [wtforms.validators.optional()])
+  youtube_id = YoutubeIdField("Youtube Video URL", [
+      wtforms.validators.optional()])
+  zip_code = ZipcodeField("Zip Code", [wtforms.validators.optional()])
 
 
 class Slug(db.Model):
@@ -190,6 +292,13 @@ class TeamHandler(TeamBaseHandler):
             jinja2.escape(team.description)))
 
 
+class LoginHandler(BaseHandler):
+  def get(self):
+    if self.logged_in:
+      return self.redirect("/dashboard")
+    self.render_template("login.html")
+
+
 class DashboardHandler(BaseHandler):
   @require_login
   def get(self):
@@ -202,40 +311,58 @@ class DashboardHandler(BaseHandler):
 class NewTeamHandler(BaseHandler):
   @require_login
   def get(self):
-    self.render_template("new_team.html")
+    self.render_template("new_team.html", form=TeamForm())
 
   @require_login
   def post(self):
-    # TODO: this is horrible. should use WTForms or something and
-    # NOT COPY PASTE
-    title = self.request.get("title")
-    description = self.request.get("description")
-    goal_dollars = self.request.get("goal_dollars") or None
-    if goal_dollars:
-      # Strip out any dollar signs
-      goal_dollars = goal_dollars.replace('$', '')
-      # Strip out any commas before converting to an int, so that an input like "1,000" is handled properly
-      goal_dollars = goal_dollars.replace(',', '')
-      # Strip out anything after a period, since we're not taking cents into account (allowing us to handle "100.00")
-      goal_dollars = goal_dollars.partition('.')[0]
-      # TODO: Support Europeans
-      goal_dollars = int(goal_dollars)
-    youtube_id = self.request.get("youtube_id") or None
-    if youtube_id and not YOUTUBE_ID_VALIDATOR.match(youtube_id):
-      raise Exception("invalid youtube id")
-    zip_code = self.request.get("zip_code") or None
-    if zip_code and not INTEGER_VALIDATOR.match(zip_code):
-      raise Exception("invalid zip_code")
-    team = Team(title=title, description=description,
-                goal_dollars=goal_dollars, youtube_id=youtube_id,
-                zip_code=zip_code)
+    form = TeamForm(self.request.POST)
+    if not form.validate():
+      return self.render_template("new_team.html", form=form)
+    team = Team(title=form.title.data, description=form.description.data,
+                goal_dollars=form.goal_dollars.data,
+                youtube_id=form.youtube_id.data, zip_code=form.zip_code.data)
     team.put()
     # TODO: can i reference a team before putting it in other reference
     # properties? should check
     AdminToTeam(user=self.current_user["user_id"], team=team).put()
     team.primary_slug = Slug.new(team)
     team.put()
-    self.redirect("/t/%s" % team.primary_slug)
+    return self.redirect("/t/%s" % team.primary_slug)
+
+
+class NewFromPledgeHandler(BaseHandler):
+  def add_to_user(self, team):
+    if self.logged_in:
+      if AdminToTeam.all().filter("user =", self.current_user["user_id"])\
+          .filter("team =", team).get() is None:
+        AdminToTeam(user=self.current_user["user_id"], team=team).put()
+
+  def get(self, user_token):
+    team = Team.all().filter('user_token =', user_token).get()
+    if team is None:
+      # TODO: get prefills from pledge service and fail if the pledge service
+      # doesn't have this token
+      form = TeamForm()
+    else:
+      self.add_to_user(team)
+      form = TeamForm(obj=team)
+    self.render_template("new_from_pledge.html", form=form)
+
+  def post(self, user_token):
+    team = Team.all().filter('user_token =', user_token).get()
+    form = TeamForm(self.request.POST, team)
+    if not form.validate():
+      return self.render_template("new_from_pledge.html", form=form)
+    if team is None:
+      team = Team(title=form.title.data, description=form.description.data,
+                  zip_code=form.zip_code.data, user_token=user_token)
+      team.put()
+    else:
+      form.populate_obj(team)
+    self.add_to_user(team)
+    team.primary_slug = Slug.new(team)
+    team.put()
+    return self.redirect("/t/%s" % team.primary_slug)
 
 
 class EditTeamHandler(TeamBaseHandler):
@@ -248,7 +375,7 @@ class EditTeamHandler(TeamBaseHandler):
       return self.redirect("/t/%s/edit" % team.primary_slug, permanent=True)
     if not is_admin:
       return self.redirect("/t/%s" % team.primary_slug)
-    self.render_template("edit_team.html", team=team)
+    self.render_template("edit_team.html", form=TeamForm(obj=team))
 
   # require_login unneeded because we do the checking ourselves with validate
   def post(self, slug):
@@ -257,24 +384,10 @@ class EditTeamHandler(TeamBaseHandler):
       return
     if not is_admin:
       return self.redirect("/t/%s" % team.primary_slug)
-
-    # TODO: this is horrible. should use WTForms or something and
-    # NOT COPY PASTE
-    team.title = self.request.get("title")
-    team.description = self.request.get("description")
-    goal_dollars = self.request.get("goal_dollars") or None
-    if goal_dollars:
-      team.goal_dollars = int(goal_dollars)
-    else:
-      team.goal_dollars = None
-    youtube_id = self.request.get("youtube_id") or None
-    if youtube_id and not YOUTUBE_ID_VALIDATOR.match(youtube_id):
-      raise Exception("invalid youtube id")
-    team.youtube_id = youtube_id
-    zip_code = self.request.get("zip_code") or None
-    if zip_code and not INTEGER_VALIDATOR.match(zip_code):
-      raise Exception("invalid zip_code")
-    team.zip_code = zip_code
+    form = TeamForm(self.request.POST, team)
+    if not form.validate():
+      return self.render_template("edit_team.html", form=form)
+    form.populate_obj(team)
     team.primary_slug = Slug.new(team)
     team.put()
     self.redirect("/t/%s" % team.primary_slug)
@@ -283,7 +396,9 @@ class EditTeamHandler(TeamBaseHandler):
 app = webapp2.WSGIApplication([
   (r'/t/([^/]+)/?', TeamHandler),
   (r'/t/([^/]+)/edit?', EditTeamHandler),
+  (r'/login/?', LoginHandler),
   (r'/dashboard/?', DashboardHandler),
   (r'/dashboard/new/?', NewTeamHandler),
+  (r'/dashboard/new_from_pledge/(\w+)', NewFromPledgeHandler),
   (r'/?', IndexHandler),
   (r'.*', NotFoundHandler)], debug=False)
