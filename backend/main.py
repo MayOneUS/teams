@@ -130,6 +130,8 @@ class Team(db.Model):
   # for use with google.appengine.api.imagesget_serving_url
   image = db.BlobProperty()
 
+  user_token = db.StringProperty()
+
 
 class YoutubeIdField(wtforms.Field):
   widget = URLInput()
@@ -328,6 +330,41 @@ class NewTeamHandler(BaseHandler):
     return self.redirect("/t/%s" % team.primary_slug)
 
 
+class NewFromPledgeHandler(BaseHandler):
+  def add_to_user(self, team):
+    if self.logged_in:
+      if AdminToTeam.all().filter("user =", self.current_user["user_id"])\
+          .filter("team =", team).get() is None:
+        AdminToTeam(user=self.current_user["user_id"], team=team).put()
+
+  def get(self, user_token):
+    team = Team.all().filter('user_token =', user_token).get()
+    if team is None:
+      # TODO: get prefills from pledge service and fail if the pledge service
+      # doesn't have this token
+      form = TeamForm()
+    else:
+      self.add_to_user(team)
+      form = TeamForm(obj=team)
+    self.render_template("new_from_pledge.html", form=form)
+
+  def post(self, user_token):
+    team = Team.all().filter('user_token =', user_token).get()
+    form = TeamForm(self.request.POST, team)
+    if not form.validate():
+      return self.render_template("new_from_pledge.html", form=form)
+    if team is None:
+      team = Team(title=form.title.data, description=form.description.data,
+                  zip_code=form.zip_code.data, user_token=user_token)
+      team.put()
+    else:
+      form.populate_obj(team)
+    self.add_to_user(team)
+    team.primary_slug = Slug.new(team)
+    team.put()
+    return self.redirect("/t/%s" % team.primary_slug)
+
+
 class EditTeamHandler(TeamBaseHandler):
   # require_login unneeded because we do the checking ourselves with validate
   def get(self, slug):
@@ -362,5 +399,6 @@ app = webapp2.WSGIApplication([
   (r'/login/?', LoginHandler),
   (r'/dashboard/?', DashboardHandler),
   (r'/dashboard/new/?', NewTeamHandler),
+  (r'/dashboard/new_from_pledge/(\w+)', NewFromPledgeHandler),
   (r'/?', IndexHandler),
   (r'.*', NotFoundHandler)], debug=False)
