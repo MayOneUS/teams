@@ -1,3 +1,7 @@
+// pull in common front-end styles, including bootstrap
+@import "extern/frontend/stylesheets/style.scss";
+
+// pull in entypo
 @import "_entypo";
 
 html, body {
