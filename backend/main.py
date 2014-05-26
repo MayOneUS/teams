@@ -9,6 +9,7 @@ import urllib
 import jinja2
 import markdown
 import webapp2
+import wtforms
 
 from google.appengine.api import urlfetch
 from google.appengine.ext import db
@@ -96,6 +97,25 @@ class Team(db.Model):
 
   # for use with google.appengine.api.imagesget_serving_url
   image = db.BlobProperty()
+
+
+class DollarField(wtforms.IntegerField):
+  pass
+
+
+class YoutubeIdField(wtforms.StringField):
+  pass
+
+
+class TeamForm(wtforms.Form):
+  title = wtforms.StringField("Title", [
+      wtforms.validators.Length(min=1, max=500)])
+  description = wtforms.TextAreaField("Description", [
+      wtforms.validators.Length(min=1)])
+
+  goal_dollars = DollarField("Goal", [wtforms.validators.optional()])
+  youtube_id = YoutubeIdField("Youtube Video URL", [wtforms.validators.optional()])
+  zip_code = wtforms.StringField("Zip Code", [wtforms.validators.optional()])
 
 
 class Slug(db.Model):
@@ -202,40 +222,23 @@ class DashboardHandler(BaseHandler):
 class NewTeamHandler(BaseHandler):
   @require_login
   def get(self):
-    self.render_template("new_team.html")
+    self.render_template("new_team.html", form=TeamForm())
 
   @require_login
   def post(self):
-    # TODO: this is horrible. should use WTForms or something and
-    # NOT COPY PASTE
-    title = self.request.get("title")
-    description = self.request.get("description")
-    goal_dollars = self.request.get("goal_dollars") or None
-    if goal_dollars:
-      # Strip out any dollar signs
-      goal_dollars = goal_dollars.replace('$', '')
-      # Strip out any commas before converting to an int, so that an input like "1,000" is handled properly
-      goal_dollars = goal_dollars.replace(',', '')
-      # Strip out anything after a period, since we're not taking cents into account (allowing us to handle "100.00")
-      goal_dollars = goal_dollars.partition('.')[0]
-      # TODO: Support Europeans
-      goal_dollars = int(goal_dollars)
-    youtube_id = self.request.get("youtube_id") or None
-    if youtube_id and not YOUTUBE_ID_VALIDATOR.match(youtube_id):
-      raise Exception("invalid youtube id")
-    zip_code = self.request.get("zip_code") or None
-    if zip_code and not INTEGER_VALIDATOR.match(zip_code):
-      raise Exception("invalid zip_code")
-    team = Team(title=title, description=description,
-                goal_dollars=goal_dollars, youtube_id=youtube_id,
-                zip_code=zip_code)
+    form = TeamForm(self.request.POST)
+    if not form.validate():
+      return self.render_template("new_team.html", form=form)
+    team = Team(title=form.title.data, description=form.description.data,
+                goal_dollars=form.goal_dollars.data,
+                youtube_id=form.youtube_id.data, zip_code=form.zip_code.data)
     team.put()
     # TODO: can i reference a team before putting it in other reference
     # properties? should check
     AdminToTeam(user=self.current_user["user_id"], team=team).put()
     team.primary_slug = Slug.new(team)
     team.put()
-    self.redirect("/t/%s" % team.primary_slug)
+    return self.redirect("/t/%s" % team.primary_slug)
 
 
 class EditTeamHandler(TeamBaseHandler):
@@ -248,7 +251,7 @@ class EditTeamHandler(TeamBaseHandler):
       return self.redirect("/t/%s/edit" % team.primary_slug, permanent=True)
     if not is_admin:
       return self.redirect("/t/%s" % team.primary_slug)
-    self.render_template("edit_team.html", team=team)
+    self.render_template("edit_team.html", form=TeamForm(obj=team))
 
   # require_login unneeded because we do the checking ourselves with validate
   def post(self, slug):
@@ -257,24 +260,10 @@ class EditTeamHandler(TeamBaseHandler):
       return
     if not is_admin:
       return self.redirect("/t/%s" % team.primary_slug)
-
-    # TODO: this is horrible. should use WTForms or something and
-    # NOT COPY PASTE
-    team.title = self.request.get("title")
-    team.description = self.request.get("description")
-    goal_dollars = self.request.get("goal_dollars") or None
-    if goal_dollars:
-      team.goal_dollars = int(goal_dollars)
-    else:
-      team.goal_dollars = None
-    youtube_id = self.request.get("youtube_id") or None
-    if youtube_id and not YOUTUBE_ID_VALIDATOR.match(youtube_id):
-      raise Exception("invalid youtube id")
-    team.youtube_id = youtube_id
-    zip_code = self.request.get("zip_code") or None
-    if zip_code and not INTEGER_VALIDATOR.match(zip_code):
-      raise Exception("invalid zip_code")
-    team.zip_code = zip_code
+    form = TeamForm(self.request.POST, team)
+    if not form.validate():
+      return self.render_template("edit_team.html", form=form)
+    form.populate_obj(team)
     team.primary_slug = Slug.new(team)
     team.put()
     self.redirect("/t/%s" % team.primary_slug)
