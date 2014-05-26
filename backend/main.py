@@ -5,11 +5,13 @@ import logging
 import os
 import re
 import urllib
+import urlparse
 
 import jinja2
 import markdown
 import webapp2
 import wtforms
+from wtforms.widgets.html5 import URLInput
 
 from google.appengine.api import urlfetch
 from google.appengine.ext import db
@@ -23,7 +25,6 @@ JINJA = jinja2.Environment(
   autoescape=True)
 
 YOUTUBE_ID_VALIDATOR = re.compile(r'^[\w\-]+$')
-INTEGER_VALIDATOR = re.compile(r'^[0-9]+$')
 INVALID_SLUG_CHARS = re.compile(r'[^\w-]')
 MULTIDASH_RE = re.compile(r'-+')
 SLUG_TOKEN_AMOUNT = 2
@@ -103,8 +104,31 @@ class DollarField(wtforms.IntegerField):
   pass
 
 
-class YoutubeIdField(wtforms.StringField):
-  pass
+class YoutubeIdField(wtforms.Field):
+  widget = URLInput()
+
+  def __init__(self, label=None, validators=None, **kwargs):
+    wtforms.Field.__init__(self, label, validators, **kwargs)
+
+  def _value(self):
+    if self.data is not None:
+      return u"https://www.youtube.com/watch?v=%s" % unicode(self.data)
+    else:
+      return ''
+
+  def process_formdata(self, valuelist):
+    self.data = None
+    if valuelist:
+      parsed = urlparse.urlparse(valuelist[0])
+      if "youtube.com" not in parsed.netloc:
+        raise ValueError(self.gettext("Not a valid Youtube URL"))
+      video_args = urlparse.parse_qs(parsed.query).get("v")
+      if len(video_args) != 1:
+        raise ValueError(self.gettext("Not a valid Youtube URL"))
+      youtube_id = video_args[0]
+      if not YOUTUBE_ID_VALIDATOR.match(youtube_id):
+        raise ValueError(self.gettext("Not a valid Youtube URL"))
+      self.data = youtube_id
 
 
 class TeamForm(wtforms.Form):
@@ -114,7 +138,8 @@ class TeamForm(wtforms.Form):
       wtforms.validators.Length(min=1)])
 
   goal_dollars = DollarField("Goal", [wtforms.validators.optional()])
-  youtube_id = YoutubeIdField("Youtube Video URL", [wtforms.validators.optional()])
+  youtube_id = YoutubeIdField("Youtube Video URL", [
+      wtforms.validators.optional()])
   zip_code = wtforms.StringField("Zip Code", [wtforms.validators.optional()])
 
 
