@@ -2,23 +2,26 @@ form(method="post")
   .container
     .col-md-6
       h2 Required:
-      p {{form.title.label}}
-      div {{form.title}}
-      {% if form.title.errors %}
-      ul.errors
-        {% for error in form.title.errors %}
-        li {{error}}
-        {% endfor %}
-      {% endif %}
+      dl
+        dt {{form.title.label}}
+        dd
+          div {{form.title}}
+          {% if form.title.errors %}
+          ul.errors
+            {% for error in form.title.errors %}
+            li {{error}}
+            {% endfor %}
+          {% endif %}
 
-      p {{form.description.label}}
-      div {{form.description(rows=10, style="width: 100%;")}}
-      {% if form.description.errors %}
-      ul.errors
-        {% for error in form.description.errors %}
-        li {{error}}
-        {% endfor %}
-      {% endif %}
+        dt {{form.description.label}}
+        dd
+          div {{form.description(rows=10, style="width: 100%;")}}
+          {% if form.description.errors %}
+          ul.errors
+            {% for error in form.description.errors %}
+            li {{error}}
+            {% endfor %}
+          {% endif %}
 
       div.create_team(style="text-align: right;")
         input(type="submit", value="Publish")
@@ -27,29 +30,33 @@ form(method="post")
     .col-md-5
       h2 Optional:
 
-      p {{form.goal_dollars.label}}
-      div {{form.goal_dollars}}
-      {% if form.goal_dollars.errors %}
-      ul.errors
-        {% for error in form.goal_dollars.errors %}
-        li {{error}}
-        {% endfor %}
-      {% endif %}
+      dl
+        dt {{form.goal_dollars.label}}
+        dd
+          div ${{form.goal_dollars}}
+          {% if form.goal_dollars.errors %}
+          ul.errors
+            {% for error in form.goal_dollars.errors %}
+            li {{error}}
+            {% endfor %}
+          {% endif %}
 
-      p {{form.youtube_id.label}}
-      div {{form.youtube_id}}
-      {% if form.youtube_id.errors %}
-      ul.errors
-        {% for error in form.youtube_id.errors %}
-        li {{error}}
-        {% endfor %}
-      {% endif %}
+        dt {{form.youtube_id.label}}
+        dd
+          div {{form.youtube_id}}
+          {% if form.youtube_id.errors %}
+          ul.errors
+            {% for error in form.youtube_id.errors %}
+            li {{error}}
+            {% endfor %}
+          {% endif %}
 
-      p {{form.zip_code.label}}
-      div {{form.zip_code}}
-      {% if form.zip_code.errors %}
-      ul.errors
-        {% for error in form.zip_code.errors %}
-        li {{error}}
-        {% endfor %}
-      {% endif %}
+        dt {{form.zip_code.label}}
+        dd
+          div {{form.zip_code}}
+          {% if form.zip_code.errors %}
+          ul.errors
+            {% for error in form.zip_code.errors %}
+            li {{error}}
+            {% endfor %}
+          {% endif %}

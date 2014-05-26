@@ -11,6 +11,7 @@ import jinja2
 import markdown
 import webapp2
 import wtforms
+from wtforms.fields.html5 import IntegerField
 from wtforms.widgets.html5 import URLInput
 
 from google.appengine.api import urlfetch
@@ -100,10 +101,6 @@ class Team(db.Model):
   image = db.BlobProperty()
 
 
-class DollarField(wtforms.IntegerField):
-  pass
-
-
 class YoutubeIdField(wtforms.Field):
   widget = URLInput()
 
@@ -131,16 +128,44 @@ class YoutubeIdField(wtforms.Field):
       self.data = youtube_id
 
 
+class ZipcodeField(wtforms.Field):
+  """
+  A text field, except all input is coerced to an integer.  Erroneous input
+  is ignored and will not be accepted as a value.
+  """
+  widget = wtforms.widgets.TextInput()
+
+  def __init__(self, label=None, validators=None, **kwargs):
+    wtforms.Field.__init__(self, label, validators, **kwargs)
+
+  def _value(self):
+    if self.data is not None:
+      return unicode(self.data)
+    else:
+      return ''
+
+  def process_formdata(self, valuelist):
+    self.data = None
+    if valuelist:
+      try:
+        int(valuelist[0])
+      except ValueError:
+        self.data = None
+        raise ValueError(self.gettext('Not a valid integer value'))
+      else:
+        self.data = valuelist[0]
+
+
 class TeamForm(wtforms.Form):
   title = wtforms.StringField("Title", [
       wtforms.validators.Length(min=1, max=500)])
   description = wtforms.TextAreaField("Description", [
       wtforms.validators.Length(min=1)])
 
-  goal_dollars = DollarField("Goal", [wtforms.validators.optional()])
+  goal_dollars = IntegerField("Goal", [wtforms.validators.optional()])
   youtube_id = YoutubeIdField("Youtube Video URL", [
       wtforms.validators.optional()])
-  zip_code = wtforms.StringField("Zip Code", [wtforms.validators.optional()])
+  zip_code = ZipcodeField("Zip Code", [wtforms.validators.optional()])
 
 
 class Slug(db.Model):
