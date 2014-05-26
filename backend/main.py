@@ -235,7 +235,7 @@ def require_login(fn):
   @functools.wraps(fn)
   def new_handler(self, *args, **kwargs):
     if not self.logged_in:
-      self.redirect("/")
+      self.redirect("/login")
       return
     return fn(self, *args, **kwargs)
   return new_handler
@@ -288,6 +288,13 @@ class TeamHandler(TeamBaseHandler):
         "show_team.html", team=team, edit_url=edit_url,
         description_rendered=markdown.markdown(
             jinja2.escape(team.description)))
+
+
+class LoginHandler(BaseHandler):
+  def get(self):
+    if self.logged_in:
+      return self.redirect("/dashboard")
+    self.render_template("login.html")
 
 
 class DashboardHandler(BaseHandler):
@@ -352,6 +359,7 @@ class EditTeamHandler(TeamBaseHandler):
 app = webapp2.WSGIApplication([
   (r'/t/([^/]+)/?', TeamHandler),
   (r'/t/([^/]+)/edit?', EditTeamHandler),
+  (r'/login/?', LoginHandler),
   (r'/dashboard/?', DashboardHandler),
   (r'/dashboard/new/?', NewTeamHandler),
   (r'/?', IndexHandler),

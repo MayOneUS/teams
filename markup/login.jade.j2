@@ -1,0 +1,19 @@
+doctype html
+html
+  head
+    include includes/head
+  body
+    include includes/header
+
+    .container
+      .page-header
+        h2 Login
+
+      .page-body
+        ul
+          {% for service, service_link in login_links.iteritems() %}
+          li
+            a(href="{{service_link}}") login with {{service}}
+          {% endfor %}
+
+    include includes/footer
