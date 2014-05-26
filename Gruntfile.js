@@ -19,7 +19,7 @@ module.exports = function(grunt) {
         sass: {
             main: {
                 files: {
-                    'build/static/style.css': 'stylesheets/style.scss'
+                    'build/static/style.css': ['stylesheets/style.scss']
                 }
             }
         },
@@ -43,9 +43,25 @@ module.exports = function(grunt) {
         autoprefixer: {
             build: {
                 expand: true,
-                cwd: 'build/static/css/',
-                src: [ '*.css' ],
-                dest: 'build/static/css/'
+                cwd: 'build/static/',
+                src: [ 'style.css' ],
+                dest: 'build/static/'
+            }
+        },
+
+        cmq: {
+            build: {
+                files: {
+                    'build/static/style.css': ['build/static/style.css']
+                }
+            }
+        },
+
+        cssmin: {
+            build: {
+                files: {
+                    'build/static/style.css': ['build/static/style.css']
+                }
             }
         },
 
@@ -60,7 +76,7 @@ module.exports = function(grunt) {
 
         watch: {
             stylesheets: {
-                files: 'stylesheets/**',
+                files: ['stylesheets/**', 'extern/frontend/stylesheets/**'],
                 tasks: [ 'css' ]
             },
             markup: {
@@ -82,11 +98,13 @@ module.exports = function(grunt) {
     grunt.loadNpmTasks('grunt-contrib-watch');
     grunt.loadNpmTasks('grunt-contrib-jade');
     grunt.loadNpmTasks('grunt-shell-spawn');
+    grunt.loadNpmTasks('grunt-contrib-cssmin');
+    grunt.loadNpmTasks('grunt-combine-media-queries');
 
     // define the tasks
     grunt.registerTask(
         'css', '',
-        [ 'sass', 'autoprefixer' ]
+        [ 'sass', 'cmq', 'autoprefixer', 'cssmin' ]
     );
     grunt.registerTask(
         'build',
