@@ -52,6 +52,7 @@ body {
     padding: 0;
     padding-top: 10px;
     padding-bottom: 10px;
+    float: right;
 }
 
 .topmenu:hover {
