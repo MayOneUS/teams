@@ -13,7 +13,7 @@ html
         ul
           {% for service, service_link in login_links.iteritems() %}
           li
-            a(href="{{service_link}}") login with {{service}}
+            a(class="zocial {{service}}" href="{{service_link}}") login with {{service}}
           {% endfor %}
 
     include includes/footer
