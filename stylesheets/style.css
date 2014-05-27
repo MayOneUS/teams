@@ -66,3 +66,16 @@ body {
     padding-top: 0;
     margin-bottom: 20px;
 }
+
+.subhead {
+    /*Setting max height, height, and line-height to 80px vertically centers the text.*/
+    text-align: center;
+    position: relative;
+    top: 30px;
+    height: 80px;
+
+    /*There may be a better way.*/
+    font-family: "Oswald", arial, helvetica, "sans serif";
+    color: #999999;
+    font-size: 22px;
+}
