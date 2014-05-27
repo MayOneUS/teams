@@ -3,6 +3,8 @@ div.full-width
     {% if logged_in %}
     a(href="{{logout_link}}")
       div.topmenu.col-md-1 Logout
+    a(href="/dashboard")
+      div.topmenu.col-md-1 Dashboard
     {% else %}
     a(href="/login")
       div.topmenu.col-md-1 Login
