@@ -1,12 +1,24 @@
-div#header
-  .container
-    .row
-      .col-lg-2.logo
-        a(href="/")
-          img(src="/static/logo_inverted31-e1398893630874.png", alt="Logo")
-      .col-lg-10.links
-        include header-links
-  input(type="checkbox", id="primary-menu-toggle")
-  label(for="primary-menu-toggle")
-  .mobile-links
-    include header-links
+div.full-width
+  div.menu-row.row
+    div.col-md-4 &nbsp;
+    a(href="//mayone.us/about", title="About Us")
+      div.topmenu.col-md-1 About Us
+    a(href="//mayone.us/faq", title="FAQ")
+      div.topmenu.col-md-1 FAQ
+    a(href="//mayone.us/ways", title="Ways to Help")
+      div.topmenu.col-md-1 Ways to Help
+    a(href="//mayone.us/contact", title="Contact")
+      div.topmenu.col-md-1 Contact
+    {% if logged_in %}
+    a(href="{{logout_link}}")
+      div.topmenu.col-md-1 Logout
+    {% else %}
+    a(href="/login")
+      div.topmenu.col-md-1 Login
+    {% endif %}
+div.container
+  div.logo-row.row
+    a(href="/")
+      div.logo.col-md-3
+        img(src="/static/logo_inverted31-e1398893630874.png", alt="Logo")
+    div.subhead.col-md-9 A citizen-funded and crowdsourced super PAC, to end all super PACs.
