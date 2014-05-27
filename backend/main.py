@@ -18,7 +18,8 @@ from google.appengine.api import urlfetch
 from google.appengine.ext import db
 
 AUTH_SERVICE_PUB = "https://auth.mayone.us"
-AUTH_SERVICE_REQ = AUTH_SERVICE_PUB  # "http://172.17.0.2"
+AUTH_SERVICE_REQ = AUTH_SERVICE_PUB
+PLEDGE_SERVICE_REQ = "https://pledge.mayone.us"
 
 JINJA = jinja2.Environment(
   loader=jinja2.FileSystemLoader('templates/'),
@@ -58,6 +59,36 @@ I'm beginning to think it's so crazy that it just might work. It'd mean the \
 world to have your support.
 
 Thank you!
+"""
+
+PREVIOUS_PLEDGE_DESC = u"""\
+Giving money to a super PAC is one of the last things I thought I'd ever \
+do... but I just gave ${pledge_dollars}!
+
+I recently joined Lawrence Lessig's citizen-funded Mayday PAC, an ambitious \
+campaign to win a Congress committed to ending corruption in 2016, and we did \
+something amazing: we raised $1 million dollars in 12 days. That's a ton of \
+money, but it's not enough.
+
+We're raising $5 million more, and I'm writing to my friends and family to \
+ask if you can help us get the rest of the way there. If all of us who have \
+supported the Mayday PAC so far each recruit just five matching donation, \
+we'd easily hit that goal. But I'd like to see if I can recruit ten of my \
+friends to donate. So my question is: will you be one of those ten?
+
+I don't have to tell you why this is important. We all know our government is \
+dismally dysfunctional because politicians spend all their time raising money \
+instead of doing the jobs they were elected to do. So our plan is to fight \
+firewith fire: raise the money needed to elect representatives that are \
+committed to the reform we so desperately need.
+
+You can read all about the Mayday PAC from the links on this page, but once \
+you do, please consider joining me in making a pledge through my personalized \
+page here. This is a totally crazy plan, but now that we've raised $1 million \
+I'm beginning to think it's so crazy that it just might work. It'd mean the \
+world to have your support.
+
+{signature}
 """
 
 
@@ -340,9 +371,28 @@ class NewFromPledgeHandler(BaseHandler):
   def get(self, user_token):
     team = Team.all().filter('user_token =', user_token).get()
     if team is None:
-      # TODO: get prefills from pledge service and fail if the pledge service
-      # doesn't have this token
-      form = TeamForm()
+      resp = urlfetch.fetch(
+          "%s/user-info/%s" % (PLEDGE_SERVICE_REQ, user_token),
+          follow_redirects=False, validate_certificate=True)
+      if resp.status_code == 404:
+        self.notfound()
+        return
+      if resp.status_code != 200:
+        raise Exception("Unexpected authentication error: %s", resp.content)
+      user_info = json.loads(resp.content)["user"]
+      user_pledge_dollars = int(user_info["pledge_amount_cents"]) / 100
+      goal_dollars = user_pledge_dollars * 10
+      if user_info["name"]:
+        signature = "Thank you,\n%s" % user_info["name"]
+      else:
+        signature = "Thank you!"
+      form = TeamForm(data={
+          "goal_dollars": str(goal_dollars),
+          "title": user_info["name"] or "My Pledge Page",
+          "zip_code": str(user_info["zip_code"] or ""),
+          "description": PREVIOUS_PLEDGE_DESC.format(
+              pledge_dollars=user_pledge_dollars,
+              signature=signature)})
     else:
       self.add_to_user(team)
       form = TeamForm(obj=team)
