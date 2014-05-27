@@ -1,0 +1,81 @@
+/* common styles for all MayDayPAC modules */
+
+/*By default, grid.css, which is part of Twitter Bootstrap, decorates the divs and makes it obvious where the boundaries are.  This code resets borders and background colors to their defaults.*/
+
+.col-md-1,
+.col-md-2,
+.col-md-3,
+.col-md-4,
+.col-md-5,
+.col-md-6,
+.col-md-7,
+.col-md-8,
+.col-md-9 {
+    background-color: transparent;
+    border: none;
+    padding:0;
+    margin:0;
+}
+
+.row,
+.row-fluid {
+    background-color: transparent;
+    border: none;
+    padding:0;
+    margin:0;
+}
+
+/*Bootstrapper only reaches 960px, so we need to wrap our rows in yet another div - one that reaches the full width of the page*/
+
+body {
+    font-family: 'Lato',  helvetica, arial, 'sans serif';
+}
+
+.full-width {
+    width: 100%;
+}
+
+/* Top menu */
+
+.menu-row {
+    background-color: white;
+    margin: 0;
+    padding: 0;
+}
+
+.topmenu {
+    font-family: 'Oswald', arial, helvetica, 'sans serif';
+    color: white;
+    font-size: 15px;
+    background-color: #003366;
+    text-align: center;
+    padding: 0;
+    padding-top: 10px;
+    padding-bottom: 10px;
+}
+
+.topmenu:hover {
+    background-color: #006666;
+    color: #ffff33;
+}
+
+/* Logo row */
+
+.logo-row {
+    background-color: white;
+    padding-top: 0;
+    margin-bottom: 20px;
+}
+
+.subhead {
+    /*Setting max height, height, and line-height to 80px vertically centers the text.*/
+    text-align: center;
+    position: relative;
+    top: 30px;
+    height: 80px;
+
+    /*There may be a better way.*/
+    font-family: "Oswald", arial, helvetica, "sans serif";
+    color: #999999;
+    font-size: 22px;
+}
