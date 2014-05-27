@@ -1,13 +1,5 @@
 div.full-width
   div.clearfix.menu-row.row
-    a(href="//mayone.us/about", title="About Us")
-      div.topmenu.col-md-1 About Us
-    a(href="//mayone.us/faq", title="FAQ")
-      div.topmenu.col-md-1 FAQ
-    a(href="//mayone.us/ways", title="Ways to Help")
-      div.topmenu.col-md-1 Ways to Help
-    a(href="//mayone.us/contact", title="Contact")
-      div.topmenu.col-md-1 Contact
     {% if logged_in %}
     a(href="{{logout_link}}")
       div.topmenu.col-md-1 Logout
@@ -15,6 +7,14 @@ div.full-width
     a(href="/login")
       div.topmenu.col-md-1 Login
     {% endif %}
+    a(href="//mayone.us/contact", title="Contact")
+      div.topmenu.col-md-1 Contact
+    a(href="//mayone.us/ways", title="Ways to Help")
+      div.topmenu.col-md-1 Ways to Help
+    a(href="//mayone.us/faq", title="FAQ")
+      div.topmenu.col-md-1 FAQ
+    a(href="//mayone.us/about", title="About Us")
+      div.topmenu.col-md-1 About Us
 div.container
   div.logo-row.row
     a(href="/")
