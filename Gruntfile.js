@@ -8,6 +8,11 @@ module.exports = function(grunt) {
                     {cwd: 'assets/', src: '**', dest: 'build/static/', expand: true },
                 ],
             },
+            extern: {
+                files: [
+                    {cwd: 'extern/frontend/stylesheets/', src: '**', dest: 'build/static/extern/', expand: true },
+                ],
+            }
         },
 
         clean: {
@@ -104,12 +109,12 @@ module.exports = function(grunt) {
     // define the tasks
     grunt.registerTask(
         'css', '',
-        [ 'sass', 'cmq', 'autoprefixer', 'cssmin' ]
+        [ 'sass', 'cmq', 'autoprefixer', 'cssmin', 'copy:extern' ]
     );
     grunt.registerTask(
         'build',
         'Compiles all of the assets and copies the files to the build directory.',
-        [ 'clean', 'copy', 'css', 'jade']
+        [ 'clean', 'copy:main', 'css', 'jade']
     );
     grunt.registerTask(
         'dev',
