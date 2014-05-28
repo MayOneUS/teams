@@ -39,11 +39,19 @@ AUTH_SERVICE_REQ variable to point to your auth service's IP directly.
 ## Installing docker
 On Mac OSX:
   Install ruby
+  
   Install brew
+  
   Get VirtualBox
+  
+  
   Follow the instructions here: http://docs.docker.io/installation/mac/
+  
   Make sure you don't miss: 
+  
      Configure the Docker OS X Client
+     
      Running the Docker daemon via boot2docker
+     
 
   
