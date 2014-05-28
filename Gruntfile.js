@@ -11,6 +11,7 @@ module.exports = function(grunt) {
             extern: {
                 files: [
                     {cwd: 'extern/frontend/stylesheets/', src: '**', dest: 'build/static/extern/', expand: true },
+                    {cwd: 'extern/frontend/zocial/', src: '**', dest: 'build/static/extern/zocial/', expand: true }
                 ],
             }
         },
