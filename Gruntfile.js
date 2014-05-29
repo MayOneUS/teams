@@ -73,7 +73,7 @@ module.exports = function(grunt) {
 
         shell: {
             devserver: {
-                command: 'dev_appserver.py --host 0.0.0.0 --port 80 --admin_host 0.0.0.0 --skip_sdk_update_check true build/',
+                command: 'dev_appserver.py --host 0.0.0.0 --port 8080 --admin_host 0.0.0.0 --skip_sdk_update_check true build/',
                 options: {
                     async: true,
                 },

@@ -1,10 +1,7 @@
-import Cookie
 import functools
 import json
-import logging
 import os
 import re
-import urllib
 import urlparse
 
 import jinja2
@@ -17,8 +14,8 @@ from wtforms.widgets.html5 import URLInput
 from google.appengine.api import urlfetch
 from google.appengine.ext import db
 
-AUTH_SERVICE_PUB = "https://auth.mayone.us"
-AUTH_SERVICE_REQ = AUTH_SERVICE_PUB
+import config_NOCOMMIT
+
 PLEDGE_SERVICE_REQ = "https://pledge.mayone.us"
 
 JINJA = jinja2.Environment(
@@ -96,22 +93,9 @@ class BaseHandler(webapp2.RequestHandler):
 
   @webapp2.cached_property
   def auth_response(self):
-    c = Cookie.SimpleCookie()
-    c["auth"] = self.request.cookies.get("auth", "")
     self.request.scheme = "https"
-    try:
-      resp = urlfetch.fetch(
-          "%s/v1/current_user?%s" % (AUTH_SERVICE_REQ, urllib.urlencode({
-              "return_to": self.request.url})),
-          headers={"Cookie": c["auth"].OutputString()},
-          follow_redirects=False,
-          validate_certificate=True)
-      if resp.status_code != 200:
-        raise Exception("Unexpected authentication error: %s", resp.content)
-      return json.loads(resp.content)
-    except Exception:
-      logging.exception("failed getting current user, assuming logged out")
-      return {"logged_in": False, "login_links": {}}
+    return config_NOCOMMIT.auth_service.getAuthResponse(
+        self.request.cookies.get("auth", ""), self.request.url)
 
   @property
   def logged_in(self):
@@ -128,8 +112,7 @@ class BaseHandler(webapp2.RequestHandler):
   @property
   def logout_link(self):
     self.request.scheme = "https"
-    return "%s/v1/logout?%s" % (AUTH_SERVICE_PUB, urllib.urlencode({
-        "return_to": self.request.url}))
+    return config_NOCOMMIT.auth_service.getLogoutLink(self.request.url)
 
   def render_template(self, template, **kwargs):
     if self.logged_in:
@@ -139,7 +122,7 @@ class BaseHandler(webapp2.RequestHandler):
         "logout_link": self.logout_link}
     else:
       data = {
-        "logged_out": False,
+        "logged_in": False,
         "login_links": self.login_links}
     data.update(kwargs)
     self.response.write(JINJA.get_template(template).render(data))
@@ -443,7 +426,7 @@ class EditTeamHandler(TeamBaseHandler):
     self.redirect("/t/%s" % team.primary_slug)
 
 
-app = webapp2.WSGIApplication([
+app = webapp2.WSGIApplication(config_NOCOMMIT.auth_service.handlers() + [
   (r'/t/([^/]+)/?', TeamHandler),
   (r'/t/([^/]+)/edit?', EditTeamHandler),
   (r'/login/?', LoginHandler),
