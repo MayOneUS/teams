@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>extra.py</title>
+  <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+  <link rel="stylesheet" media="all" href="../../../doc-style.css" />
+  <script src="../../../doc-filelist.js"></script>
+  <script>
+    var relativeDir = "../../../", thisFile = "backend/markdown/extensions/extra.py", defaultSidebar = true;
+  </script>
+  <script src="../../../doc-script.js"></script>
+</head>
+<body>
+  <div id="sidebar_wrapper">
+    <div id="sidebar_switch">
+      <span class="tree">Files</span>
+      <span class="headings">Headings</span>
+    </div>
+    <div id="tree"></div>
+    <div id="headings">
+    </div>
+  </div>
+  <div id="sidebar-toggle"></div>
+  <div id="container"><div class="background highlight"></div>
+<table cellpadding="0" cellspacing="0">
+  <tbody>
+      <tr>
+        <td class="docs">
+          <h1>extra.py</h1>
+        </td>
+        <td class="code highlight"></td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-1" id="section-1">&#182;</a>
+</div>
+
+        </td>
+        <td class="code highlight"><div class="highlight"><pre><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Python-Markdown Extra Extension</span>
+<span class="sd">===============================</span>
+
+<span class="sd">A compilation of various Python-Markdown extensions that imitates</span>
+<span class="sd">[PHP Markdown Extra](http://michelf.com/projects/php-markdown/extra/).</span>
+
+<span class="sd">Note that each of the individual extensions still need to be available</span>
+<span class="sd">on your PYTHONPATH. This extension simply wraps them all up as a</span>
+<span class="sd">convenience so that only one extension needs to be listed when</span>
+<span class="sd">initiating Markdown. See the documentation for each individual</span>
+<span class="sd">extension for specifics about that extension.</span>
+
+<span class="sd">In the event that one or more of the supported extensions are not</span>
+<span class="sd">available for import, Markdown will issue a warning and simply continue</span>
+<span class="sd">without that extension.</span>
+
+<span class="sd">There may be additional extensions that are distributed with</span>
+<span class="sd">Python-Markdown that are not included here in Extra. Those extensions</span>
+<span class="sd">are not part of PHP Markdown Extra, and therefore, not part of</span>
+<span class="sd">Python-Markdown Extra. If you really would like Extra to include</span>
+<span class="sd">additional extensions, we suggest creating your own clone of Extra</span>
+<span class="sd">under a differant name. You could also edit the `extensions` global</span>
+<span class="sd">variable defined below, but be aware that such changes may be lost</span>
+<span class="sd">when you upgrade to any future version of Python-Markdown.</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">absolute_import</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">unicode_literals</span>
+<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">Extension</span>
+<span class="kn">from</span> <span class="nn">..blockprocessors</span> <span class="kn">import</span> <span class="n">BlockProcessor</span>
+<span class="kn">from</span> <span class="nn">..</span> <span class="kn">import</span> <span class="n">util</span>
+<span class="kn">import</span> <span class="nn">re</span>
+
+<span class="n">extensions</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;smart_strong&#39;</span><span class="p">,</span>
+              <span class="s">&#39;fenced_code&#39;</span><span class="p">,</span>
+              <span class="s">&#39;footnotes&#39;</span><span class="p">,</span>
+              <span class="s">&#39;attr_list&#39;</span><span class="p">,</span>
+              <span class="s">&#39;def_list&#39;</span><span class="p">,</span>
+              <span class="s">&#39;tables&#39;</span><span class="p">,</span>
+              <span class="s">&#39;abbr&#39;</span><span class="p">,</span>
+              <span class="p">]</span>
+
+
+<span class="k">class</span> <span class="nc">ExtraExtension</span><span class="p">(</span><span class="n">Extension</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Add various extensions to Markdown class.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">extendMarkdown</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">md</span><span class="p">,</span> <span class="n">md_globals</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Register extension instances. &quot;&quot;&quot;</span>
+        <span class="n">md</span><span class="o">.</span><span class="n">registerExtensions</span><span class="p">(</span><span class="n">extensions</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">md</span><span class="o">.</span><span class="n">safeMode</span><span class="p">:</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-2" id="section-2">&#182;</a>
+</div>
+<p>Turn on processing of markdown text within raw html</p>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+            <span class="n">md</span><span class="o">.</span><span class="n">preprocessors</span><span class="p">[</span><span class="s">&#39;html_block&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">markdown_in_raw</span> <span class="o">=</span> <span class="bp">True</span>
+            <span class="n">md</span><span class="o">.</span><span class="n">parser</span><span class="o">.</span><span class="n">blockprocessors</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s">&#39;markdown_block&#39;</span><span class="p">,</span>
+                                          <span class="n">MarkdownInHtmlProcessor</span><span class="p">(</span><span class="n">md</span><span class="o">.</span><span class="n">parser</span><span class="p">),</span>
+                                          <span class="s">&#39;_begin&#39;</span><span class="p">)</span>
+            <span class="n">md</span><span class="o">.</span><span class="n">parser</span><span class="o">.</span><span class="n">blockprocessors</span><span class="o">.</span><span class="n">tag_counter</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+            <span class="n">md</span><span class="o">.</span><span class="n">parser</span><span class="o">.</span><span class="n">blockprocessors</span><span class="o">.</span><span class="n">contain_span_tags</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span>
+                <span class="s">r&#39;^(p|h[1-6]|li|dd|dt|td|th|legend|address)$&#39;</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">IGNORECASE</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">makeExtension</span><span class="p">(</span><span class="n">configs</span><span class="o">=</span><span class="p">{}):</span>
+    <span class="k">return</span> <span class="n">ExtraExtension</span><span class="p">(</span><span class="n">configs</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">configs</span><span class="p">))</span>
+
+
+<span class="k">class</span> <span class="nc">MarkdownInHtmlProcessor</span><span class="p">(</span><span class="n">BlockProcessor</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Process Markdown Inside HTML Blocks.&quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">test</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="n">block</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">block</span> <span class="o">==</span> <span class="n">util</span><span class="o">.</span><span class="n">TAG_PLACEHOLDER</span> <span class="o">%</span> \
+            <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parser</span><span class="o">.</span><span class="n">blockprocessors</span><span class="o">.</span><span class="n">tag_counter</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_process_nests</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">element</span><span class="p">,</span> <span class="n">block</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Process the element&#39;s child elements in self.run.&quot;&quot;&quot;</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-3" id="section-3">&#182;</a>
+</div>
+<p>Build list of indexes of each nest within the parent element.</p>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+        <span class="n">nest_index</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c"># a list of tuples: (left index, right index)</span>
+        <span class="n">i</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parser</span><span class="o">.</span><span class="n">blockprocessors</span><span class="o">.</span><span class="n">tag_counter</span> <span class="o">+</span> <span class="mi">1</span>
+        <span class="k">while</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_tag_data</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">i</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_tag_data</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s">&#39;left_index&#39;</span><span class="p">]:</span>
+            <span class="n">left_child_index</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_tag_data</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s">&#39;left_index&#39;</span><span class="p">]</span>
+            <span class="n">right_child_index</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_tag_data</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s">&#39;right_index&#39;</span><span class="p">]</span>
+            <span class="n">nest_index</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">left_child_index</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="n">right_child_index</span><span class="p">))</span>
+            <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-4" id="section-4">&#182;</a>
+</div>
+<p>Create each nest subelement.</p>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="p">(</span><span class="n">left_index</span><span class="p">,</span> <span class="n">right_index</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">nest_index</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">element</span><span class="p">,</span> <span class="n">block</span><span class="p">[</span><span class="n">left_index</span><span class="p">:</span><span class="n">right_index</span><span class="p">],</span>
+                     <span class="n">block</span><span class="p">[</span><span class="n">right_index</span><span class="p">:</span><span class="n">nest_index</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]],</span> <span class="bp">True</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">element</span><span class="p">,</span> <span class="n">block</span><span class="p">[</span><span class="n">nest_index</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]:</span><span class="n">nest_index</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]],</span>  <span class="c"># last</span>
+                 <span class="n">block</span><span class="p">[</span><span class="n">nest_index</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]:],</span> <span class="bp">True</span><span class="p">)</span>                      <span class="c"># nest</span>
+
+    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="n">blocks</span><span class="p">,</span> <span class="n">tail</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">nest</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_tag_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parser</span><span class="o">.</span><span class="n">markdown</span><span class="o">.</span><span class="n">htmlStash</span><span class="o">.</span><span class="n">tag_data</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">parser</span><span class="o">.</span><span class="n">blockprocessors</span><span class="o">.</span><span class="n">tag_counter</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="n">tag</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_tag_data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">parser</span><span class="o">.</span><span class="n">blockprocessors</span><span class="o">.</span><span class="n">tag_counter</span><span class="p">]</span>
+
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-5" id="section-5">&#182;</a>
+</div>
+<p>Create Element</p>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+        <span class="n">markdown_value</span> <span class="o">=</span> <span class="n">tag</span><span class="p">[</span><span class="s">&#39;attrs&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s">&#39;markdown&#39;</span><span class="p">)</span>
+        <span class="n">element</span> <span class="o">=</span> <span class="n">util</span><span class="o">.</span><span class="n">etree</span><span class="o">.</span><span class="n">SubElement</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span> <span class="n">tag</span><span class="p">[</span><span class="s">&#39;tag&#39;</span><span class="p">],</span> <span class="n">tag</span><span class="p">[</span><span class="s">&#39;attrs&#39;</span><span class="p">])</span>
+
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-6" id="section-6">&#182;</a>
+</div>
+<p>Slice Off Block</p>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+        <span class="k">if</span> <span class="n">nest</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">parser</span><span class="o">.</span><span class="n">parseBlocks</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span> <span class="n">tail</span><span class="p">)</span>  <span class="c"># Process Tail</span>
+            <span class="n">block</span> <span class="o">=</span> <span class="n">blocks</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
+        <span class="k">else</span><span class="p">:</span>  <span class="c"># includes nests since a third level of nesting isn&#39;t supported</span>
+            <span class="n">block</span> <span class="o">=</span> <span class="n">blocks</span><span class="p">[</span><span class="n">tag</span><span class="p">[</span><span class="s">&#39;left_index&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span><span class="p">:</span> <span class="n">tag</span><span class="p">[</span><span class="s">&#39;right_index&#39;</span><span class="p">]]</span>
+            <span class="k">del</span> <span class="n">blocks</span><span class="p">[:</span><span class="n">tag</span><span class="p">[</span><span class="s">&#39;right_index&#39;</span><span class="p">]]</span>
+
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-7" id="section-7">&#182;</a>
+</div>
+<p>Process Text</p>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+        <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parser</span><span class="o">.</span><span class="n">blockprocessors</span><span class="o">.</span><span class="n">contain_span_tags</span><span class="o">.</span><span class="n">match</span><span class="p">(</span>  <span class="c"># Span Mode</span>
+                <span class="n">tag</span><span class="p">[</span><span class="s">&#39;tag&#39;</span><span class="p">])</span> <span class="ow">and</span> <span class="n">markdown_value</span> <span class="o">!=</span> <span class="s">&#39;block&#39;</span><span class="p">)</span> <span class="ow">or</span> \
+                <span class="n">markdown_value</span> <span class="o">==</span> <span class="s">&#39;span&#39;</span><span class="p">:</span>
+            <span class="n">element</span><span class="o">.</span><span class="n">text</span> <span class="o">=</span> <span class="s">&#39;</span><span class="se">\n</span><span class="s">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">block</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>                                                     <span class="c"># Block Mode</span>
+            <span class="n">i</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parser</span><span class="o">.</span><span class="n">blockprocessors</span><span class="o">.</span><span class="n">tag_counter</span> <span class="o">+</span> <span class="mi">1</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_tag_data</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">i</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_tag_data</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s">&#39;left_index&#39;</span><span class="p">]:</span>
+                <span class="n">first_subelement_index</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_tag_data</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s">&#39;left_index&#39;</span><span class="p">]</span> <span class="o">-</span> <span class="mi">1</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">parser</span><span class="o">.</span><span class="n">parseBlocks</span><span class="p">(</span>
+                    <span class="n">element</span><span class="p">,</span> <span class="n">block</span><span class="p">[:</span><span class="n">first_subelement_index</span><span class="p">])</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">nest</span><span class="p">:</span>
+                    <span class="n">block</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_process_nests</span><span class="p">(</span><span class="n">element</span><span class="p">,</span> <span class="n">block</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">parser</span><span class="o">.</span><span class="n">parseBlocks</span><span class="p">(</span><span class="n">element</span><span class="p">,</span> <span class="n">block</span><span class="p">)</span>
+</pre></div>
+        </td>
+      </tr>
+  </tbody>
+</table>
+  </div>
+</body>
+</html>

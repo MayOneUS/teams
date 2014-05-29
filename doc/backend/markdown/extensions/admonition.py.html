@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>admonition.py</title>
+  <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+  <link rel="stylesheet" media="all" href="../../../doc-style.css" />
+  <script src="../../../doc-filelist.js"></script>
+  <script>
+    var relativeDir = "../../../", thisFile = "backend/markdown/extensions/admonition.py", defaultSidebar = true;
+  </script>
+  <script src="../../../doc-script.js"></script>
+</head>
+<body>
+  <div id="sidebar_wrapper">
+    <div id="sidebar_switch">
+      <span class="tree">Files</span>
+      <span class="headings">Headings</span>
+    </div>
+    <div id="tree"></div>
+    <div id="headings">
+    </div>
+  </div>
+  <div id="sidebar-toggle"></div>
+  <div id="container"><div class="background highlight"></div>
+<table cellpadding="0" cellspacing="0">
+  <tbody>
+      <tr>
+        <td class="docs">
+          <h1>admonition.py</h1>
+        </td>
+        <td class="code highlight"></td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-1" id="section-1">&#182;</a>
+</div>
+
+        </td>
+        <td class="code highlight"><div class="highlight"><pre><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Admonition extension for Python-Markdown</span>
+<span class="sd">========================================</span>
+
+<span class="sd">Adds rST-style admonitions. Inspired by [rST][] feature with the same name.</span>
+
+<span class="sd">The syntax is (followed by an indented block with the contents):</span>
+<span class="sd">    !!! [type] [optional explicit title]</span>
+
+<span class="sd">Where `type` is used as a CSS class name of the div. If not present, `title`</span>
+<span class="sd">defaults to the capitalized `type`, so &quot;note&quot; -&gt; &quot;Note&quot;.</span>
+
+<span class="sd">rST suggests the following `types`, but you&#39;re free to use whatever you want:</span>
+<span class="sd">    attention, caution, danger, error, hint, important, note, tip, warning</span>
+
+
+<span class="sd">A simple example:</span>
+<span class="sd">    !!! note</span>
+<span class="sd">        This is the first line inside the box.</span>
+
+<span class="sd">Outputs:</span>
+<span class="sd">    &lt;div class=&quot;admonition note&quot;&gt;</span>
+<span class="sd">    &lt;p class=&quot;admonition-title&quot;&gt;Note&lt;/p&gt;</span>
+<span class="sd">    &lt;p&gt;This is the first line inside the box&lt;/p&gt;</span>
+<span class="sd">    &lt;/div&gt;</span>
+
+<span class="sd">You can also specify the title and CSS class of the admonition:</span>
+<span class="sd">    !!! custom &quot;Did you know?&quot;</span>
+<span class="sd">        Another line here.</span>
+
+<span class="sd">Outputs:</span>
+<span class="sd">    &lt;div class=&quot;admonition custom&quot;&gt;</span>
+<span class="sd">    &lt;p class=&quot;admonition-title&quot;&gt;Did you know?&lt;/p&gt;</span>
+<span class="sd">    &lt;p&gt;Another line here.&lt;/p&gt;</span>
+<span class="sd">    &lt;/div&gt;</span>
+
+<span class="sd">[rST]: http://docutils.sourceforge.net/docs/ref/rst/directives.html#specific-admonitions</span>
+
+<span class="sd">By [Tiago Serafim](http://www.tiagoserafim.com/).</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">absolute_import</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">unicode_literals</span>
+<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">Extension</span>
+<span class="kn">from</span> <span class="nn">..blockprocessors</span> <span class="kn">import</span> <span class="n">BlockProcessor</span>
+<span class="kn">from</span> <span class="nn">..util</span> <span class="kn">import</span> <span class="n">etree</span>
+<span class="kn">import</span> <span class="nn">re</span>
+
+
+<span class="k">class</span> <span class="nc">AdmonitionExtension</span><span class="p">(</span><span class="n">Extension</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Admonition extension for Python-Markdown. &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">extendMarkdown</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">md</span><span class="p">,</span> <span class="n">md_globals</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Add Admonition to Markdown instance. &quot;&quot;&quot;</span>
+        <span class="n">md</span><span class="o">.</span><span class="n">registerExtension</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+
+        <span class="n">md</span><span class="o">.</span><span class="n">parser</span><span class="o">.</span><span class="n">blockprocessors</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s">&#39;admonition&#39;</span><span class="p">,</span>
+                                      <span class="n">AdmonitionProcessor</span><span class="p">(</span><span class="n">md</span><span class="o">.</span><span class="n">parser</span><span class="p">),</span>
+                                      <span class="s">&#39;_begin&#39;</span><span class="p">)</span>
+
+
+<span class="k">class</span> <span class="nc">AdmonitionProcessor</span><span class="p">(</span><span class="n">BlockProcessor</span><span class="p">):</span>
+
+    <span class="n">CLASSNAME</span> <span class="o">=</span> <span class="s">&#39;admonition&#39;</span>
+    <span class="n">CLASSNAME_TITLE</span> <span class="o">=</span> <span class="s">&#39;admonition-title&#39;</span>
+    <span class="n">RE</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="s">r&#39;(?:^|\n)!!!\ ?([\w\-]+)(?:\ &quot;(.*?)&quot;)?&#39;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">test</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="n">block</span><span class="p">):</span>
+        <span class="n">sibling</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lastChild</span><span class="p">(</span><span class="n">parent</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">RE</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">block</span><span class="p">)</span> <span class="ow">or</span> \
+            <span class="p">(</span><span class="n">block</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s">&#39; &#39;</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">tab_length</span><span class="p">)</span> <span class="ow">and</span> <span class="n">sibling</span> <span class="ow">and</span> \
+                <span class="n">sibling</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;class&#39;</span><span class="p">,</span> <span class="s">&#39;&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">CLASSNAME</span><span class="p">)</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="n">blocks</span><span class="p">):</span>
+        <span class="n">sibling</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lastChild</span><span class="p">(</span><span class="n">parent</span><span class="p">)</span>
+        <span class="n">block</span> <span class="o">=</span> <span class="n">blocks</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">m</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">RE</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">block</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">m</span><span class="p">:</span>
+            <span class="n">block</span> <span class="o">=</span> <span class="n">block</span><span class="p">[</span><span class="n">m</span><span class="o">.</span><span class="n">end</span><span class="p">()</span> <span class="o">+</span> <span class="mi">1</span><span class="p">:]</span>  <span class="c"># removes the first line</span>
+
+        <span class="n">block</span><span class="p">,</span> <span class="n">theRest</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">detab</span><span class="p">(</span><span class="n">block</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">m</span><span class="p">:</span>
+            <span class="n">klass</span><span class="p">,</span> <span class="n">title</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_class_and_title</span><span class="p">(</span><span class="n">m</span><span class="p">)</span>
+            <span class="n">div</span> <span class="o">=</span> <span class="n">etree</span><span class="o">.</span><span class="n">SubElement</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span> <span class="s">&#39;div&#39;</span><span class="p">)</span>
+            <span class="n">div</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s">&#39;class&#39;</span><span class="p">,</span> <span class="s">&#39;</span><span class="si">%s</span><span class="s"> </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">CLASSNAME</span><span class="p">,</span> <span class="n">klass</span><span class="p">))</span>
+            <span class="k">if</span> <span class="n">title</span><span class="p">:</span>
+                <span class="n">p</span> <span class="o">=</span> <span class="n">etree</span><span class="o">.</span><span class="n">SubElement</span><span class="p">(</span><span class="n">div</span><span class="p">,</span> <span class="s">&#39;p&#39;</span><span class="p">)</span>
+                <span class="n">p</span><span class="o">.</span><span class="n">text</span> <span class="o">=</span> <span class="n">title</span>
+                <span class="n">p</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s">&#39;class&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">CLASSNAME_TITLE</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">div</span> <span class="o">=</span> <span class="n">sibling</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">parser</span><span class="o">.</span><span class="n">parseChunk</span><span class="p">(</span><span class="n">div</span><span class="p">,</span> <span class="n">block</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">theRest</span><span class="p">:</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-2" id="section-2">&#182;</a>
+</div>
+<p>This block contained unindented line(s) after the first indented
+line. Insert these lines as the first block of the master blocks
+list for future processing.</p>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+            <span class="n">blocks</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">theRest</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">get_class_and_title</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">match</span><span class="p">):</span>
+        <span class="n">klass</span><span class="p">,</span> <span class="n">title</span> <span class="o">=</span> <span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">(),</span> <span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">title</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-3" id="section-3">&#182;</a>
+</div>
+<p>no title was provided, use the capitalized classname as title
+e.g.: <code>!!! note</code> will render <code>&lt;p class="admonition-title"&gt;Note&lt;/p&gt;</code></p>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+            <span class="n">title</span> <span class="o">=</span> <span class="n">klass</span><span class="o">.</span><span class="n">capitalize</span><span class="p">()</span>
+        <span class="k">elif</span> <span class="n">title</span> <span class="o">==</span> <span class="s">&#39;&#39;</span><span class="p">:</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-4" id="section-4">&#182;</a>
+</div>
+<p>an explicit blank title should not be rendered
+e.g.: <code>!!! warning ""</code> will <em>not</em> render <code>p</code> with a title</p>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+            <span class="n">title</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="k">return</span> <span class="n">klass</span><span class="p">,</span> <span class="n">title</span>
+
+
+<span class="k">def</span> <span class="nf">makeExtension</span><span class="p">(</span><span class="n">configs</span><span class="o">=</span><span class="p">{}):</span>
+    <span class="k">return</span> <span class="n">AdmonitionExtension</span><span class="p">(</span><span class="n">configs</span><span class="o">=</span><span class="n">configs</span><span class="p">)</span>
+</pre></div>
+        </td>
+      </tr>
+  </tbody>
+</table>
+  </div>
+</body>
+</html>

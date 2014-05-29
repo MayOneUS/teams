@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>headerid.py</title>
+  <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+  <link rel="stylesheet" media="all" href="../../../doc-style.css" />
+  <script src="../../../doc-filelist.js"></script>
+  <script>
+    var relativeDir = "../../../", thisFile = "build/markdown/extensions/headerid.py", defaultSidebar = true;
+  </script>
+  <script src="../../../doc-script.js"></script>
+</head>
+<body>
+  <div id="sidebar_wrapper">
+    <div id="sidebar_switch">
+      <span class="tree">Files</span>
+      <span class="headings">Headings</span>
+    </div>
+    <div id="tree"></div>
+    <div id="headings">
+    </div>
+  </div>
+  <div id="sidebar-toggle"></div>
+  <div id="container"><div class="background highlight"></div>
+<table cellpadding="0" cellspacing="0">
+  <tbody>
+      <tr>
+        <td class="docs">
+          <h1>headerid.py</h1>
+        </td>
+        <td class="code highlight"></td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-1" id="section-1">&#182;</a>
+</div>
+
+        </td>
+        <td class="code highlight"><div class="highlight"><pre><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">HeaderID Extension for Python-Markdown</span>
+<span class="sd">======================================</span>
+
+<span class="sd">Auto-generate id attributes for HTML headers.</span>
+
+<span class="sd">Basic usage:</span>
+
+<span class="sd">    &gt;&gt;&gt; import markdown</span>
+<span class="sd">    &gt;&gt;&gt; text = &quot;# Some Header #&quot;</span>
+<span class="sd">    &gt;&gt;&gt; md = markdown.markdown(text, [&#39;headerid&#39;])</span>
+<span class="sd">    &gt;&gt;&gt; print md</span>
+<span class="sd">    &lt;h1 id=&quot;some-header&quot;&gt;Some Header&lt;/h1&gt;</span>
+
+<span class="sd">All header IDs are unique:</span>
+
+<span class="sd">    &gt;&gt;&gt; text = &#39;&#39;&#39;</span>
+<span class="sd">    ... #Header</span>
+<span class="sd">    ... #Header</span>
+<span class="sd">    ... #Header&#39;&#39;&#39;</span>
+<span class="sd">    &gt;&gt;&gt; md = markdown.markdown(text, [&#39;headerid&#39;])</span>
+<span class="sd">    &gt;&gt;&gt; print md</span>
+<span class="sd">    &lt;h1 id=&quot;header&quot;&gt;Header&lt;/h1&gt;</span>
+<span class="sd">    &lt;h1 id=&quot;header_1&quot;&gt;Header&lt;/h1&gt;</span>
+<span class="sd">    &lt;h1 id=&quot;header_2&quot;&gt;Header&lt;/h1&gt;</span>
+
+<span class="sd">To fit within a html template&#39;s hierarchy, set the header base level:</span>
+
+<span class="sd">    &gt;&gt;&gt; text = &#39;&#39;&#39;</span>
+<span class="sd">    ... #Some Header</span>
+<span class="sd">    ... ## Next Level&#39;&#39;&#39;</span>
+<span class="sd">    &gt;&gt;&gt; md = markdown.markdown(text, [&#39;headerid(level=3)&#39;])</span>
+<span class="sd">    &gt;&gt;&gt; print md</span>
+<span class="sd">    &lt;h3 id=&quot;some-header&quot;&gt;Some Header&lt;/h3&gt;</span>
+<span class="sd">    &lt;h4 id=&quot;next-level&quot;&gt;Next Level&lt;/h4&gt;</span>
+
+<span class="sd">Works with inline markup.</span>
+
+<span class="sd">    &gt;&gt;&gt; text = &#39;#Some *Header* with [markup](http://example.com).&#39;</span>
+<span class="sd">    &gt;&gt;&gt; md = markdown.markdown(text, [&#39;headerid&#39;])</span>
+<span class="sd">    &gt;&gt;&gt; print md</span>
+<span class="sd">    &lt;h1 id=&quot;some-header-with-markup&quot;&gt;Some &lt;em&gt;Header&lt;/em&gt; with &lt;a href=&quot;http://example.com&quot;&gt;markup&lt;/a&gt;.&lt;/h1&gt;</span>
+
+<span class="sd">Turn off auto generated IDs:</span>
+
+<span class="sd">    &gt;&gt;&gt; text = &#39;&#39;&#39;</span>
+<span class="sd">    ... # Some Header</span>
+<span class="sd">    ... # Another Header&#39;&#39;&#39;</span>
+<span class="sd">    &gt;&gt;&gt; md = markdown.markdown(text, [&#39;headerid(forceid=False)&#39;])</span>
+<span class="sd">    &gt;&gt;&gt; print md</span>
+<span class="sd">    &lt;h1&gt;Some Header&lt;/h1&gt;</span>
+<span class="sd">    &lt;h1&gt;Another Header&lt;/h1&gt;</span>
+
+<span class="sd">Use with MetaData extension:</span>
+
+<span class="sd">    &gt;&gt;&gt; text = &#39;&#39;&#39;header_level: 2</span>
+<span class="sd">    ... header_forceid: Off</span>
+<span class="sd">    ...</span>
+<span class="sd">    ... # A Header&#39;&#39;&#39;</span>
+<span class="sd">    &gt;&gt;&gt; md = markdown.markdown(text, [&#39;headerid&#39;, &#39;meta&#39;])</span>
+<span class="sd">    &gt;&gt;&gt; print md</span>
+<span class="sd">    &lt;h2&gt;A Header&lt;/h2&gt;</span>
+
+<span class="sd">Copyright 2007-2011 [Waylan Limberg](http://achinghead.com/).</span>
+
+<span class="sd">Project website: &lt;http://packages.python.org/Markdown/extensions/header_id.html&gt;</span>
+<span class="sd">Contact: markdown@freewisdom.org</span>
+
+<span class="sd">License: BSD (see ../docs/LICENSE for details) </span>
+
+<span class="sd">Dependencies:</span>
+<span class="sd">* [Python 2.3+](http://python.org)</span>
+<span class="sd">* [Markdown 2.0+](http://packages.python.org/Markdown/)</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">absolute_import</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">unicode_literals</span>
+<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">Extension</span>
+<span class="kn">from</span> <span class="nn">..treeprocessors</span> <span class="kn">import</span> <span class="n">Treeprocessor</span>
+<span class="kn">from</span> <span class="nn">..util</span> <span class="kn">import</span> <span class="n">HTML_PLACEHOLDER_RE</span><span class="p">,</span> <span class="n">parseBoolValue</span>
+<span class="kn">import</span> <span class="nn">re</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">unicodedata</span>
+
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s">&#39;MARKDOWN&#39;</span><span class="p">)</span>
+
+<span class="n">IDCOUNT_RE</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="s">r&#39;^(.*)_([0-9]+)$&#39;</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">slugify</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">separator</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Slugify a string, to make it URL friendly. &quot;&quot;&quot;</span>
+    <span class="n">value</span> <span class="o">=</span> <span class="n">unicodedata</span><span class="o">.</span><span class="n">normalize</span><span class="p">(</span><span class="s">&#39;NFKD&#39;</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s">&#39;ascii&#39;</span><span class="p">,</span> <span class="s">&#39;ignore&#39;</span><span class="p">)</span>
+    <span class="n">value</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s">&#39;[^\w\s-]&#39;</span><span class="p">,</span> <span class="s">&#39;&#39;</span><span class="p">,</span> <span class="n">value</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s">&#39;ascii&#39;</span><span class="p">))</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s">&#39;[</span><span class="si">%s</span><span class="s">\s]+&#39;</span> <span class="o">%</span> <span class="n">separator</span><span class="p">,</span> <span class="n">separator</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">unique</span><span class="p">(</span><span class="nb">id</span><span class="p">,</span> <span class="n">ids</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Ensure id is unique in set of ids. Append &#39;_1&#39;, &#39;_2&#39;... if not &quot;&quot;&quot;</span>
+    <span class="k">while</span> <span class="nb">id</span> <span class="ow">in</span> <span class="n">ids</span> <span class="ow">or</span> <span class="ow">not</span> <span class="nb">id</span><span class="p">:</span>
+        <span class="n">m</span> <span class="o">=</span> <span class="n">IDCOUNT_RE</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="nb">id</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">m</span><span class="p">:</span>
+            <span class="nb">id</span> <span class="o">=</span> <span class="s">&#39;</span><span class="si">%s</span><span class="s">_</span><span class="si">%d</span><span class="s">&#39;</span><span class="o">%</span> <span class="p">(</span><span class="n">m</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span> <span class="nb">int</span><span class="p">(</span><span class="n">m</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">2</span><span class="p">))</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="nb">id</span> <span class="o">=</span> <span class="s">&#39;</span><span class="si">%s</span><span class="s">_</span><span class="si">%d</span><span class="s">&#39;</span><span class="o">%</span> <span class="p">(</span><span class="nb">id</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">ids</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="nb">id</span><span class="p">)</span>
+    <span class="k">return</span> <span class="nb">id</span>
+
+
+<span class="k">def</span> <span class="nf">itertext</span><span class="p">(</span><span class="n">elem</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Loop through all children and return text only. </span>
+<span class="sd">    </span>
+<span class="sd">    Reimplements method of same name added to ElementTree in Python 2.7</span>
+<span class="sd">    </span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">elem</span><span class="o">.</span><span class="n">text</span><span class="p">:</span>
+        <span class="k">yield</span> <span class="n">elem</span><span class="o">.</span><span class="n">text</span>
+    <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">elem</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">itertext</span><span class="p">(</span><span class="n">e</span><span class="p">):</span>
+            <span class="k">yield</span> <span class="n">s</span>
+        <span class="k">if</span> <span class="n">e</span><span class="o">.</span><span class="n">tail</span><span class="p">:</span>
+            <span class="k">yield</span> <span class="n">e</span><span class="o">.</span><span class="n">tail</span>
+
+
+<span class="k">def</span> <span class="nf">stashedHTML2text</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">md</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Extract raw HTML, reduce to plain text and swap with placeholder. &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">_html_sub</span><span class="p">(</span><span class="n">m</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Substitute raw html with plain text. &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+          <span class="n">raw</span><span class="p">,</span> <span class="n">safe</span> <span class="o">=</span> <span class="n">md</span><span class="o">.</span><span class="n">htmlStash</span><span class="o">.</span><span class="n">rawHtmlBlocks</span><span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">m</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">))]</span>
+        <span class="k">except</span> <span class="p">(</span><span class="ne">IndexError</span><span class="p">,</span> <span class="ne">TypeError</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">m</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">md</span><span class="o">.</span><span class="n">safeMode</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">safe</span><span class="p">:</span>
+            <span class="k">return</span> <span class="s">&#39;&#39;</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-2" id="section-2">&#182;</a>
+</div>
+<p>Strip out tags and entities - leaveing text</p>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+        <span class="k">return</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s">r&#39;(&lt;[^&gt;]+&gt;)|(&amp;[\#a-zA-Z0-9]+;)&#39;</span><span class="p">,</span> <span class="s">&#39;&#39;</span><span class="p">,</span> <span class="n">raw</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">HTML_PLACEHOLDER_RE</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="n">_html_sub</span><span class="p">,</span> <span class="n">text</span><span class="p">)</span>
+
+
+<span class="k">class</span> <span class="nc">HeaderIdTreeprocessor</span><span class="p">(</span><span class="n">Treeprocessor</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Assign IDs to headers. &quot;&quot;&quot;</span>
+
+    <span class="n">IDs</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">doc</span><span class="p">):</span>
+        <span class="n">start_level</span><span class="p">,</span> <span class="n">force_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_meta</span><span class="p">()</span>
+        <span class="n">slugify</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s">&#39;slugify&#39;</span><span class="p">]</span>
+        <span class="n">sep</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s">&#39;separator&#39;</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">elem</span> <span class="ow">in</span> <span class="n">doc</span><span class="o">.</span><span class="n">getiterator</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">elem</span><span class="o">.</span><span class="n">tag</span> <span class="ow">in</span> <span class="p">[</span><span class="s">&#39;h1&#39;</span><span class="p">,</span> <span class="s">&#39;h2&#39;</span><span class="p">,</span> <span class="s">&#39;h3&#39;</span><span class="p">,</span> <span class="s">&#39;h4&#39;</span><span class="p">,</span> <span class="s">&#39;h5&#39;</span><span class="p">,</span> <span class="s">&#39;h6&#39;</span><span class="p">]:</span>
+                <span class="k">if</span> <span class="n">force_id</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="s">&quot;id&quot;</span> <span class="ow">in</span> <span class="n">elem</span><span class="o">.</span><span class="n">attrib</span><span class="p">:</span>
+                        <span class="nb">id</span> <span class="o">=</span> <span class="n">elem</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;id&#39;</span><span class="p">)</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="nb">id</span> <span class="o">=</span> <span class="n">stashedHTML2text</span><span class="p">(</span><span class="s">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">itertext</span><span class="p">(</span><span class="n">elem</span><span class="p">)),</span> <span class="bp">self</span><span class="o">.</span><span class="n">md</span><span class="p">)</span>
+                        <span class="nb">id</span> <span class="o">=</span> <span class="n">slugify</span><span class="p">(</span><span class="nb">id</span><span class="p">,</span> <span class="n">sep</span><span class="p">)</span>
+                    <span class="n">elem</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s">&#39;id&#39;</span><span class="p">,</span> <span class="n">unique</span><span class="p">(</span><span class="nb">id</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">IDs</span><span class="p">))</span>
+                <span class="k">if</span> <span class="n">start_level</span><span class="p">:</span>
+                    <span class="n">level</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">elem</span><span class="o">.</span><span class="n">tag</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span> <span class="o">+</span> <span class="n">start_level</span>
+                    <span class="k">if</span> <span class="n">level</span> <span class="o">&gt;</span> <span class="mi">6</span><span class="p">:</span>
+                        <span class="n">level</span> <span class="o">=</span> <span class="mi">6</span>
+                    <span class="n">elem</span><span class="o">.</span><span class="n">tag</span> <span class="o">=</span> <span class="s">&#39;h</span><span class="si">%d</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">level</span>
+
+
+    <span class="k">def</span> <span class="nf">_get_meta</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Return meta data suported by this ext as a tuple &quot;&quot;&quot;</span>
+        <span class="n">level</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s">&#39;level&#39;</span><span class="p">])</span> <span class="o">-</span> <span class="mi">1</span>
+        <span class="n">force</span> <span class="o">=</span> <span class="n">parseBoolValue</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s">&#39;forceid&#39;</span><span class="p">])</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">md</span><span class="p">,</span> <span class="s">&#39;Meta&#39;</span><span class="p">):</span>
+            <span class="k">if</span> <span class="s">&#39;header_level&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">md</span><span class="o">.</span><span class="n">Meta</span><span class="p">:</span>
+                <span class="n">level</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">md</span><span class="o">.</span><span class="n">Meta</span><span class="p">[</span><span class="s">&#39;header_level&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span> <span class="o">-</span> <span class="mi">1</span>
+            <span class="k">if</span> <span class="s">&#39;header_forceid&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">md</span><span class="o">.</span><span class="n">Meta</span><span class="p">:</span> 
+                <span class="n">force</span> <span class="o">=</span> <span class="n">parseBoolValue</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">md</span><span class="o">.</span><span class="n">Meta</span><span class="p">[</span><span class="s">&#39;header_forceid&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>
+        <span class="k">return</span> <span class="n">level</span><span class="p">,</span> <span class="n">force</span>
+
+
+<span class="k">class</span> <span class="nc">HeaderIdExtension</span><span class="p">(</span><span class="n">Extension</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">configs</span><span class="p">):</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-3" id="section-3">&#182;</a>
+</div>
+<p>set defaults</p>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+        <span class="bp">self</span><span class="o">.</span><span class="n">config</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="s">&#39;level&#39;</span> <span class="p">:</span> <span class="p">[</span><span class="s">&#39;1&#39;</span><span class="p">,</span> <span class="s">&#39;Base level for headers.&#39;</span><span class="p">],</span>
+                <span class="s">&#39;forceid&#39;</span> <span class="p">:</span> <span class="p">[</span><span class="s">&#39;True&#39;</span><span class="p">,</span> <span class="s">&#39;Force all headers to have an id.&#39;</span><span class="p">],</span>
+                <span class="s">&#39;separator&#39;</span> <span class="p">:</span> <span class="p">[</span><span class="s">&#39;-&#39;</span><span class="p">,</span> <span class="s">&#39;Word separator.&#39;</span><span class="p">],</span>
+                <span class="s">&#39;slugify&#39;</span> <span class="p">:</span> <span class="p">[</span><span class="n">slugify</span><span class="p">,</span> <span class="s">&#39;Callable to generate anchors&#39;</span><span class="p">],</span> 
+            <span class="p">}</span>
+
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">configs</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">setConfig</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">extendMarkdown</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">md</span><span class="p">,</span> <span class="n">md_globals</span><span class="p">):</span>
+        <span class="n">md</span><span class="o">.</span><span class="n">registerExtension</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">processor</span> <span class="o">=</span> <span class="n">HeaderIdTreeprocessor</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">processor</span><span class="o">.</span><span class="n">md</span> <span class="o">=</span> <span class="n">md</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">processor</span><span class="o">.</span><span class="n">config</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getConfigs</span><span class="p">()</span>
+        <span class="k">if</span> <span class="s">&#39;attr_list&#39;</span> <span class="ow">in</span> <span class="n">md</span><span class="o">.</span><span class="n">treeprocessors</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-4" id="section-4">&#182;</a>
+</div>
+<p>insert after attr_list treeprocessor</p>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+            <span class="n">md</span><span class="o">.</span><span class="n">treeprocessors</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s">&#39;headerid&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">processor</span><span class="p">,</span> <span class="s">&#39;&gt;attr_list&#39;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-5" id="section-5">&#182;</a>
+</div>
+<p>insert after 'prettify' treeprocessor.</p>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+            <span class="n">md</span><span class="o">.</span><span class="n">treeprocessors</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s">&#39;headerid&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">processor</span><span class="p">,</span> <span class="s">&#39;&gt;prettify&#39;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">reset</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">processor</span><span class="o">.</span><span class="n">IDs</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+
+
+<span class="k">def</span> <span class="nf">makeExtension</span><span class="p">(</span><span class="n">configs</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">HeaderIdExtension</span><span class="p">(</span><span class="n">configs</span><span class="o">=</span><span class="n">configs</span><span class="p">)</span>
+</pre></div>
+        </td>
+      </tr>
+  </tbody>
+</table>
+  </div>
+</body>
+</html>

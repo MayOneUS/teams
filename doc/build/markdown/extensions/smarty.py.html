@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>smarty.py</title>
+  <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+  <link rel="stylesheet" media="all" href="../../../doc-style.css" />
+  <script src="../../../doc-filelist.js"></script>
+  <script>
+    var relativeDir = "../../../", thisFile = "build/markdown/extensions/smarty.py", defaultSidebar = true;
+  </script>
+  <script src="../../../doc-script.js"></script>
+</head>
+<body>
+  <div id="sidebar_wrapper">
+    <div id="sidebar_switch">
+      <span class="tree">Files</span>
+      <span class="headings">Headings</span>
+    </div>
+    <div id="tree"></div>
+    <div id="headings">
+    </div>
+  </div>
+  <div id="sidebar-toggle"></div>
+  <div id="container"><div class="background highlight"></div>
+<table cellpadding="0" cellspacing="0">
+  <tbody>
+      <tr>
+        <td class="docs">
+          <h1>smarty.py</h1>
+        </td>
+        <td class="code highlight"></td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-1" id="section-1">&#182;</a>
+</div>
+<p>-<em>- coding: utf-8 -</em>-
+Smarty extension for Python-Markdown
+Author: 2013, Dmitry Shachnev <a href="&#109;&#97;&#105;&#x6C;&#116;&#x6F;:&#x6D;&#105;&#x74;&#121;&#x61;&#x35;&#55;&#x40;&#x67;&#109;a&#x69;l&#x2E;&#x63;&#x6F;&#x6D;">&#x6D;&#105;&#x74;&#121;&#x61;&#x35;&#55;&#x40;&#x67;&#109;a&#x69;l&#x2E;&#x63;&#x6F;&#x6D;</a></p>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre></pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-2" id="section-2">&#182;</a>
+</div>
+<p>SmartyPants license:</p>
+
+<p>Copyright (c) 2003 John Gruber <a href="http://daringfireball.net/">http://daringfireball.net/</a>
+  All rights reserved.</p>
+
+<p>Redistribution and use in source and binary forms, with or without
+  modification, are permitted provided that the following conditions are
+  met:</p>
+
+<ul>
+<li><p>Redistributions of source code must retain the above copyright
+ notice, this list of conditions and the following disclaimer.</p></li>
+<li><p>Redistributions in binary form must reproduce the above copyright
+ notice, this list of conditions and the following disclaimer in
+ the documentation and/or other materials provided with the
+ distribution.</p></li>
+<li><p>Neither the name "SmartyPants" nor the names of its contributors 
+ may be used to endorse or promote products derived from this
+ software without specific prior written permission.</p>
+
+<p>This software is provided by the copyright holders and contributors "as
+is" and any express or implied warranties, including, but not limited
+to, the implied warranties of merchantability and fitness for a
+particular purpose are disclaimed. In no event shall the copyright
+owner or contributors be liable for any direct, indirect, incidental,
+special, exemplary, or consequential damages (including, but not
+limited to, procurement of substitute goods or services; loss of use,
+data, or profits; or business interruption) however caused and on any
+theory of liability, whether in contract, strict liability, or tort
+(including negligence or otherwise) arising in any way out of the use
+of this software, even if advised of the possibility of such damage.</p></li>
+</ul>
+
+<p>smartypants.py license:</p>
+
+<p>smartypants.py is a derivative work of SmartyPants.
+  Copyright (c) 2004, 2007 Chad Miller <a href="http://web.chad.org/">http://web.chad.org/</a></p>
+
+<p>Redistribution and use in source and binary forms, with or without
+  modification, are permitted provided that the following conditions are
+  met:</p>
+
+<ul>
+<li><p>Redistributions of source code must retain the above copyright
+ notice, this list of conditions and the following disclaimer.</p></li>
+<li><p>Redistributions in binary form must reproduce the above copyright
+ notice, this list of conditions and the following disclaimer in
+ the documentation and/or other materials provided with the
+ distribution.</p>
+
+<p>This software is provided by the copyright holders and contributors "as
+is" and any express or implied warranties, including, but not limited
+to, the implied warranties of merchantability and fitness for a
+particular purpose are disclaimed. In no event shall the copyright
+owner or contributors be liable for any direct, indirect, incidental,
+special, exemplary, or consequential damages (including, but not
+limited to, procurement of substitute goods or services; loss of use,
+data, or profits; or business interruption) however caused and on any
+theory of liability, whether in contract, strict liability, or tort
+(including negligence or otherwise) arising in any way out of the use
+of this software, even if advised of the possibility of such damage.</p></li>
+</ul>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">unicode_literals</span>
+<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">Extension</span>
+<span class="kn">from</span> <span class="nn">..inlinepatterns</span> <span class="kn">import</span> <span class="n">HtmlPattern</span>
+<span class="kn">from</span> <span class="nn">..util</span> <span class="kn">import</span> <span class="n">parseBoolValue</span>
+
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-3" id="section-3">&#182;</a>
+</div>
+<p>Constants for quote education.</p>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+<span class="n">punctClass</span> <span class="o">=</span> <span class="s">r&quot;&quot;&quot;[!&quot;#\$\%&#39;()*+,-.\/:;&lt;=&gt;?\@\[\\\]\^_`{|}~]&quot;&quot;&quot;</span>
+<span class="n">endOfWordClass</span> <span class="o">=</span> <span class="s">r&quot;[\s.,;:!?)]&quot;</span>
+<span class="n">closeClass</span> <span class="o">=</span> <span class="s">&quot;[^\ </span><span class="se">\t\r\n</span><span class="s">\[\{\(\-</span><span class="se">\u0002\u0003</span><span class="s">]&quot;</span>
+
+<span class="n">openingQuotesBase</span> <span class="o">=</span> <span class="p">(</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-4" id="section-4">&#182;</a>
+</div>
+<p>'(\s'              # a  whitespace char
+   '|&nbsp;'          # or a non-breaking space entity
+   '|--'              # or dashes
+   '|–|—'             # or unicode
+   '|&amp;[mn]dash;'      # or named dash entities
+   '|&#8211;|&#8212;' # or decimal entities</p>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+   <span class="s">&#39;)&#39;</span>
+<span class="p">)</span>
+
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-5" id="section-5">&#182;</a>
+</div>
+<p>Special case if the very first character is a quote
+followed by punctuation at a non-word-break. Close the quotes by brute force:</p>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+<span class="n">singleQuoteStartRe</span> <span class="o">=</span> <span class="s">r&quot;^&#39;(?=</span><span class="si">%s</span><span class="se">\\</span><span class="s">B)&quot;</span> <span class="o">%</span> <span class="n">punctClass</span>
+<span class="n">doubleQuoteStartRe</span> <span class="o">=</span> <span class="s">r&#39;^&quot;(?=</span><span class="si">%s</span><span class="se">\\</span><span class="s">B)&#39;</span> <span class="o">%</span> <span class="n">punctClass</span>
+
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-6" id="section-6">&#182;</a>
+</div>
+<p>Special case for double sets of quotes, e.g.:
+  <p>He said, "'Quoted' words in a larger quote."</p></p>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+<span class="n">doubleQuoteSetsRe</span> <span class="o">=</span> <span class="s">r&quot;&quot;&quot;&quot;&#39;(?=\w)&quot;&quot;&quot;</span>
+<span class="n">singleQuoteSetsRe</span> <span class="o">=</span> <span class="s">r&quot;&quot;&quot;&#39;&quot;(?=\w)&quot;&quot;&quot;</span>
+
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-7" id="section-7">&#182;</a>
+</div>
+<p>Get most opening double quotes:</p>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+<span class="n">openingDoubleQuotesRegex</span> <span class="o">=</span> <span class="s">r&#39;</span><span class="si">%s</span><span class="s">&quot;(?=\w)&#39;</span> <span class="o">%</span> <span class="n">openingQuotesBase</span>
+
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-8" id="section-8">&#182;</a>
+</div>
+<p>Double closing quotes:</p>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+<span class="n">closingDoubleQuotesRegex</span> <span class="o">=</span> <span class="s">r&#39;&quot;(?=\s)&#39;</span>
+<span class="n">closingDoubleQuotesRegex2</span> <span class="o">=</span> <span class="s">&#39;(?&lt;=</span><span class="si">%s</span><span class="s">)&quot;&#39;</span> <span class="o">%</span> <span class="n">closeClass</span>
+
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-9" id="section-9">&#182;</a>
+</div>
+<p>Get most opening single quotes:</p>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+<span class="n">openingSingleQuotesRegex</span> <span class="o">=</span> <span class="s">r&quot;</span><span class="si">%s</span><span class="s">&#39;(?=\w)&quot;</span> <span class="o">%</span> <span class="n">openingQuotesBase</span>
+
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-10" id="section-10">&#182;</a>
+</div>
+<p>Single closing quotes:</p>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+<span class="n">closingSingleQuotesRegex</span>  <span class="o">=</span> <span class="s">r&quot;(?&lt;=</span><span class="si">%s</span><span class="s">)&#39;(?!\s|s\b|\d)&quot;</span> <span class="o">%</span> <span class="n">closeClass</span>
+<span class="n">closingSingleQuotesRegex2</span> <span class="o">=</span> <span class="s">r&quot;(?&lt;=</span><span class="si">%s</span><span class="s">)&#39;(\s|s\b)&quot;</span> <span class="o">%</span> <span class="n">closeClass</span>
+
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-11" id="section-11">&#182;</a>
+</div>
+<p>All remaining quotes should be opening ones</p>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+<span class="n">remainingSingleQuotesRegex</span> <span class="o">=</span> <span class="s">&quot;&#39;&quot;</span>
+<span class="n">remainingDoubleQuotesRegex</span> <span class="o">=</span> <span class="s">&#39;&quot;&#39;</span>
+
+<span class="n">lsquo</span><span class="p">,</span> <span class="n">rsquo</span><span class="p">,</span> <span class="n">ldquo</span><span class="p">,</span> <span class="n">rdquo</span> <span class="o">=</span> <span class="s">&#39;&amp;lsquo;&#39;</span><span class="p">,</span> <span class="s">&#39;&amp;rsquo;&#39;</span><span class="p">,</span> <span class="s">&#39;&amp;ldquo;&#39;</span><span class="p">,</span> <span class="s">&#39;&amp;rdquo;&#39;</span>
+
+<span class="k">class</span> <span class="nc">SubstituteTextPattern</span><span class="p">(</span><span class="n">HtmlPattern</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pattern</span><span class="p">,</span> <span class="n">replace</span><span class="p">,</span> <span class="n">markdown_instance</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Replaces matches with some text. &quot;&quot;&quot;</span>
+        <span class="n">HtmlPattern</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pattern</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">replace</span> <span class="o">=</span> <span class="n">replace</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">markdown</span> <span class="o">=</span> <span class="n">markdown_instance</span>
+
+    <span class="k">def</span> <span class="nf">handleMatch</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">m</span><span class="p">):</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="s">&#39;&#39;</span>
+        <span class="k">for</span> <span class="n">part</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">replace</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">part</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
+                <span class="n">result</span> <span class="o">+=</span> <span class="n">m</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="n">part</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">result</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">markdown</span><span class="o">.</span><span class="n">htmlStash</span><span class="o">.</span><span class="n">store</span><span class="p">(</span><span class="n">part</span><span class="p">,</span> <span class="n">safe</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">result</span>
+
+<span class="k">class</span> <span class="nc">SmartyExtension</span><span class="p">(</span><span class="n">Extension</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">configs</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">config</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s">&#39;smart_quotes&#39;</span><span class="p">:</span> <span class="p">[</span><span class="bp">True</span><span class="p">,</span> <span class="s">&#39;Educate quotes&#39;</span><span class="p">],</span>
+            <span class="s">&#39;smart_dashes&#39;</span><span class="p">:</span> <span class="p">[</span><span class="bp">True</span><span class="p">,</span> <span class="s">&#39;Educate dashes&#39;</span><span class="p">],</span>
+            <span class="s">&#39;smart_ellipses&#39;</span><span class="p">:</span> <span class="p">[</span><span class="bp">True</span><span class="p">,</span> <span class="s">&#39;Educate ellipses&#39;</span><span class="p">]</span>
+        <span class="p">}</span>
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">configs</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">setConfig</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">parseBoolValue</span><span class="p">(</span><span class="n">value</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="nf">_addPatterns</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">md</span><span class="p">,</span> <span class="n">patterns</span><span class="p">,</span> <span class="n">serie</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">ind</span><span class="p">,</span> <span class="n">pattern</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">patterns</span><span class="p">):</span>
+            <span class="n">pattern</span> <span class="o">+=</span> <span class="p">(</span><span class="n">md</span><span class="p">,)</span>
+            <span class="n">pattern</span> <span class="o">=</span> <span class="n">SubstituteTextPattern</span><span class="p">(</span><span class="o">*</span><span class="n">pattern</span><span class="p">)</span>
+            <span class="n">after</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;&gt;smarty-</span><span class="si">%s</span><span class="s">-</span><span class="si">%d</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">serie</span><span class="p">,</span> <span class="n">ind</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="k">if</span> <span class="n">ind</span> <span class="k">else</span> <span class="s">&#39;&gt;entity&#39;</span><span class="p">)</span>
+            <span class="n">name</span> <span class="o">=</span> <span class="s">&#39;smarty-</span><span class="si">%s</span><span class="s">-</span><span class="si">%d</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">serie</span><span class="p">,</span> <span class="n">ind</span><span class="p">)</span>
+            <span class="n">md</span><span class="o">.</span><span class="n">inlinePatterns</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">pattern</span><span class="p">,</span> <span class="n">after</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">educateDashes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">md</span><span class="p">):</span>
+        <span class="n">emDashesPattern</span> <span class="o">=</span> <span class="n">SubstituteTextPattern</span><span class="p">(</span><span class="s">r&#39;(?&lt;!-)---(?!-)&#39;</span><span class="p">,</span> <span class="p">(</span><span class="s">&#39;&amp;mdash;&#39;</span><span class="p">,),</span> <span class="n">md</span><span class="p">)</span>
+        <span class="n">enDashesPattern</span> <span class="o">=</span> <span class="n">SubstituteTextPattern</span><span class="p">(</span><span class="s">r&#39;(?&lt;!-)--(?!-)&#39;</span><span class="p">,</span> <span class="p">(</span><span class="s">&#39;&amp;ndash;&#39;</span><span class="p">,),</span> <span class="n">md</span><span class="p">)</span>
+        <span class="n">md</span><span class="o">.</span><span class="n">inlinePatterns</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s">&#39;smarty-em-dashes&#39;</span><span class="p">,</span> <span class="n">emDashesPattern</span><span class="p">,</span> <span class="s">&#39;&gt;entity&#39;</span><span class="p">)</span>
+        <span class="n">md</span><span class="o">.</span><span class="n">inlinePatterns</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s">&#39;smarty-en-dashes&#39;</span><span class="p">,</span> <span class="n">enDashesPattern</span><span class="p">,</span>
+            <span class="s">&#39;&gt;smarty-em-dashes&#39;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">educateEllipses</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">md</span><span class="p">):</span>
+        <span class="n">ellipsesPattern</span> <span class="o">=</span> <span class="n">SubstituteTextPattern</span><span class="p">(</span><span class="s">r&#39;(?&lt;!\.)\.{3}(?!\.)&#39;</span><span class="p">,</span> <span class="p">(</span><span class="s">&#39;&amp;hellip;&#39;</span><span class="p">,),</span> <span class="n">md</span><span class="p">)</span>
+        <span class="n">md</span><span class="o">.</span><span class="n">inlinePatterns</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s">&#39;smarty-ellipses&#39;</span><span class="p">,</span> <span class="n">ellipsesPattern</span><span class="p">,</span> <span class="s">&#39;&gt;entity&#39;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">educateQuotes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">md</span><span class="p">):</span>
+        <span class="n">patterns</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="p">(</span><span class="n">singleQuoteStartRe</span><span class="p">,</span> <span class="p">(</span><span class="n">rsquo</span><span class="p">,)),</span>
+            <span class="p">(</span><span class="n">doubleQuoteStartRe</span><span class="p">,</span> <span class="p">(</span><span class="n">rdquo</span><span class="p">,)),</span>
+            <span class="p">(</span><span class="n">doubleQuoteSetsRe</span><span class="p">,</span> <span class="p">(</span><span class="n">ldquo</span> <span class="o">+</span> <span class="n">lsquo</span><span class="p">,)),</span>
+            <span class="p">(</span><span class="n">singleQuoteSetsRe</span><span class="p">,</span> <span class="p">(</span><span class="n">lsquo</span> <span class="o">+</span> <span class="n">ldquo</span><span class="p">,)),</span>
+            <span class="p">(</span><span class="n">openingSingleQuotesRegex</span><span class="p">,</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">lsquo</span><span class="p">)),</span>
+            <span class="p">(</span><span class="n">closingSingleQuotesRegex</span><span class="p">,</span> <span class="p">(</span><span class="n">rsquo</span><span class="p">,)),</span>
+            <span class="p">(</span><span class="n">closingSingleQuotesRegex2</span><span class="p">,</span> <span class="p">(</span><span class="n">rsquo</span><span class="p">,</span> <span class="mi">2</span><span class="p">)),</span>
+            <span class="p">(</span><span class="n">remainingSingleQuotesRegex</span><span class="p">,</span> <span class="p">(</span><span class="n">lsquo</span><span class="p">,)),</span>
+            <span class="p">(</span><span class="n">openingDoubleQuotesRegex</span><span class="p">,</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">ldquo</span><span class="p">)),</span>
+            <span class="p">(</span><span class="n">closingDoubleQuotesRegex</span><span class="p">,</span> <span class="p">(</span><span class="n">rdquo</span><span class="p">,)),</span>
+            <span class="p">(</span><span class="n">closingDoubleQuotesRegex2</span><span class="p">,</span> <span class="p">(</span><span class="n">rdquo</span><span class="p">,)),</span>
+            <span class="p">(</span><span class="n">remainingDoubleQuotesRegex</span><span class="p">,</span> <span class="p">(</span><span class="n">ldquo</span><span class="p">,))</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_addPatterns</span><span class="p">(</span><span class="n">md</span><span class="p">,</span> <span class="n">patterns</span><span class="p">,</span> <span class="s">&#39;quotes&#39;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">extendMarkdown</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">md</span><span class="p">,</span> <span class="n">md_globals</span><span class="p">):</span>
+        <span class="n">configs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getConfigs</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">configs</span><span class="p">[</span><span class="s">&#39;smart_quotes&#39;</span><span class="p">]:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">educateQuotes</span><span class="p">(</span><span class="n">md</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">configs</span><span class="p">[</span><span class="s">&#39;smart_dashes&#39;</span><span class="p">]:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">educateDashes</span><span class="p">(</span><span class="n">md</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">configs</span><span class="p">[</span><span class="s">&#39;smart_ellipses&#39;</span><span class="p">]:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">educateEllipses</span><span class="p">(</span><span class="n">md</span><span class="p">)</span>
+        <span class="n">md</span><span class="o">.</span><span class="n">ESCAPED_CHARS</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span><span class="s">&#39;&quot;&#39;</span><span class="p">,</span> <span class="s">&quot;&#39;&quot;</span><span class="p">])</span>
+
+<span class="k">def</span> <span class="nf">makeExtension</span><span class="p">(</span><span class="n">configs</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">SmartyExtension</span><span class="p">(</span><span class="n">configs</span><span class="p">)</span>
+</pre></div>
+        </td>
+      </tr>
+  </tbody>
+</table>
+  </div>
+</body>
+</html>

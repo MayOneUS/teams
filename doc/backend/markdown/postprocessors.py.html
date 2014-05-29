@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>postprocessors.py</title>
+  <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+  <link rel="stylesheet" media="all" href="../../doc-style.css" />
+  <script src="../../doc-filelist.js"></script>
+  <script>
+    var relativeDir = "../../", thisFile = "backend/markdown/postprocessors.py", defaultSidebar = true;
+  </script>
+  <script src="../../doc-script.js"></script>
+</head>
+<body>
+  <div id="sidebar_wrapper">
+    <div id="sidebar_switch">
+      <span class="tree">Files</span>
+      <span class="headings">Headings</span>
+    </div>
+    <div id="tree"></div>
+    <div id="headings">
+    </div>
+  </div>
+  <div id="sidebar-toggle"></div>
+  <div id="container"><div class="background highlight"></div>
+<table cellpadding="0" cellspacing="0">
+  <tbody>
+      <tr>
+        <td class="docs">
+          <h1>postprocessors.py</h1>
+        </td>
+        <td class="code highlight"></td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-1" id="section-1">&#182;</a>
+</div>
+
+        </td>
+        <td class="code highlight"><div class="highlight"><pre><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">POST-PROCESSORS</span>
+<span class="sd">=============================================================================</span>
+
+<span class="sd">Markdown also allows post-processors, which are similar to preprocessors in</span>
+<span class="sd">that they need to implement a &quot;run&quot; method. However, they are run after core</span>
+<span class="sd">processing.</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">absolute_import</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">unicode_literals</span>
+<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">util</span>
+<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">odict</span>
+<span class="kn">import</span> <span class="nn">re</span>
+
+
+<span class="k">def</span> <span class="nf">build_postprocessors</span><span class="p">(</span><span class="n">md_instance</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Build the default postprocessors for Markdown. &quot;&quot;&quot;</span>
+    <span class="n">postprocessors</span> <span class="o">=</span> <span class="n">odict</span><span class="o">.</span><span class="n">OrderedDict</span><span class="p">()</span>
+    <span class="n">postprocessors</span><span class="p">[</span><span class="s">&quot;raw_html&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">RawHtmlPostprocessor</span><span class="p">(</span><span class="n">md_instance</span><span class="p">)</span>
+    <span class="n">postprocessors</span><span class="p">[</span><span class="s">&quot;amp_substitute&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">AndSubstitutePostprocessor</span><span class="p">()</span>
+    <span class="n">postprocessors</span><span class="p">[</span><span class="s">&quot;unescape&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">UnescapePostprocessor</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">postprocessors</span>
+
+
+<span class="k">class</span> <span class="nc">Postprocessor</span><span class="p">(</span><span class="n">util</span><span class="o">.</span><span class="n">Processor</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Postprocessors are run after the ElementTree it converted back into text.</span>
+
+<span class="sd">    Each Postprocessor implements a &quot;run&quot; method that takes a pointer to a</span>
+<span class="sd">    text string, modifies it as necessary and returns a text string.</span>
+
+<span class="sd">    Postprocessors must extend markdown.Postprocessor.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Subclasses of Postprocessor should implement a `run` method, which</span>
+<span class="sd">        takes the html document as a single text string and returns a</span>
+<span class="sd">        (possibly modified) string.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">pass</span>
+
+
+<span class="k">class</span> <span class="nc">RawHtmlPostprocessor</span><span class="p">(</span><span class="n">Postprocessor</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Restore raw html to the document. &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Iterate over html stash and restore &quot;safe&quot; html. &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">markdown</span><span class="o">.</span><span class="n">htmlStash</span><span class="o">.</span><span class="n">html_counter</span><span class="p">):</span>
+            <span class="n">html</span><span class="p">,</span> <span class="n">safe</span>  <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">markdown</span><span class="o">.</span><span class="n">htmlStash</span><span class="o">.</span><span class="n">rawHtmlBlocks</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">markdown</span><span class="o">.</span><span class="n">safeMode</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">safe</span><span class="p">:</span>
+                <span class="k">if</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">markdown</span><span class="o">.</span><span class="n">safeMode</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s">&#39;escape&#39;</span><span class="p">:</span>
+                    <span class="n">html</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">escape</span><span class="p">(</span><span class="n">html</span><span class="p">)</span>
+                <span class="k">elif</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">markdown</span><span class="o">.</span><span class="n">safeMode</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s">&#39;remove&#39;</span><span class="p">:</span>
+                    <span class="n">html</span> <span class="o">=</span> <span class="s">&#39;&#39;</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">html</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">markdown</span><span class="o">.</span><span class="n">html_replacement_text</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">isblocklevel</span><span class="p">(</span><span class="n">html</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">safe</span> <span class="ow">or</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">markdown</span><span class="o">.</span><span class="n">safeMode</span><span class="p">):</span>
+                <span class="n">text</span> <span class="o">=</span> <span class="n">text</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s">&quot;&lt;p&gt;</span><span class="si">%s</span><span class="s">&lt;/p&gt;&quot;</span> <span class="o">%</span> 
+                            <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">markdown</span><span class="o">.</span><span class="n">htmlStash</span><span class="o">.</span><span class="n">get_placeholder</span><span class="p">(</span><span class="n">i</span><span class="p">)),</span>
+                            <span class="n">html</span> <span class="o">+</span> <span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">)</span>
+            <span class="n">text</span> <span class="o">=</span>  <span class="n">text</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">markdown</span><span class="o">.</span><span class="n">htmlStash</span><span class="o">.</span><span class="n">get_placeholder</span><span class="p">(</span><span class="n">i</span><span class="p">),</span> 
+                                 <span class="n">html</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">text</span>
+
+    <span class="k">def</span> <span class="nf">escape</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">html</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Basic html escaping &quot;&quot;&quot;</span>
+        <span class="n">html</span> <span class="o">=</span> <span class="n">html</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s">&#39;&amp;&#39;</span><span class="p">,</span> <span class="s">&#39;&amp;amp;&#39;</span><span class="p">)</span>
+        <span class="n">html</span> <span class="o">=</span> <span class="n">html</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s">&#39;&lt;&#39;</span><span class="p">,</span> <span class="s">&#39;&amp;lt;&#39;</span><span class="p">)</span>
+        <span class="n">html</span> <span class="o">=</span> <span class="n">html</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s">&#39;&gt;&#39;</span><span class="p">,</span> <span class="s">&#39;&amp;gt;&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">html</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s">&#39;&quot;&#39;</span><span class="p">,</span> <span class="s">&#39;&amp;quot;&#39;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">isblocklevel</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">html</span><span class="p">):</span>
+        <span class="n">m</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="s">r&#39;^\&lt;\/?([^ &gt;]+)&#39;</span><span class="p">,</span> <span class="n">html</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">m</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">m</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">in</span> <span class="p">(</span><span class="s">&#39;!&#39;</span><span class="p">,</span> <span class="s">&#39;?&#39;</span><span class="p">,</span> <span class="s">&#39;@&#39;</span><span class="p">,</span> <span class="s">&#39;%&#39;</span><span class="p">):</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-2" id="section-2">&#182;</a>
+</div>
+<p>Comment, php etc...</p>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+                <span class="k">return</span> <span class="bp">True</span>
+            <span class="k">return</span> <span class="n">util</span><span class="o">.</span><span class="n">isBlockLevel</span><span class="p">(</span><span class="n">m</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span>
+        <span class="k">return</span> <span class="bp">False</span>
+
+
+<span class="k">class</span> <span class="nc">AndSubstitutePostprocessor</span><span class="p">(</span><span class="n">Postprocessor</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Restore valid entities &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="p">):</span>
+        <span class="n">text</span> <span class="o">=</span>  <span class="n">text</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">util</span><span class="o">.</span><span class="n">AMP_SUBSTITUTE</span><span class="p">,</span> <span class="s">&quot;&amp;&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">text</span>
+
+
+<span class="k">class</span> <span class="nc">UnescapePostprocessor</span><span class="p">(</span><span class="n">Postprocessor</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Restore escaped chars &quot;&quot;&quot;</span>
+
+    <span class="n">RE</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="s">&#39;</span><span class="si">%s</span><span class="s">(\d+)</span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">util</span><span class="o">.</span><span class="n">STX</span><span class="p">,</span> <span class="n">util</span><span class="o">.</span><span class="n">ETX</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="nf">unescape</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">m</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">util</span><span class="o">.</span><span class="n">int2str</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">m</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">)))</span>
+
+    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">RE</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">unescape</span><span class="p">,</span> <span class="n">text</span><span class="p">)</span>
+</pre></div>
+        </td>
+      </tr>
+  </tbody>
+</table>
+  </div>
+</body>
+</html>

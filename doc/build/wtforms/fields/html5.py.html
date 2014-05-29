@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>html5.py</title>
+  <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+  <link rel="stylesheet" media="all" href="../../../doc-style.css" />
+  <script src="../../../doc-filelist.js"></script>
+  <script>
+    var relativeDir = "../../../", thisFile = "build/wtforms/fields/html5.py", defaultSidebar = true;
+  </script>
+  <script src="../../../doc-script.js"></script>
+</head>
+<body>
+  <div id="sidebar_wrapper">
+    <div id="sidebar_switch">
+      <span class="tree">Files</span>
+      <span class="headings">Headings</span>
+    </div>
+    <div id="tree"></div>
+    <div id="headings">
+    </div>
+  </div>
+  <div id="sidebar-toggle"></div>
+  <div id="container"><div class="background highlight"></div>
+<table cellpadding="0" cellspacing="0">
+  <tbody>
+      <tr>
+        <td class="docs">
+          <h1>html5.py</h1>
+        </td>
+        <td class="code highlight"></td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-1" id="section-1">&#182;</a>
+</div>
+
+        </td>
+        <td class="code highlight"><div class="highlight"><pre><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Fields to support various HTML5 input types.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">..widgets</span> <span class="kn">import</span> <span class="n">html5</span> <span class="k">as</span> <span class="n">widgets</span>
+<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">core</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="s">&#39;DateField&#39;</span><span class="p">,</span> <span class="s">&#39;DateTimeField&#39;</span><span class="p">,</span> <span class="s">&#39;DateTimeLocalField&#39;</span><span class="p">,</span> <span class="s">&#39;DecimalField&#39;</span><span class="p">,</span>
+    <span class="s">&#39;DecimalRangeField&#39;</span><span class="p">,</span> <span class="s">&#39;EmailField&#39;</span><span class="p">,</span> <span class="s">&#39;IntegerField&#39;</span><span class="p">,</span> <span class="s">&#39;IntegerRangeField&#39;</span><span class="p">,</span>
+    <span class="s">&#39;SearchField&#39;</span><span class="p">,</span> <span class="s">&#39;TelField&#39;</span><span class="p">,</span> <span class="s">&#39;URLField&#39;</span><span class="p">,</span>
+<span class="p">)</span>
+
+
+<span class="k">class</span> <span class="nc">SearchField</span><span class="p">(</span><span class="n">core</span><span class="o">.</span><span class="n">StringField</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Represents an ``&lt;input type=&quot;search&quot;&gt;``.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">widget</span> <span class="o">=</span> <span class="n">widgets</span><span class="o">.</span><span class="n">SearchInput</span><span class="p">()</span>
+
+
+<span class="k">class</span> <span class="nc">TelField</span><span class="p">(</span><span class="n">core</span><span class="o">.</span><span class="n">StringField</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Represents an ``&lt;input type=&quot;tel&quot;&gt;``.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">widget</span> <span class="o">=</span> <span class="n">widgets</span><span class="o">.</span><span class="n">TelInput</span><span class="p">()</span>
+
+
+<span class="k">class</span> <span class="nc">URLField</span><span class="p">(</span><span class="n">core</span><span class="o">.</span><span class="n">StringField</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Represents an ``&lt;input type=&quot;url&quot;&gt;``.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">widget</span> <span class="o">=</span> <span class="n">widgets</span><span class="o">.</span><span class="n">URLInput</span><span class="p">()</span>
+
+
+<span class="k">class</span> <span class="nc">EmailField</span><span class="p">(</span><span class="n">core</span><span class="o">.</span><span class="n">StringField</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Represents an ``&lt;input type=&quot;email&quot;&gt;``.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">widget</span> <span class="o">=</span> <span class="n">widgets</span><span class="o">.</span><span class="n">EmailInput</span><span class="p">()</span>
+
+
+<span class="k">class</span> <span class="nc">DateTimeField</span><span class="p">(</span><span class="n">core</span><span class="o">.</span><span class="n">DateTimeField</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Represents an ``&lt;input type=&quot;datetime&quot;&gt;``.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">widget</span> <span class="o">=</span> <span class="n">widgets</span><span class="o">.</span><span class="n">DateTimeInput</span><span class="p">()</span>
+
+
+<span class="k">class</span> <span class="nc">DateField</span><span class="p">(</span><span class="n">core</span><span class="o">.</span><span class="n">DateField</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Represents an ``&lt;input type=&quot;date&quot;&gt;``.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">widget</span> <span class="o">=</span> <span class="n">widgets</span><span class="o">.</span><span class="n">DateInput</span><span class="p">()</span>
+
+
+<span class="k">class</span> <span class="nc">DateTimeLocalField</span><span class="p">(</span><span class="n">core</span><span class="o">.</span><span class="n">DateTimeField</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Represents an ``&lt;input type=&quot;datetime-local&quot;&gt;``.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">widget</span> <span class="o">=</span> <span class="n">widgets</span><span class="o">.</span><span class="n">DateTimeLocalInput</span><span class="p">()</span>
+
+
+<span class="k">class</span> <span class="nc">IntegerField</span><span class="p">(</span><span class="n">core</span><span class="o">.</span><span class="n">IntegerField</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Represents an ``&lt;input type=&quot;number&quot;&gt;``.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">widget</span> <span class="o">=</span> <span class="n">widgets</span><span class="o">.</span><span class="n">NumberInput</span><span class="p">(</span><span class="n">step</span><span class="o">=</span><span class="s">&#39;1&#39;</span><span class="p">)</span>
+
+
+<span class="k">class</span> <span class="nc">DecimalField</span><span class="p">(</span><span class="n">core</span><span class="o">.</span><span class="n">DecimalField</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Represents an ``&lt;input type=&quot;number&quot;&gt;``.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">widget</span> <span class="o">=</span> <span class="n">widgets</span><span class="o">.</span><span class="n">NumberInput</span><span class="p">(</span><span class="n">step</span><span class="o">=</span><span class="s">&#39;any&#39;</span><span class="p">)</span>
+
+
+<span class="k">class</span> <span class="nc">IntegerRangeField</span><span class="p">(</span><span class="n">core</span><span class="o">.</span><span class="n">IntegerField</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Represents an ``&lt;input type=&quot;range&quot;&gt;``.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">widget</span> <span class="o">=</span> <span class="n">widgets</span><span class="o">.</span><span class="n">RangeInput</span><span class="p">(</span><span class="n">step</span><span class="o">=</span><span class="s">&#39;1&#39;</span><span class="p">)</span>
+
+
+<span class="k">class</span> <span class="nc">DecimalRangeField</span><span class="p">(</span><span class="n">core</span><span class="o">.</span><span class="n">DecimalField</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Represents an ``&lt;input type=&quot;range&quot;&gt;``.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">widget</span> <span class="o">=</span> <span class="n">widgets</span><span class="o">.</span><span class="n">RangeInput</span><span class="p">(</span><span class="n">step</span><span class="o">=</span><span class="s">&#39;any&#39;</span><span class="p">)</span>
+</pre></div>
+        </td>
+      </tr>
+  </tbody>
+</table>
+  </div>
+</body>
+</html>

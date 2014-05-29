@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>header.jade</title>
+  <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+  <link rel="stylesheet" media="all" href="../../doc-style.css" />
+  <script src="../../doc-filelist.js"></script>
+  <script>
+    var relativeDir = "../../", thisFile = "markup/includes/header.jade", defaultSidebar = true;
+  </script>
+  <script src="../../doc-script.js"></script>
+</head>
+<body>
+  <div id="sidebar_wrapper">
+    <div id="sidebar_switch">
+      <span class="tree">Files</span>
+      <span class="headings">Headings</span>
+    </div>
+    <div id="tree"></div>
+    <div id="headings">
+    </div>
+  </div>
+  <div id="sidebar-toggle"></div>
+  <div id="container"><div class="background highlight"></div>
+<table cellpadding="0" cellspacing="0">
+  <tbody>
+      <tr>
+        <td class="docs">
+          <h1>header.jade</h1>
+        </td>
+        <td class="code highlight"></td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-1" id="section-1">&#182;</a>
+</div>
+
+        </td>
+        <td class="code highlight"><div class="highlight"><pre><span class="nt">div</span><span class="nc">.full-width</span>
+  <span class="nt">div</span><span class="nc">.clearfix.menu-row.row</span>
+    <span class="err">{% </span><span class="nt">if</span> logged_in %}
+    <span class="nt">a</span>(<span class="na">href=</span><span class="s">&quot;{{logout_link}}&quot;</span>)
+      <span class="nt">div</span><span class="nc">.topmenu.col-md-1</span> Logout
+    <span class="nt">a</span>(<span class="na">href=</span><span class="s">&quot;/dashboard&quot;</span>)
+      <span class="nt">div</span><span class="nc">.topmenu.col-md-1</span> Dashboard
+    <span class="err">{% </span><span class="nt">else</span> %}
+    <span class="nt">a</span>(<span class="na">href=</span><span class="s">&quot;/login&quot;</span>)
+      <span class="nt">div</span><span class="nc">.topmenu.col-md-1</span> Login
+    <span class="err">{% </span><span class="nt">endif</span> %}
+    <span class="nt">a</span>(<span class="na">href=</span><span class="s">&quot;//mayone.us/contact&quot;</span><span class="err">,</span> <span class="na">title=</span><span class="s">&quot;Contact&quot;</span>)
+      <span class="nt">div</span><span class="nc">.topmenu.col-md-1</span> Contact
+    <span class="nt">a</span>(<span class="na">href=</span><span class="s">&quot;//mayone.us/ways&quot;</span><span class="err">,</span> <span class="na">title=</span><span class="s">&quot;Ways to Help&quot;</span>)
+      <span class="nt">div</span><span class="nc">.topmenu.col-md-1</span> Ways to Help
+    <span class="nt">a</span>(<span class="na">href=</span><span class="s">&quot;//mayone.us/faq&quot;</span><span class="err">,</span> <span class="na">title=</span><span class="s">&quot;FAQ&quot;</span>)
+      <span class="nt">div</span><span class="nc">.topmenu.col-md-1</span> FAQ
+    <span class="nt">a</span>(<span class="na">href=</span><span class="s">&quot;//mayone.us/about&quot;</span><span class="err">,</span> <span class="na">title=</span><span class="s">&quot;About Us&quot;</span>)
+      <span class="nt">div</span><span class="nc">.topmenu.col-md-1</span> About Us
+<span class="nt">div</span><span class="nc">.container</span>
+  <span class="nt">div</span><span class="nc">.logo-row.row</span>
+    <span class="nt">a</span>(<span class="na">href=</span><span class="s">&quot;/&quot;</span>)
+      <span class="nt">div</span><span class="nc">.logo.col-md-3</span>
+        <span class="nt">img</span>(<span class="na">src=</span><span class="s">&quot;/static/logo_inverted31-e1398893630874.png&quot;</span><span class="err">,</span> <span class="na">alt=</span><span class="s">&quot;Logo&quot;</span>)
+    <span class="nt">div</span><span class="nc">.subhead.col-md-9</span> A citizen-funded and crowdsourced super PAC, to end all super PACs.
+</pre></div>
+        </td>
+      </tr>
+  </tbody>
+</table>
+  </div>
+</body>
+</html>

@@ -1,0 +1,1335 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>blockprocessors.py</title>
+  <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+  <link rel="stylesheet" media="all" href="../../doc-style.css" />
+  <script src="../../doc-filelist.js"></script>
+  <script>
+    var relativeDir = "../../", thisFile = "backend/markdown/blockprocessors.py", defaultSidebar = true;
+  </script>
+  <script src="../../doc-script.js"></script>
+</head>
+<body>
+  <div id="sidebar_wrapper">
+    <div id="sidebar_switch">
+      <span class="tree">Files</span>
+      <span class="headings">Headings</span>
+    </div>
+    <div id="tree"></div>
+    <div id="headings">
+    </div>
+  </div>
+  <div id="sidebar-toggle"></div>
+  <div id="container"><div class="background highlight"></div>
+<table cellpadding="0" cellspacing="0">
+  <tbody>
+      <tr>
+        <td class="docs">
+          <h1>blockprocessors.py</h1>
+        </td>
+        <td class="code highlight"></td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-1" id="section-1">&#182;</a>
+</div>
+
+        </td>
+        <td class="code highlight"><div class="highlight"><pre><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">CORE MARKDOWN BLOCKPARSER</span>
+<span class="sd">===========================================================================</span>
+
+<span class="sd">This parser handles basic parsing of Markdown blocks.  It doesn&#39;t concern itself</span>
+<span class="sd">with inline elements such as **bold** or *italics*, but rather just catches</span>
+<span class="sd">blocks, lists, quotes, etc.</span>
+
+<span class="sd">The BlockParser is made up of a bunch of BlockProssors, each handling a</span>
+<span class="sd">different type of block. Extensions may add/replace/remove BlockProcessors</span>
+<span class="sd">as they need to alter how markdown blocks are parsed.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">absolute_import</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">division</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">unicode_literals</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">re</span>
+<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">util</span>
+<span class="kn">from</span> <span class="nn">.blockparser</span> <span class="kn">import</span> <span class="n">BlockParser</span>
+
+<span class="n">logger</span> <span class="o">=</span>  <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s">&#39;MARKDOWN&#39;</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">build_block_parser</span><span class="p">(</span><span class="n">md_instance</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Build the default block parser used by Markdown. &quot;&quot;&quot;</span>
+    <span class="n">parser</span> <span class="o">=</span> <span class="n">BlockParser</span><span class="p">(</span><span class="n">md_instance</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">blockprocessors</span><span class="p">[</span><span class="s">&#39;empty&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">EmptyBlockProcessor</span><span class="p">(</span><span class="n">parser</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">blockprocessors</span><span class="p">[</span><span class="s">&#39;indent&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ListIndentProcessor</span><span class="p">(</span><span class="n">parser</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">blockprocessors</span><span class="p">[</span><span class="s">&#39;code&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">CodeBlockProcessor</span><span class="p">(</span><span class="n">parser</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">blockprocessors</span><span class="p">[</span><span class="s">&#39;hashheader&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">HashHeaderProcessor</span><span class="p">(</span><span class="n">parser</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">blockprocessors</span><span class="p">[</span><span class="s">&#39;setextheader&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">SetextHeaderProcessor</span><span class="p">(</span><span class="n">parser</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">blockprocessors</span><span class="p">[</span><span class="s">&#39;hr&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">HRProcessor</span><span class="p">(</span><span class="n">parser</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">blockprocessors</span><span class="p">[</span><span class="s">&#39;olist&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">OListProcessor</span><span class="p">(</span><span class="n">parser</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">blockprocessors</span><span class="p">[</span><span class="s">&#39;ulist&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">UListProcessor</span><span class="p">(</span><span class="n">parser</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">blockprocessors</span><span class="p">[</span><span class="s">&#39;quote&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">BlockQuoteProcessor</span><span class="p">(</span><span class="n">parser</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">blockprocessors</span><span class="p">[</span><span class="s">&#39;paragraph&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ParagraphProcessor</span><span class="p">(</span><span class="n">parser</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">parser</span>
+
+
+<span class="k">class</span> <span class="nc">BlockProcessor</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot; Base class for block processors. </span>
+<span class="sd">    </span>
+<span class="sd">    Each subclass will provide the methods below to work with the source and</span>
+<span class="sd">    tree. Each processor will need to define it&#39;s own ``test`` and ``run``</span>
+<span class="sd">    methods. The ``test`` method should return True or False, to indicate</span>
+<span class="sd">    whether the current block should be processed by this processor. If the</span>
+<span class="sd">    test passes, the parser will call the processors ``run`` method.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parser</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parser</span> <span class="o">=</span> <span class="n">parser</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tab_length</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">markdown</span><span class="o">.</span><span class="n">tab_length</span>
+
+    <span class="k">def</span> <span class="nf">lastChild</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Return the last child of an etree element. &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">parent</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">parent</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">None</span>
+
+    <span class="k">def</span> <span class="nf">detab</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Remove a tab from the front of each line of the given text. &quot;&quot;&quot;</span>
+        <span class="n">newtext</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">lines</span> <span class="o">=</span> <span class="n">text</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39;</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">lines</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">line</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s">&#39; &#39;</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">tab_length</span><span class="p">):</span>
+                <span class="n">newtext</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">tab_length</span><span class="p">:])</span>
+            <span class="k">elif</span> <span class="ow">not</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">():</span>
+                <span class="n">newtext</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s">&#39;&#39;</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">break</span>
+        <span class="k">return</span> <span class="s">&#39;</span><span class="se">\n</span><span class="s">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">newtext</span><span class="p">),</span> <span class="s">&#39;</span><span class="se">\n</span><span class="s">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">lines</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">newtext</span><span class="p">):])</span>
+
+    <span class="k">def</span> <span class="nf">looseDetab</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Remove a tab from front of lines but allowing dedented lines. &quot;&quot;&quot;</span>
+        <span class="n">lines</span> <span class="o">=</span> <span class="n">text</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39;</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">lines</span><span class="p">)):</span>
+            <span class="k">if</span> <span class="n">lines</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s">&#39; &#39;</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">tab_length</span><span class="o">*</span><span class="n">level</span><span class="p">):</span>
+                <span class="n">lines</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">lines</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="bp">self</span><span class="o">.</span><span class="n">tab_length</span><span class="o">*</span><span class="n">level</span><span class="p">:]</span>
+        <span class="k">return</span> <span class="s">&#39;</span><span class="se">\n</span><span class="s">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">lines</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">test</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="n">block</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Test for block type. Must be overridden by subclasses. </span>
+<span class="sd">        </span>
+<span class="sd">        As the parser loops through processors, it will call the ``test`` method</span>
+<span class="sd">        on each to determine if the given block of text is of that type. This</span>
+<span class="sd">        method must return a boolean ``True`` or ``False``. The actual method of</span>
+<span class="sd">        testing is left to the needs of that particular block type. It could </span>
+<span class="sd">        be as simple as ``block.startswith(some_string)`` or a complex regular</span>
+<span class="sd">        expression. As the block type may be different depending on the parent</span>
+<span class="sd">        of the block (i.e. inside a list), the parent etree element is also </span>
+<span class="sd">        provided and may be used as part of the test.</span>
+
+<span class="sd">        Keywords:</span>
+<span class="sd">        </span>
+<span class="sd">        * ``parent``: A etree element which will be the parent of the block.</span>
+<span class="sd">        * ``block``: A block of text from the source which has been split at </span>
+<span class="sd">            blank lines.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">pass</span>
+
+    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="n">blocks</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Run processor. Must be overridden by subclasses. </span>
+<span class="sd">        </span>
+<span class="sd">        When the parser determines the appropriate type of a block, the parser</span>
+<span class="sd">        will call the corresponding processor&#39;s ``run`` method. This method</span>
+<span class="sd">        should parse the individual lines of the block and append them to</span>
+<span class="sd">        the etree. </span>
+
+<span class="sd">        Note that both the ``parent`` and ``etree`` keywords are pointers</span>
+<span class="sd">        to instances of the objects which should be edited in place. Each</span>
+<span class="sd">        processor must make changes to the existing objects as there is no</span>
+<span class="sd">        mechanism to return new/different objects to replace them.</span>
+
+<span class="sd">        This means that this method should be adding SubElements or adding text</span>
+<span class="sd">        to the parent, and should remove (``pop``) or add (``insert``) items to</span>
+<span class="sd">        the list of blocks.</span>
+
+<span class="sd">        Keywords:</span>
+
+<span class="sd">        * ``parent``: A etree element which is the parent of the current block.</span>
+<span class="sd">        * ``blocks``: A list of all remaining blocks of the document.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">pass</span>
+
+
+<span class="k">class</span> <span class="nc">ListIndentProcessor</span><span class="p">(</span><span class="n">BlockProcessor</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Process children of list items. </span>
+<span class="sd">    </span>
+<span class="sd">    Example:</span>
+<span class="sd">        * a list item</span>
+<span class="sd">            process this part</span>
+
+<span class="sd">            or this part</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">ITEM_TYPES</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;li&#39;</span><span class="p">]</span>
+    <span class="n">LIST_TYPES</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;ul&#39;</span><span class="p">,</span> <span class="s">&#39;ol&#39;</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
+        <span class="n">BlockProcessor</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">INDENT_RE</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="s">r&#39;^(([ ]{</span><span class="si">%s</span><span class="s">})+)&#39;</span><span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">tab_length</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">test</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="n">block</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">block</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s">&#39; &#39;</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">tab_length</span><span class="p">)</span> <span class="ow">and</span> \
+                <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">parser</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">isstate</span><span class="p">(</span><span class="s">&#39;detabbed&#39;</span><span class="p">)</span> <span class="ow">and</span>  \
+                <span class="p">(</span><span class="n">parent</span><span class="o">.</span><span class="n">tag</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">ITEM_TYPES</span> <span class="ow">or</span> \
+                    <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">parent</span><span class="p">)</span> <span class="ow">and</span> <span class="n">parent</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="ow">and</span> \
+                        <span class="p">(</span><span class="n">parent</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">tag</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">LIST_TYPES</span><span class="p">)</span>
+                    <span class="p">)</span>
+                <span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="n">blocks</span><span class="p">):</span>
+        <span class="n">block</span> <span class="o">=</span> <span class="n">blocks</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">level</span><span class="p">,</span> <span class="n">sibling</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_level</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span> <span class="n">block</span><span class="p">)</span>
+        <span class="n">block</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">looseDetab</span><span class="p">(</span><span class="n">block</span><span class="p">,</span> <span class="n">level</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">parser</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s">&#39;detabbed&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">parent</span><span class="o">.</span><span class="n">tag</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">ITEM_TYPES</span><span class="p">:</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-2" id="section-2">&#182;</a>
+</div>
+<p>It's possible that this parent has a 'ul' or 'ol' child list
+with a member.  If that is the case, then that should be the
+parent.  This is intended to catch the edge case of an indented 
+list whose first member was parsed previous to this point
+see OListProcessor</p>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">parent</span><span class="p">)</span> <span class="ow">and</span> <span class="n">parent</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">tag</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">LIST_TYPES</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">parser</span><span class="o">.</span><span class="n">parseBlocks</span><span class="p">(</span><span class="n">parent</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="p">[</span><span class="n">block</span><span class="p">])</span>
+            <span class="k">else</span><span class="p">:</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-3" id="section-3">&#182;</a>
+</div>
+<p>The parent is already a li. Just parse the child block.</p>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+                <span class="bp">self</span><span class="o">.</span><span class="n">parser</span><span class="o">.</span><span class="n">parseBlocks</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span> <span class="p">[</span><span class="n">block</span><span class="p">])</span>
+        <span class="k">elif</span> <span class="n">sibling</span><span class="o">.</span><span class="n">tag</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">ITEM_TYPES</span><span class="p">:</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-4" id="section-4">&#182;</a>
+</div>
+<p>The sibling is a li. Use it as parent.</p>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+            <span class="bp">self</span><span class="o">.</span><span class="n">parser</span><span class="o">.</span><span class="n">parseBlocks</span><span class="p">(</span><span class="n">sibling</span><span class="p">,</span> <span class="p">[</span><span class="n">block</span><span class="p">])</span>
+        <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">sibling</span><span class="p">)</span> <span class="ow">and</span> <span class="n">sibling</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">tag</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">ITEM_TYPES</span><span class="p">:</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-5" id="section-5">&#182;</a>
+</div>
+<p>The parent is a list (<code>ol</code> or <code>ul</code>) which has children.
+Assume the last child li is the parent of this block.</p>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+            <span class="k">if</span> <span class="n">sibling</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">text</span><span class="p">:</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-6" id="section-6">&#182;</a>
+</div>
+<p>If the parent li has text, that text needs to be moved to a p
+The p must be 'inserted' at beginning of list in the event
+that other children already exist i.e.; a nested sublist.</p>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+                <span class="n">p</span> <span class="o">=</span> <span class="n">util</span><span class="o">.</span><span class="n">etree</span><span class="o">.</span><span class="n">Element</span><span class="p">(</span><span class="s">&#39;p&#39;</span><span class="p">)</span>
+                <span class="n">p</span><span class="o">.</span><span class="n">text</span> <span class="o">=</span> <span class="n">sibling</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">text</span>
+                <span class="n">sibling</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">text</span> <span class="o">=</span> <span class="s">&#39;&#39;</span>
+                <span class="n">sibling</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">p</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">parser</span><span class="o">.</span><span class="n">parseChunk</span><span class="p">(</span><span class="n">sibling</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">block</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">create_item</span><span class="p">(</span><span class="n">sibling</span><span class="p">,</span> <span class="n">block</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parser</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">reset</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">create_item</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="n">block</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Create a new li and parse the block with it as the parent. &quot;&quot;&quot;</span>
+        <span class="n">li</span> <span class="o">=</span> <span class="n">util</span><span class="o">.</span><span class="n">etree</span><span class="o">.</span><span class="n">SubElement</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span> <span class="s">&#39;li&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parser</span><span class="o">.</span><span class="n">parseBlocks</span><span class="p">(</span><span class="n">li</span><span class="p">,</span> <span class="p">[</span><span class="n">block</span><span class="p">])</span>
+ 
+    <span class="k">def</span> <span class="nf">get_level</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="n">block</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Get level of indent based on list level. &quot;&quot;&quot;</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-7" id="section-7">&#182;</a>
+</div>
+<p>Get indent level</p>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+        <span class="n">m</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">INDENT_RE</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">block</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">m</span><span class="p">:</span>
+            <span class="n">indent_level</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">m</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">tab_length</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">indent_level</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parser</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">isstate</span><span class="p">(</span><span class="s">&#39;list&#39;</span><span class="p">):</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-8" id="section-8">&#182;</a>
+</div>
+<p>We're in a tightlist - so we already are at correct parent.</p>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+            <span class="n">level</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="k">else</span><span class="p">:</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-9" id="section-9">&#182;</a>
+</div>
+<p>We're in a looselist - so we need to find parent.</p>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+            <span class="n">level</span> <span class="o">=</span> <span class="mi">0</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-10" id="section-10">&#182;</a>
+</div>
+<p>Step through children of tree to find matching indent level.</p>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+        <span class="k">while</span> <span class="n">indent_level</span> <span class="o">&gt;</span> <span class="n">level</span><span class="p">:</span>
+            <span class="n">child</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lastChild</span><span class="p">(</span><span class="n">parent</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">child</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">and</span> <span class="p">(</span><span class="n">child</span><span class="o">.</span><span class="n">tag</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">LIST_TYPES</span> <span class="ow">or</span> <span class="n">child</span><span class="o">.</span><span class="n">tag</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">ITEM_TYPES</span><span class="p">):</span>
+                <span class="k">if</span> <span class="n">child</span><span class="o">.</span><span class="n">tag</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">LIST_TYPES</span><span class="p">:</span>
+                    <span class="n">level</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="n">parent</span> <span class="o">=</span> <span class="n">child</span>
+            <span class="k">else</span><span class="p">:</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-11" id="section-11">&#182;</a>
+</div>
+<p>No more child levels. If we're short of indent_level,
+we have a code block. So we stop here.</p>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+                <span class="k">break</span>
+        <span class="k">return</span> <span class="n">level</span><span class="p">,</span> <span class="n">parent</span>
+
+
+<span class="k">class</span> <span class="nc">CodeBlockProcessor</span><span class="p">(</span><span class="n">BlockProcessor</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Process code blocks. &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">test</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="n">block</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">block</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s">&#39; &#39;</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">tab_length</span><span class="p">)</span>
+    
+    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="n">blocks</span><span class="p">):</span>
+        <span class="n">sibling</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lastChild</span><span class="p">(</span><span class="n">parent</span><span class="p">)</span>
+        <span class="n">block</span> <span class="o">=</span> <span class="n">blocks</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">theRest</span> <span class="o">=</span> <span class="s">&#39;&#39;</span>
+        <span class="k">if</span> <span class="n">sibling</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">and</span> <span class="n">sibling</span><span class="o">.</span><span class="n">tag</span> <span class="o">==</span> <span class="s">&quot;pre&quot;</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">sibling</span><span class="p">)</span> \
+                    <span class="ow">and</span> <span class="n">sibling</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">tag</span> <span class="o">==</span> <span class="s">&quot;code&quot;</span><span class="p">:</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-12" id="section-12">&#182;</a>
+</div>
+<p>The previous block was a code block. As blank lines do not start
+new code blocks, append this block to the previous, adding back
+linebreaks removed from the split into a list.</p>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+            <span class="n">code</span> <span class="o">=</span> <span class="n">sibling</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">block</span><span class="p">,</span> <span class="n">theRest</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">detab</span><span class="p">(</span><span class="n">block</span><span class="p">)</span>
+            <span class="n">code</span><span class="o">.</span><span class="n">text</span> <span class="o">=</span> <span class="n">util</span><span class="o">.</span><span class="n">AtomicString</span><span class="p">(</span><span class="s">&#39;</span><span class="si">%s</span><span class="se">\n</span><span class="si">%s</span><span class="se">\n</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">code</span><span class="o">.</span><span class="n">text</span><span class="p">,</span> <span class="n">block</span><span class="o">.</span><span class="n">rstrip</span><span class="p">()))</span>
+        <span class="k">else</span><span class="p">:</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-13" id="section-13">&#182;</a>
+</div>
+<p>This is a new codeblock. Create the elements and insert text.</p>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+            <span class="n">pre</span> <span class="o">=</span> <span class="n">util</span><span class="o">.</span><span class="n">etree</span><span class="o">.</span><span class="n">SubElement</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span> <span class="s">&#39;pre&#39;</span><span class="p">)</span>
+            <span class="n">code</span> <span class="o">=</span> <span class="n">util</span><span class="o">.</span><span class="n">etree</span><span class="o">.</span><span class="n">SubElement</span><span class="p">(</span><span class="n">pre</span><span class="p">,</span> <span class="s">&#39;code&#39;</span><span class="p">)</span>
+            <span class="n">block</span><span class="p">,</span> <span class="n">theRest</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">detab</span><span class="p">(</span><span class="n">block</span><span class="p">)</span>
+            <span class="n">code</span><span class="o">.</span><span class="n">text</span> <span class="o">=</span> <span class="n">util</span><span class="o">.</span><span class="n">AtomicString</span><span class="p">(</span><span class="s">&#39;</span><span class="si">%s</span><span class="se">\n</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">block</span><span class="o">.</span><span class="n">rstrip</span><span class="p">())</span>
+        <span class="k">if</span> <span class="n">theRest</span><span class="p">:</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-14" id="section-14">&#182;</a>
+</div>
+<p>This block contained unindented line(s) after the first indented 
+line. Insert these lines as the first block of the master blocks
+list for future processing.</p>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+            <span class="n">blocks</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">theRest</span><span class="p">)</span>
+
+
+<span class="k">class</span> <span class="nc">BlockQuoteProcessor</span><span class="p">(</span><span class="n">BlockProcessor</span><span class="p">):</span>
+
+    <span class="n">RE</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="s">r&#39;(^|\n)[ ]{0,3}&gt;[ ]?(.*)&#39;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">test</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="n">block</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">bool</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">RE</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">block</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="n">blocks</span><span class="p">):</span>
+        <span class="n">block</span> <span class="o">=</span> <span class="n">blocks</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">m</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">RE</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">block</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">m</span><span class="p">:</span>
+            <span class="n">before</span> <span class="o">=</span> <span class="n">block</span><span class="p">[:</span><span class="n">m</span><span class="o">.</span><span class="n">start</span><span class="p">()]</span> <span class="c"># Lines before blockquote</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-15" id="section-15">&#182;</a>
+</div>
+<p>Pass lines before blockquote in recursively for parsing forst.</p>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+            <span class="bp">self</span><span class="o">.</span><span class="n">parser</span><span class="o">.</span><span class="n">parseBlocks</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span> <span class="p">[</span><span class="n">before</span><span class="p">])</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-16" id="section-16">&#182;</a>
+</div>
+<p>Remove <code>&gt;</code> from begining of each line.</p>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+            <span class="n">block</span> <span class="o">=</span> <span class="s">&#39;</span><span class="se">\n</span><span class="s">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">clean</span><span class="p">(</span><span class="n">line</span><span class="p">)</span> <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> 
+                            <span class="n">block</span><span class="p">[</span><span class="n">m</span><span class="o">.</span><span class="n">start</span><span class="p">():]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39;</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)])</span>
+        <span class="n">sibling</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lastChild</span><span class="p">(</span><span class="n">parent</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">sibling</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">and</span> <span class="n">sibling</span><span class="o">.</span><span class="n">tag</span> <span class="o">==</span> <span class="s">&quot;blockquote&quot;</span><span class="p">:</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-17" id="section-17">&#182;</a>
+</div>
+<p>Previous block was a blockquote so set that as this blocks parent</p>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+            <span class="n">quote</span> <span class="o">=</span> <span class="n">sibling</span>
+        <span class="k">else</span><span class="p">:</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-18" id="section-18">&#182;</a>
+</div>
+<p>This is a new blockquote. Create a new parent element.</p>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+            <span class="n">quote</span> <span class="o">=</span> <span class="n">util</span><span class="o">.</span><span class="n">etree</span><span class="o">.</span><span class="n">SubElement</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span> <span class="s">&#39;blockquote&#39;</span><span class="p">)</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-19" id="section-19">&#182;</a>
+</div>
+<p>Recursively parse block with blockquote as parent.
+change parser state so blockquotes embedded in lists use p tags</p>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parser</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s">&#39;blockquote&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parser</span><span class="o">.</span><span class="n">parseChunk</span><span class="p">(</span><span class="n">quote</span><span class="p">,</span> <span class="n">block</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parser</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">reset</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">clean</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">line</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Remove ``&gt;`` from beginning of a line. &quot;&quot;&quot;</span>
+        <span class="n">m</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">RE</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="o">==</span> <span class="s">&quot;&gt;&quot;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="s">&quot;&quot;</span>
+        <span class="k">elif</span> <span class="n">m</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">m</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">line</span>
+
+<span class="k">class</span> <span class="nc">OListProcessor</span><span class="p">(</span><span class="n">BlockProcessor</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Process ordered list blocks. &quot;&quot;&quot;</span>
+
+    <span class="n">TAG</span> <span class="o">=</span> <span class="s">&#39;ol&#39;</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-20" id="section-20">&#182;</a>
+</div>
+<p>Detect an item (<code>1. item</code>). <code>group(1)</code> contains contents of item.</p>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+    <span class="n">RE</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="s">r&#39;^[ ]{0,3}\d+\.[ ]+(.*)&#39;</span><span class="p">)</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-21" id="section-21">&#182;</a>
+</div>
+<p>Detect items on secondary lines. they can be of either list type.</p>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+    <span class="n">CHILD_RE</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="s">r&#39;^[ ]{0,3}((\d+\.)|[*+-])[ ]+(.*)&#39;</span><span class="p">)</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-22" id="section-22">&#182;</a>
+</div>
+<p>Detect indented (nested) items of either type</p>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+    <span class="n">INDENT_RE</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="s">r&#39;^[ ]{4,7}((\d+\.)|[*+-])[ ]+.*&#39;</span><span class="p">)</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-23" id="section-23">&#182;</a>
+</div>
+<p>The integer (python string) with which the lists starts (default=1)
+Eg: If list is intialized as)
+  3. Item
+The ol tag will get starts="3" attribute</p>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+    <span class="n">STARTSWITH</span> <span class="o">=</span> <span class="s">&#39;1&#39;</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-24" id="section-24">&#182;</a>
+</div>
+<p>List of allowed sibling tags. </p>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+    <span class="n">SIBLING_TAGS</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;ol&#39;</span><span class="p">,</span> <span class="s">&#39;ul&#39;</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="nf">test</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="n">block</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">bool</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">RE</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">block</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="n">blocks</span><span class="p">):</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-25" id="section-25">&#182;</a>
+</div>
+<p>Check fr multiple items in one block.</p>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+        <span class="n">items</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_items</span><span class="p">(</span><span class="n">blocks</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="mi">0</span><span class="p">))</span>
+        <span class="n">sibling</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lastChild</span><span class="p">(</span><span class="n">parent</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">sibling</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">and</span> <span class="n">sibling</span><span class="o">.</span><span class="n">tag</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">SIBLING_TAGS</span><span class="p">:</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-26" id="section-26">&#182;</a>
+</div>
+<p>Previous block was a list item, so set that as parent</p>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+            <span class="n">lst</span> <span class="o">=</span> <span class="n">sibling</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-27" id="section-27">&#182;</a>
+</div>
+<p>make sure previous item is in a p- if the item has text, then it
+it isn't in a p</p>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+            <span class="k">if</span> <span class="n">lst</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">text</span><span class="p">:</span> 
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-28" id="section-28">&#182;</a>
+</div>
+<p>since it's possible there are other children for this sibling,
+we can't just SubElement the p, we need to insert it as the 
+first item</p>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+                <span class="n">p</span> <span class="o">=</span> <span class="n">util</span><span class="o">.</span><span class="n">etree</span><span class="o">.</span><span class="n">Element</span><span class="p">(</span><span class="s">&#39;p&#39;</span><span class="p">)</span>
+                <span class="n">p</span><span class="o">.</span><span class="n">text</span> <span class="o">=</span> <span class="n">lst</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">text</span>
+                <span class="n">lst</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">text</span> <span class="o">=</span> <span class="s">&#39;&#39;</span>
+                <span class="n">lst</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">p</span><span class="p">)</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-29" id="section-29">&#182;</a>
+</div>
+<p>if the last item has a tail, then the tail needs to be put in a p
+likely only when a header is not followed by a blank line</p>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+            <span class="n">lch</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lastChild</span><span class="p">(</span><span class="n">lst</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+            <span class="k">if</span> <span class="n">lch</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">and</span> <span class="n">lch</span><span class="o">.</span><span class="n">tail</span><span class="p">:</span>
+                <span class="n">p</span> <span class="o">=</span> <span class="n">util</span><span class="o">.</span><span class="n">etree</span><span class="o">.</span><span class="n">SubElement</span><span class="p">(</span><span class="n">lst</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="s">&#39;p&#39;</span><span class="p">)</span>
+                <span class="n">p</span><span class="o">.</span><span class="n">text</span> <span class="o">=</span> <span class="n">lch</span><span class="o">.</span><span class="n">tail</span><span class="o">.</span><span class="n">lstrip</span><span class="p">()</span>
+                <span class="n">lch</span><span class="o">.</span><span class="n">tail</span> <span class="o">=</span> <span class="s">&#39;&#39;</span>
+
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-30" id="section-30">&#182;</a>
+</div>
+<p>parse first block differently as it gets wrapped in a p.</p>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+            <span class="n">li</span> <span class="o">=</span> <span class="n">util</span><span class="o">.</span><span class="n">etree</span><span class="o">.</span><span class="n">SubElement</span><span class="p">(</span><span class="n">lst</span><span class="p">,</span> <span class="s">&#39;li&#39;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">parser</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s">&#39;looselist&#39;</span><span class="p">)</span>
+            <span class="n">firstitem</span> <span class="o">=</span> <span class="n">items</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">parser</span><span class="o">.</span><span class="n">parseBlocks</span><span class="p">(</span><span class="n">li</span><span class="p">,</span> <span class="p">[</span><span class="n">firstitem</span><span class="p">])</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">parser</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">reset</span><span class="p">()</span>
+        <span class="k">elif</span> <span class="n">parent</span><span class="o">.</span><span class="n">tag</span> <span class="ow">in</span> <span class="p">[</span><span class="s">&#39;ol&#39;</span><span class="p">,</span> <span class="s">&#39;ul&#39;</span><span class="p">]:</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-31" id="section-31">&#182;</a>
+</div>
+<p>this catches the edge case of a multi-item indented list whose 
+first item is in a blank parent-list item:
+* * subitem1
+    * subitem2
+see also ListIndentProcessor</p>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+            <span class="n">lst</span> <span class="o">=</span> <span class="n">parent</span>
+        <span class="k">else</span><span class="p">:</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-32" id="section-32">&#182;</a>
+</div>
+<p>This is a new list so create parent with appropriate tag.</p>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+            <span class="n">lst</span> <span class="o">=</span> <span class="n">util</span><span class="o">.</span><span class="n">etree</span><span class="o">.</span><span class="n">SubElement</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">TAG</span><span class="p">)</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-33" id="section-33">&#182;</a>
+</div>
+<p>Check if a custom start integer is set</p>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+            <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">parser</span><span class="o">.</span><span class="n">markdown</span><span class="o">.</span><span class="n">lazy_ol</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">STARTSWITH</span> <span class="o">!=</span><span class="s">&#39;1&#39;</span><span class="p">:</span>
+                <span class="n">lst</span><span class="o">.</span><span class="n">attrib</span><span class="p">[</span><span class="s">&#39;start&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">STARTSWITH</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">parser</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s">&#39;list&#39;</span><span class="p">)</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-34" id="section-34">&#182;</a>
+</div>
+<p>Loop through items in block, recursively parsing each with the
+appropriate parent.</p>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+        <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">items</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">item</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s">&#39; &#39;</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">tab_length</span><span class="p">):</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-35" id="section-35">&#182;</a>
+</div>
+<p>Item is indented. Parse with last item as parent</p>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+                <span class="bp">self</span><span class="o">.</span><span class="n">parser</span><span class="o">.</span><span class="n">parseBlocks</span><span class="p">(</span><span class="n">lst</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="p">[</span><span class="n">item</span><span class="p">])</span>
+            <span class="k">else</span><span class="p">:</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-36" id="section-36">&#182;</a>
+</div>
+<p>New item. Create li and parse with it as parent</p>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+                <span class="n">li</span> <span class="o">=</span> <span class="n">util</span><span class="o">.</span><span class="n">etree</span><span class="o">.</span><span class="n">SubElement</span><span class="p">(</span><span class="n">lst</span><span class="p">,</span> <span class="s">&#39;li&#39;</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">parser</span><span class="o">.</span><span class="n">parseBlocks</span><span class="p">(</span><span class="n">li</span><span class="p">,</span> <span class="p">[</span><span class="n">item</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parser</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">reset</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">get_items</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">block</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Break a block into list items. &quot;&quot;&quot;</span>
+        <span class="n">items</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">block</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39;</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">):</span>
+            <span class="n">m</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">CHILD_RE</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">m</span><span class="p">:</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-37" id="section-37">&#182;</a>
+</div>
+<p>This is a new list item
+Check first item for the start index</p>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">items</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">TAG</span><span class="o">==</span><span class="s">&#39;ol&#39;</span><span class="p">:</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-38" id="section-38">&#182;</a>
+</div>
+<p>Detect the integer value of first list item</p>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+                    <span class="n">INTEGER_RE</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="s">&#39;(\d+)&#39;</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">STARTSWITH</span> <span class="o">=</span> <span class="n">INTEGER_RE</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">m</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span><span class="o">.</span><span class="n">group</span><span class="p">()</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-39" id="section-39">&#182;</a>
+</div>
+<p>Append to the list</p>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+                <span class="n">items</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">m</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">3</span><span class="p">))</span>
+            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">INDENT_RE</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">line</span><span class="p">):</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-40" id="section-40">&#182;</a>
+</div>
+<p>This is an indented (possibly nested) item.</p>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+                <span class="k">if</span> <span class="n">items</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s">&#39; &#39;</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">tab_length</span><span class="p">):</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-41" id="section-41">&#182;</a>
+</div>
+<p>Previous item was indented. Append to that item.</p>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+                    <span class="n">items</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="s">&#39;</span><span class="si">%s</span><span class="se">\n</span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">items</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">line</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">items</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-42" id="section-42">&#182;</a>
+</div>
+<p>This is another line of previous item. Append to that item.</p>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+                <span class="n">items</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="s">&#39;</span><span class="si">%s</span><span class="se">\n</span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">items</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">line</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">items</span>
+
+
+<span class="k">class</span> <span class="nc">UListProcessor</span><span class="p">(</span><span class="n">OListProcessor</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Process unordered list blocks. &quot;&quot;&quot;</span>
+
+    <span class="n">TAG</span> <span class="o">=</span> <span class="s">&#39;ul&#39;</span>
+    <span class="n">RE</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="s">r&#39;^[ ]{0,3}[*+-][ ]+(.*)&#39;</span><span class="p">)</span>
+
+
+<span class="k">class</span> <span class="nc">HashHeaderProcessor</span><span class="p">(</span><span class="n">BlockProcessor</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Process Hash Headers. &quot;&quot;&quot;</span>
+
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-43" id="section-43">&#182;</a>
+</div>
+<p>Detect a header at start of any line in block</p>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+    <span class="n">RE</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="s">r&#39;(^|\n)(?P&lt;level&gt;#{1,6})(?P&lt;header&gt;.*?)#*(\n|$)&#39;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">test</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="n">block</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">bool</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">RE</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">block</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="n">blocks</span><span class="p">):</span>
+        <span class="n">block</span> <span class="o">=</span> <span class="n">blocks</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">m</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">RE</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">block</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">m</span><span class="p">:</span>
+            <span class="n">before</span> <span class="o">=</span> <span class="n">block</span><span class="p">[:</span><span class="n">m</span><span class="o">.</span><span class="n">start</span><span class="p">()]</span> <span class="c"># All lines before header</span>
+            <span class="n">after</span> <span class="o">=</span> <span class="n">block</span><span class="p">[</span><span class="n">m</span><span class="o">.</span><span class="n">end</span><span class="p">():]</span>    <span class="c"># All lines after header</span>
+            <span class="k">if</span> <span class="n">before</span><span class="p">:</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-44" id="section-44">&#182;</a>
+</div>
+<p>As the header was not the first line of the block and the
+lines before the header must be parsed first,
+recursively parse this lines as a block.</p>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+                <span class="bp">self</span><span class="o">.</span><span class="n">parser</span><span class="o">.</span><span class="n">parseBlocks</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span> <span class="p">[</span><span class="n">before</span><span class="p">])</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-45" id="section-45">&#182;</a>
+</div>
+<p>Create header using named groups from RE</p>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+            <span class="n">h</span> <span class="o">=</span> <span class="n">util</span><span class="o">.</span><span class="n">etree</span><span class="o">.</span><span class="n">SubElement</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span> <span class="s">&#39;h</span><span class="si">%d</span><span class="s">&#39;</span> <span class="o">%</span> <span class="nb">len</span><span class="p">(</span><span class="n">m</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="s">&#39;level&#39;</span><span class="p">)))</span>
+            <span class="n">h</span><span class="o">.</span><span class="n">text</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="s">&#39;header&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">after</span><span class="p">:</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-46" id="section-46">&#182;</a>
+</div>
+<p>Insert remaining lines as first block for future parsing.</p>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+                <span class="n">blocks</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">after</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-47" id="section-47">&#182;</a>
+</div>
+<p>This should never happen, but just in case...</p>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+            <span class="n">logger</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s">&quot;We&#39;ve got a problem header: </span><span class="si">%r</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">block</span><span class="p">)</span>
+
+
+<span class="k">class</span> <span class="nc">SetextHeaderProcessor</span><span class="p">(</span><span class="n">BlockProcessor</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Process Setext-style Headers. &quot;&quot;&quot;</span>
+
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-48" id="section-48">&#182;</a>
+</div>
+<p>Detect Setext-style header. Must be first 2 lines of block.</p>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+    <span class="n">RE</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="s">r&#39;^.*?\n[=-]+[ ]*(\n|$)&#39;</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">MULTILINE</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">test</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="n">block</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">bool</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">RE</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">block</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="n">blocks</span><span class="p">):</span>
+        <span class="n">lines</span> <span class="o">=</span> <span class="n">blocks</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39;</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-49" id="section-49">&#182;</a>
+</div>
+<p>Determine level. <code>=</code> is 1 and <code>-</code> is 2.</p>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+        <span class="k">if</span> <span class="n">lines</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s">&#39;=&#39;</span><span class="p">):</span>
+            <span class="n">level</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">level</span> <span class="o">=</span> <span class="mi">2</span>
+        <span class="n">h</span> <span class="o">=</span> <span class="n">util</span><span class="o">.</span><span class="n">etree</span><span class="o">.</span><span class="n">SubElement</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span> <span class="s">&#39;h</span><span class="si">%d</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">level</span><span class="p">)</span>
+        <span class="n">h</span><span class="o">.</span><span class="n">text</span> <span class="o">=</span> <span class="n">lines</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">lines</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">2</span><span class="p">:</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-50" id="section-50">&#182;</a>
+</div>
+<p>Block contains additional lines. Add to  master blocks for later.</p>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+            <span class="n">blocks</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="s">&#39;</span><span class="se">\n</span><span class="s">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">lines</span><span class="p">[</span><span class="mi">2</span><span class="p">:]))</span>
+
+
+<span class="k">class</span> <span class="nc">HRProcessor</span><span class="p">(</span><span class="n">BlockProcessor</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Process Horizontal Rules. &quot;&quot;&quot;</span>
+
+    <span class="n">RE</span> <span class="o">=</span> <span class="s">r&#39;^[ ]{0,3}((-+[ ]{0,2}){3,}|(_+[ ]{0,2}){3,}|(\*+[ ]{0,2}){3,})[ ]*&#39;</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-51" id="section-51">&#182;</a>
+</div>
+<p>Detect hr on any line of a block.</p>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+    <span class="n">SEARCH_RE</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="n">RE</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">MULTILINE</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">test</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="n">block</span><span class="p">):</span>
+        <span class="n">m</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">SEARCH_RE</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">block</span><span class="p">)</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-52" id="section-52">&#182;</a>
+</div>
+<p>No atomic grouping in python so we simulate it here for performance.
+The regex only matches what would be in the atomic group - the HR.
+Then check if we are at end of block or if next char is a newline.</p>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+        <span class="k">if</span> <span class="n">m</span> <span class="ow">and</span> <span class="p">(</span><span class="n">m</span><span class="o">.</span><span class="n">end</span><span class="p">()</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">block</span><span class="p">)</span> <span class="ow">or</span> <span class="n">block</span><span class="p">[</span><span class="n">m</span><span class="o">.</span><span class="n">end</span><span class="p">()]</span> <span class="o">==</span> <span class="s">&#39;</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">):</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-53" id="section-53">&#182;</a>
+</div>
+<p>Save match object on class instance so we can use it later.</p>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+            <span class="bp">self</span><span class="o">.</span><span class="n">match</span> <span class="o">=</span> <span class="n">m</span>
+            <span class="k">return</span> <span class="bp">True</span>
+        <span class="k">return</span> <span class="bp">False</span>
+
+    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="n">blocks</span><span class="p">):</span>
+        <span class="n">block</span> <span class="o">=</span> <span class="n">blocks</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-54" id="section-54">&#182;</a>
+</div>
+<p>Check for lines in block before hr.</p>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+        <span class="n">prelines</span> <span class="o">=</span> <span class="n">block</span><span class="p">[:</span><span class="bp">self</span><span class="o">.</span><span class="n">match</span><span class="o">.</span><span class="n">start</span><span class="p">()]</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span><span class="s">&#39;</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">prelines</span><span class="p">:</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-55" id="section-55">&#182;</a>
+</div>
+<p>Recursively parse lines before hr so they get parsed first.</p>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+            <span class="bp">self</span><span class="o">.</span><span class="n">parser</span><span class="o">.</span><span class="n">parseBlocks</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span> <span class="p">[</span><span class="n">prelines</span><span class="p">])</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-56" id="section-56">&#182;</a>
+</div>
+<p>create hr</p>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+        <span class="n">util</span><span class="o">.</span><span class="n">etree</span><span class="o">.</span><span class="n">SubElement</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span> <span class="s">&#39;hr&#39;</span><span class="p">)</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-57" id="section-57">&#182;</a>
+</div>
+<p>check for lines in block after hr.</p>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+        <span class="n">postlines</span> <span class="o">=</span> <span class="n">block</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">match</span><span class="o">.</span><span class="n">end</span><span class="p">():]</span><span class="o">.</span><span class="n">lstrip</span><span class="p">(</span><span class="s">&#39;</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">postlines</span><span class="p">:</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-58" id="section-58">&#182;</a>
+</div>
+<p>Add lines after hr to master blocks for later parsing.</p>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+            <span class="n">blocks</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">postlines</span><span class="p">)</span>
+
+
+
+<span class="k">class</span> <span class="nc">EmptyBlockProcessor</span><span class="p">(</span><span class="n">BlockProcessor</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Process blocks that are empty or start with an empty line. &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">test</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="n">block</span><span class="p">):</span>
+        <span class="k">return</span> <span class="ow">not</span> <span class="n">block</span> <span class="ow">or</span> <span class="n">block</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s">&#39;</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="n">blocks</span><span class="p">):</span>
+        <span class="n">block</span> <span class="o">=</span> <span class="n">blocks</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">filler</span> <span class="o">=</span> <span class="s">&#39;</span><span class="se">\n\n</span><span class="s">&#39;</span>
+        <span class="k">if</span> <span class="n">block</span><span class="p">:</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-59" id="section-59">&#182;</a>
+</div>
+<p>Starts with empty line
+Only replace a single line.</p>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+            <span class="n">filler</span> <span class="o">=</span> <span class="s">&#39;</span><span class="se">\n</span><span class="s">&#39;</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-60" id="section-60">&#182;</a>
+</div>
+<p>Save the rest for later.</p>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+            <span class="n">theRest</span> <span class="o">=</span> <span class="n">block</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
+            <span class="k">if</span> <span class="n">theRest</span><span class="p">:</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-61" id="section-61">&#182;</a>
+</div>
+<p>Add remaining lines to master blocks for later.</p>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+                <span class="n">blocks</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">theRest</span><span class="p">)</span>
+        <span class="n">sibling</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lastChild</span><span class="p">(</span><span class="n">parent</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">sibling</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">and</span> <span class="n">sibling</span><span class="o">.</span><span class="n">tag</span> <span class="o">==</span> <span class="s">&#39;pre&#39;</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">sibling</span><span class="p">)</span> <span class="ow">and</span> <span class="n">sibling</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">tag</span> <span class="o">==</span> <span class="s">&#39;code&#39;</span><span class="p">:</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-62" id="section-62">&#182;</a>
+</div>
+<p>Last block is a codeblock. Append to preserve whitespace.</p>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+            <span class="n">sibling</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">text</span> <span class="o">=</span> <span class="n">util</span><span class="o">.</span><span class="n">AtomicString</span><span class="p">(</span><span class="s">&#39;</span><span class="si">%s%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">sibling</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">text</span><span class="p">,</span> <span class="n">filler</span><span class="p">))</span>
+
+
+<span class="k">class</span> <span class="nc">ParagraphProcessor</span><span class="p">(</span><span class="n">BlockProcessor</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Process Paragraph blocks. &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">test</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="n">block</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">True</span>
+
+    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="n">blocks</span><span class="p">):</span>
+        <span class="n">block</span> <span class="o">=</span> <span class="n">blocks</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">block</span><span class="o">.</span><span class="n">strip</span><span class="p">():</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-63" id="section-63">&#182;</a>
+</div>
+<p>Not a blank block. Add to parent, otherwise throw it away.</p>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parser</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">isstate</span><span class="p">(</span><span class="s">&#39;list&#39;</span><span class="p">):</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-64" id="section-64">&#182;</a>
+</div>
+<p>The parent is a tight-list.</p>
+
+<p>Check for any children. This will likely only happen in a 
+tight-list when a header isn't followed by a blank line.
+For example:</p>
+
+
+<div class="highlight"><pre><code><span class="o">*</span> <span class="err">#</span> <span class="nx">Header</span>
+<span class="nx">Line</span> <span class="mi">2</span> <span class="nx">of</span> <span class="nx">list</span> <span class="nx">item</span> <span class="o">-</span> <span class="nx">not</span> <span class="nx">part</span> <span class="nx">of</span> <span class="nx">header</span><span class="p">.</span>
+</code></pre></div>
+
+
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+                <span class="n">sibling</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lastChild</span><span class="p">(</span><span class="n">parent</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">sibling</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-65" id="section-65">&#182;</a>
+</div>
+<p>Insetrt after sibling.</p>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+                    <span class="k">if</span> <span class="n">sibling</span><span class="o">.</span><span class="n">tail</span><span class="p">:</span>
+                        <span class="n">sibling</span><span class="o">.</span><span class="n">tail</span> <span class="o">=</span> <span class="s">&#39;</span><span class="si">%s</span><span class="se">\n</span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">sibling</span><span class="o">.</span><span class="n">tail</span><span class="p">,</span> <span class="n">block</span><span class="p">)</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">sibling</span><span class="o">.</span><span class="n">tail</span> <span class="o">=</span> <span class="s">&#39;</span><span class="se">\n</span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">block</span>
+                <span class="k">else</span><span class="p">:</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-66" id="section-66">&#182;</a>
+</div>
+<p>Append to parent.text</p>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+                    <span class="k">if</span> <span class="n">parent</span><span class="o">.</span><span class="n">text</span><span class="p">:</span>
+                        <span class="n">parent</span><span class="o">.</span><span class="n">text</span> <span class="o">=</span> <span class="s">&#39;</span><span class="si">%s</span><span class="se">\n</span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">parent</span><span class="o">.</span><span class="n">text</span><span class="p">,</span> <span class="n">block</span><span class="p">)</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">parent</span><span class="o">.</span><span class="n">text</span> <span class="o">=</span> <span class="n">block</span><span class="o">.</span><span class="n">lstrip</span><span class="p">()</span>
+            <span class="k">else</span><span class="p">:</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-67" id="section-67">&#182;</a>
+</div>
+<p>Create a regular paragraph</p>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+                <span class="n">p</span> <span class="o">=</span> <span class="n">util</span><span class="o">.</span><span class="n">etree</span><span class="o">.</span><span class="n">SubElement</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span> <span class="s">&#39;p&#39;</span><span class="p">)</span>
+                <span class="n">p</span><span class="o">.</span><span class="n">text</span> <span class="o">=</span> <span class="n">block</span><span class="o">.</span><span class="n">lstrip</span><span class="p">()</span>
+</pre></div>
+        </td>
+      </tr>
+  </tbody>
+</table>
+  </div>
+</body>
+</html>

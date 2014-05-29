@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>README.md</title>
+  <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+  <link rel="stylesheet" media="all" href="doc-style.css" />
+  <script src="doc-filelist.js"></script>
+  <script>
+    var relativeDir = "", thisFile = "README.md", defaultSidebar = true;
+  </script>
+  <script src="doc-script.js"></script>
+</head>
+<body>
+  <div id="sidebar_wrapper">
+    <div id="sidebar_switch">
+      <span class="tree">Files</span>
+      <span class="headings">Headings</span>
+    </div>
+    <div id="tree"></div>
+    <div id="headings">
+      <div class="heading h1">
+        <a href="#teams">teams</a>
+      </div>
+      <div class="heading h2">
+        <a href="#quickstart">Quickstart</a>
+      </div>
+    </div>
+  </div>
+  <div id="sidebar-toggle"></div>
+  <div id="container"><div class="docs markdown">
+<div class="pilwrap" id="teams">
+  <h1>
+    <a href="#teams" name="teams" class="pilcrow">&#182;</a>
+    teams
+  </h1>
+</div>
+
+
+<p>team page service</p>
+
+<p>Please see <a href='https://github.com/MayOneUS/wiki/wiki/My-SuperPAC-design-doc'>https://github.com/MayOneUS/wiki/wiki/My-SuperPAC-design-doc</a></p>
+
+
+<div class="pilwrap" id="quickstart">
+  <h2>
+    <a href="#quickstart" name="quickstart" class="pilcrow">&#182;</a>
+    Quickstart
+  </h2>
+</div>
+
+
+<p>After checking out the code, run</p>
+
+
+<div class="highlight"><pre><code><span class="nx">cp</span> <span class="nx">backend</span><span class="o">/</span><span class="nx">config_NOCOMMIT_README</span> <span class="nx">backend</span><span class="o">/</span><span class="nx">config_NOCOMMIT</span><span class="p">.</span><span class="nx">py</span>
+</code></pre></div>
+
+
+
+<p>Then, run <code>npm install</code>.</p>
+
+<p>To start the server, run <code>npm start</code> and go to <code>http://localhost:8080</code>.
+That's it!</p>
+
+<p>If you want to rapidly set up a development environment that already has npm
+and dependencies installed using docker, try running</p>
+
+
+<div class="highlight"><pre><code><span class="nx">docker</span> <span class="nx">run</span> <span class="o">-</span><span class="nx">t</span> <span class="o">-</span><span class="nx">i</span> <span class="o">-</span><span class="nx">v</span> <span class="o">/</span><span class="nx">path</span><span class="o">/</span><span class="nx">to</span><span class="o">/</span><span class="nx">checkout</span><span class="o">:</span><span class="err">/develop jtolds/mayone-gae /bin/bash</span>
+</code></pre></div>
+
+
+
+<p>Then in that new shell</p>
+
+
+<div class="highlight"><pre><code><span class="nx">cd</span> <span class="o">/</span><span class="nx">develop</span>
+<span class="nx">npm</span> <span class="nx">install</span>
+<span class="nx">npm</span> <span class="nx">start</span>
+</code></pre></div>
+
+</div>
+  </div>
+</body>
+</html>

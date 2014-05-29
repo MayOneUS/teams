@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>tables.py</title>
+  <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+  <link rel="stylesheet" media="all" href="../../../doc-style.css" />
+  <script src="../../../doc-filelist.js"></script>
+  <script>
+    var relativeDir = "../../../", thisFile = "build/markdown/extensions/tables.py", defaultSidebar = true;
+  </script>
+  <script src="../../../doc-script.js"></script>
+</head>
+<body>
+  <div id="sidebar_wrapper">
+    <div id="sidebar_switch">
+      <span class="tree">Files</span>
+      <span class="headings">Headings</span>
+    </div>
+    <div id="tree"></div>
+    <div id="headings">
+    </div>
+  </div>
+  <div id="sidebar-toggle"></div>
+  <div id="container"><div class="background highlight"></div>
+<table cellpadding="0" cellspacing="0">
+  <tbody>
+      <tr>
+        <td class="docs">
+          <h1>tables.py</h1>
+        </td>
+        <td class="code highlight"></td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-1" id="section-1">&#182;</a>
+</div>
+
+        </td>
+        <td class="code highlight"><div class="highlight"><pre><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Tables Extension for Python-Markdown</span>
+<span class="sd">====================================</span>
+
+<span class="sd">Added parsing of tables to Python-Markdown.</span>
+
+<span class="sd">A simple example:</span>
+
+<span class="sd">    First Header  | Second Header</span>
+<span class="sd">    ------------- | -------------</span>
+<span class="sd">    Content Cell  | Content Cell</span>
+<span class="sd">    Content Cell  | Content Cell</span>
+
+<span class="sd">Copyright 2009 - [Waylan Limberg](http://achinghead.com)</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">absolute_import</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">unicode_literals</span>
+<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">Extension</span>
+<span class="kn">from</span> <span class="nn">..blockprocessors</span> <span class="kn">import</span> <span class="n">BlockProcessor</span>
+<span class="kn">from</span> <span class="nn">..util</span> <span class="kn">import</span> <span class="n">etree</span>
+
+<span class="k">class</span> <span class="nc">TableProcessor</span><span class="p">(</span><span class="n">BlockProcessor</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Process Tables. &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">test</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="n">block</span><span class="p">):</span>
+        <span class="n">rows</span> <span class="o">=</span> <span class="n">block</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39;</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">rows</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">2</span> <span class="ow">and</span> <span class="s">&#39;|&#39;</span> <span class="ow">in</span> <span class="n">rows</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">and</span> 
+                <span class="s">&#39;|&#39;</span> <span class="ow">in</span> <span class="n">rows</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="ow">and</span> <span class="s">&#39;-&#39;</span> <span class="ow">in</span> <span class="n">rows</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="ow">and</span> 
+                <span class="n">rows</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">in</span> <span class="p">[</span><span class="s">&#39;|&#39;</span><span class="p">,</span> <span class="s">&#39;:&#39;</span><span class="p">,</span> <span class="s">&#39;-&#39;</span><span class="p">])</span>
+
+    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="n">blocks</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Parse a table block and build table. &quot;&quot;&quot;</span>
+        <span class="n">block</span> <span class="o">=</span> <span class="n">blocks</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39;</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span>
+        <span class="n">header</span> <span class="o">=</span> <span class="n">block</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+        <span class="n">seperator</span> <span class="o">=</span> <span class="n">block</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+        <span class="n">rows</span> <span class="o">=</span> <span class="n">block</span><span class="p">[</span><span class="mi">2</span><span class="p">:]</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-2" id="section-2">&#182;</a>
+</div>
+<p>Get format type (bordered by pipes or not)</p>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+        <span class="n">border</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="k">if</span> <span class="n">header</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s">&#39;|&#39;</span><span class="p">):</span>
+            <span class="n">border</span> <span class="o">=</span> <span class="bp">True</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-3" id="section-3">&#182;</a>
+</div>
+<p>Get alignment of columns</p>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+        <span class="n">align</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_split_row</span><span class="p">(</span><span class="n">seperator</span><span class="p">,</span> <span class="n">border</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">c</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s">&#39;:&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">c</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s">&#39;:&#39;</span><span class="p">):</span>
+                <span class="n">align</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s">&#39;center&#39;</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">c</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s">&#39;:&#39;</span><span class="p">):</span>
+                <span class="n">align</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s">&#39;left&#39;</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">c</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s">&#39;:&#39;</span><span class="p">):</span>
+                <span class="n">align</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s">&#39;right&#39;</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">align</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">None</span><span class="p">)</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-4" id="section-4">&#182;</a>
+</div>
+<p>Build table</p>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+        <span class="n">table</span> <span class="o">=</span> <span class="n">etree</span><span class="o">.</span><span class="n">SubElement</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span> <span class="s">&#39;table&#39;</span><span class="p">)</span>
+        <span class="n">thead</span> <span class="o">=</span> <span class="n">etree</span><span class="o">.</span><span class="n">SubElement</span><span class="p">(</span><span class="n">table</span><span class="p">,</span> <span class="s">&#39;thead&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_build_row</span><span class="p">(</span><span class="n">header</span><span class="p">,</span> <span class="n">thead</span><span class="p">,</span> <span class="n">align</span><span class="p">,</span> <span class="n">border</span><span class="p">)</span>
+        <span class="n">tbody</span> <span class="o">=</span> <span class="n">etree</span><span class="o">.</span><span class="n">SubElement</span><span class="p">(</span><span class="n">table</span><span class="p">,</span> <span class="s">&#39;tbody&#39;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">rows</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_build_row</span><span class="p">(</span><span class="n">row</span><span class="o">.</span><span class="n">strip</span><span class="p">(),</span> <span class="n">tbody</span><span class="p">,</span> <span class="n">align</span><span class="p">,</span> <span class="n">border</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_build_row</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">row</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="n">align</span><span class="p">,</span> <span class="n">border</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Given a row of text, build table cells. &quot;&quot;&quot;</span>
+        <span class="n">tr</span> <span class="o">=</span> <span class="n">etree</span><span class="o">.</span><span class="n">SubElement</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span> <span class="s">&#39;tr&#39;</span><span class="p">)</span>
+        <span class="n">tag</span> <span class="o">=</span> <span class="s">&#39;td&#39;</span>
+        <span class="k">if</span> <span class="n">parent</span><span class="o">.</span><span class="n">tag</span> <span class="o">==</span> <span class="s">&#39;thead&#39;</span><span class="p">:</span>
+            <span class="n">tag</span> <span class="o">=</span> <span class="s">&#39;th&#39;</span>
+        <span class="n">cells</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_split_row</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="n">border</span><span class="p">)</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-5" id="section-5">&#182;</a>
+</div>
+<p>We use align here rather than cells to ensure every row 
+contains the same number of columns.</p>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">a</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">align</span><span class="p">):</span>
+            <span class="n">c</span> <span class="o">=</span> <span class="n">etree</span><span class="o">.</span><span class="n">SubElement</span><span class="p">(</span><span class="n">tr</span><span class="p">,</span> <span class="n">tag</span><span class="p">)</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">c</span><span class="o">.</span><span class="n">text</span> <span class="o">=</span> <span class="n">cells</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+            <span class="k">except</span> <span class="ne">IndexError</span><span class="p">:</span>
+                <span class="n">c</span><span class="o">.</span><span class="n">text</span> <span class="o">=</span> <span class="s">&quot;&quot;</span>
+            <span class="k">if</span> <span class="n">a</span><span class="p">:</span>
+                <span class="n">c</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s">&#39;align&#39;</span><span class="p">,</span> <span class="n">a</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_split_row</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">row</span><span class="p">,</span> <span class="n">border</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; split a row of text into list of cells. &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">border</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">row</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s">&#39;|&#39;</span><span class="p">):</span>
+                <span class="n">row</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
+            <span class="k">if</span> <span class="n">row</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s">&#39;|&#39;</span><span class="p">):</span>
+                <span class="n">row</span> <span class="o">=</span> <span class="n">row</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">row</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39;|&#39;</span><span class="p">)</span>
+
+
+<span class="k">class</span> <span class="nc">TableExtension</span><span class="p">(</span><span class="n">Extension</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Add tables to Markdown. &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">extendMarkdown</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">md</span><span class="p">,</span> <span class="n">md_globals</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Add an instance of TableProcessor to BlockParser. &quot;&quot;&quot;</span>
+        <span class="n">md</span><span class="o">.</span><span class="n">parser</span><span class="o">.</span><span class="n">blockprocessors</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s">&#39;table&#39;</span><span class="p">,</span> 
+                                      <span class="n">TableProcessor</span><span class="p">(</span><span class="n">md</span><span class="o">.</span><span class="n">parser</span><span class="p">),</span>
+                                      <span class="s">&#39;&lt;hashheader&#39;</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">makeExtension</span><span class="p">(</span><span class="n">configs</span><span class="o">=</span><span class="p">{}):</span>
+    <span class="k">return</span> <span class="n">TableExtension</span><span class="p">(</span><span class="n">configs</span><span class="o">=</span><span class="n">configs</span><span class="p">)</span>
+</pre></div>
+        </td>
+      </tr>
+  </tbody>
+</table>
+  </div>
+</body>
+</html>

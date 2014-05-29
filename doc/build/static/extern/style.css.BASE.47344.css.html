@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>style.css.BASE.47344.css</title>
+  <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+  <link rel="stylesheet" media="all" href="../../../doc-style.css" />
+  <script src="../../../doc-filelist.js"></script>
+  <script>
+    var relativeDir = "../../../", thisFile = "build/static/extern/style.css.BASE.47344.css", defaultSidebar = true;
+  </script>
+  <script src="../../../doc-script.js"></script>
+</head>
+<body>
+  <div id="sidebar_wrapper">
+    <div id="sidebar_switch">
+      <span class="tree">Files</span>
+      <span class="headings">Headings</span>
+    </div>
+    <div id="tree"></div>
+    <div id="headings">
+    </div>
+  </div>
+  <div id="sidebar-toggle"></div>
+  <div id="container"><div class="background highlight"></div>
+<table cellpadding="0" cellspacing="0">
+  <tbody>
+      <tr>
+        <td class="docs">
+          <h1>style.css.BASE.47344.css</h1>
+        </td>
+        <td class="code highlight"></td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-1" id="section-1">&#182;</a>
+</div>
+
+        </td>
+        <td class="code highlight"><div class="highlight"><pre><span class="c">/* common styles for all MayDayPAC modules */</span>
+
+<span class="c">/*By default, grid.css, which is part of Twitter Bootstrap, decorates the divs and makes it obvious where the boundaries are.  This code resets borders and background colors to their defaults.*/</span>
+
+<span class="nc">.col-md-1</span><span class="o">,</span>
+<span class="nc">.col-md-2</span><span class="o">,</span>
+<span class="nc">.col-md-3</span><span class="o">,</span>
+<span class="nc">.col-md-4</span><span class="o">,</span>
+<span class="nc">.col-md-5</span><span class="o">,</span>
+<span class="nc">.col-md-6</span><span class="o">,</span>
+<span class="nc">.col-md-7</span><span class="o">,</span>
+<span class="nc">.col-md-8</span><span class="o">,</span>
+<span class="nc">.col-md-9</span> <span class="p">{</span>
+    <span class="k">background-color</span><span class="o">:</span> <span class="k">transparent</span><span class="p">;</span>
+    <span class="k">border</span><span class="o">:</span> <span class="k">none</span><span class="p">;</span>
+    <span class="k">padding</span><span class="o">:</span><span class="m">0</span><span class="p">;</span>
+    <span class="k">margin</span><span class="o">:</span><span class="m">0</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="nc">.row</span><span class="o">,</span>
+<span class="nc">.row-fluid</span> <span class="p">{</span>
+    <span class="k">background-color</span><span class="o">:</span> <span class="k">transparent</span><span class="p">;</span>
+    <span class="k">border</span><span class="o">:</span> <span class="k">none</span><span class="p">;</span>
+    <span class="k">padding</span><span class="o">:</span><span class="m">0</span><span class="p">;</span>
+    <span class="k">margin</span><span class="o">:</span><span class="m">0</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="c">/*Bootstrapper only reaches 960px, so we need to wrap our rows in yet another div - one that reaches the full width of the page*/</span>
+
+<span class="nt">body</span> <span class="p">{</span>
+    <span class="k">font-family</span><span class="o">:</span> <span class="s1">&#39;Lato&#39;</span><span class="o">,</span>  <span class="n">helvetica</span><span class="o">,</span> <span class="n">arial</span><span class="o">,</span> <span class="s1">&#39;sans serif&#39;</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="nc">.full-width</span> <span class="p">{</span>
+    <span class="k">width</span><span class="o">:</span> <span class="m">100</span><span class="o">%</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="c">/* Top menu */</span>
+
+<span class="nc">.menu-row</span> <span class="p">{</span>
+    <span class="k">background-color</span><span class="o">:</span> <span class="nb">white</span><span class="p">;</span>
+    <span class="k">margin</span><span class="o">:</span> <span class="m">0</span><span class="p">;</span>
+    <span class="k">padding</span><span class="o">:</span> <span class="m">0</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="nc">.topmenu</span> <span class="p">{</span>
+    <span class="k">font-family</span><span class="o">:</span> <span class="s1">&#39;Oswald&#39;</span><span class="o">,</span> <span class="n">arial</span><span class="o">,</span> <span class="n">helvetica</span><span class="o">,</span> <span class="s1">&#39;sans serif&#39;</span><span class="p">;</span>
+    <span class="k">color</span><span class="o">:</span> <span class="nb">white</span><span class="p">;</span>
+    <span class="k">font-size</span><span class="o">:</span> <span class="m">15px</span><span class="p">;</span>
+    <span class="k">background-color</span><span class="o">:</span> <span class="m">#003366</span><span class="p">;</span>
+    <span class="k">text-align</span><span class="o">:</span> <span class="k">center</span><span class="p">;</span>
+    <span class="k">padding</span><span class="o">:</span> <span class="m">0</span><span class="p">;</span>
+    <span class="k">padding-top</span><span class="o">:</span> <span class="m">10px</span><span class="p">;</span>
+    <span class="k">padding-bottom</span><span class="o">:</span> <span class="m">10px</span><span class="p">;</span>
+    <span class="k">float</span><span class="o">:</span> <span class="k">right</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="nc">.topmenu</span><span class="nd">:hover</span> <span class="p">{</span>
+    <span class="k">background-color</span><span class="o">:</span> <span class="m">#006666</span><span class="p">;</span>
+    <span class="k">color</span><span class="o">:</span> <span class="m">#ffff33</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="c">/* Logo row */</span>
+
+<span class="nc">.logo-row</span> <span class="p">{</span>
+    <span class="k">background-color</span><span class="o">:</span> <span class="nb">white</span><span class="p">;</span>
+    <span class="k">padding-top</span><span class="o">:</span> <span class="m">0</span><span class="p">;</span>
+    <span class="k">margin-bottom</span><span class="o">:</span> <span class="m">20px</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="nc">.subhead</span> <span class="p">{</span>
+    <span class="c">/*Setting max height, height, and line-height to 80px vertically centers the text.*/</span>
+    <span class="k">text-align</span><span class="o">:</span> <span class="k">center</span><span class="p">;</span>
+    <span class="k">position</span><span class="o">:</span> <span class="k">relative</span><span class="p">;</span>
+    <span class="k">top</span><span class="o">:</span> <span class="m">30px</span><span class="p">;</span>
+    <span class="k">height</span><span class="o">:</span> <span class="m">80px</span><span class="p">;</span>
+
+    <span class="c">/*There may be a better way.*/</span>
+    <span class="k">font-family</span><span class="o">:</span> <span class="s2">&quot;Oswald&quot;</span><span class="o">,</span> <span class="n">arial</span><span class="o">,</span> <span class="n">helvetica</span><span class="o">,</span> <span class="s2">&quot;sans serif&quot;</span><span class="p">;</span>
+    <span class="k">color</span><span class="o">:</span> <span class="m">#999999</span><span class="p">;</span>
+    <span class="k">font-size</span><span class="o">:</span> <span class="m">22px</span><span class="p">;</span>
+<span class="p">}</span>
+</pre></div>
+        </td>
+      </tr>
+  </tbody>
+</table>
+  </div>
+</body>
+</html>
