@@ -100,21 +100,27 @@ background-color: #9e0b0f;
 	text-align:left;
 	top:-30px;
 	z-index:-20;
+    max-width: 310px;
+}
+.logo-row a {
+    display: block;
+    cursor: pointer;
 }
 .logo-row img{
-    width: 33%;
-    max-width: 310px;
+    width: 100%;
+    height: auto;
 }
 
 @media only screen and (max-width: 767px) {
     .logo-row {
     	text-align:center;
     	top: 0;
-    	margin-bottom: 20px;
+        margin: 20px auto;
     }
 
-    .logo-row img{
-        width:66%;
+    .logo-row a {
+        width: 66%;
+        margin: 0 auto;
     }
 }
 
