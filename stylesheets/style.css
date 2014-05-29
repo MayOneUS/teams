@@ -81,16 +81,23 @@ body {
     padding-top: 0;
     margin-bottom: 20px;
 	margin-top:10px;
+	text-align:left;
+}
+.logo-row img{
+width:33%;
 }
 
-.subhead {
-    /*Setting max height, height, and line-height to 80px vertically centers the text.*/
-    text-align: center;
-    position: relative;
-    top: 30px;
-    height: 80px;
+@media only screen and (max-width: 767px) {
+.logo-row {
+	text-align:center;
+}
+.logo-row img{
+width:66%;
+}
+}
 
-    /*There may be a better way.*/
+
+.subhead {
     font-family: "Oswald", arial, helvetica, "sans serif";
     color: #999999;
     font-size: 22px;
