@@ -6,6 +6,7 @@ Please see https://github.com/MayOneUS/wiki/wiki/My-SuperPAC-design-doc
 
 
 ## Quickstart
+Make sure you have docker.  If not: see below Installing Docker
 
 Run
 
@@ -34,3 +35,23 @@ https://github.com/MayOneUS/authservice
 N.B.: it looks like the GAE dev server's urlfetch service doesn't respect
 /etc/hosts? I'm not totally sure - you may need to edit backend/main.py's
 AUTH_SERVICE_REQ variable to point to your auth service's IP directly.
+
+## Installing docker
+On Mac OSX:
+  Install ruby
+  
+  Install brew
+  
+  Get VirtualBox
+  
+  
+  Follow the instructions here: http://docs.docker.io/installation/mac/
+  
+  Make sure you don't miss: 
+  
+     Configure the Docker OS X Client
+     
+     Running the Docker daemon via boot2docker
+     
+
+  
