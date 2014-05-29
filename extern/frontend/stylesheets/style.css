@@ -102,19 +102,20 @@ background-color: #9e0b0f;
 	z-index:-20;
 }
 .logo-row img{
-width:33%;
-max-width:310px;
+    width: 33%;
+    max-width: 310px;
 }
 
 @media only screen and (max-width: 767px) {
-.logo-row {
-	text-align:center;
-	top:0px;
-	margin-bottom: 20px;
-}
-.logo-row img{
-width:66%;
-}
+    .logo-row {
+    	text-align:center;
+    	top: 0;
+    	margin-bottom: 20px;
+    }
+
+    .logo-row img{
+        width:66%;
+    }
 }
 
 
@@ -124,12 +125,13 @@ width:66%;
     font-size: 22px;
 }
 
-/*END OF THE COMMON HEAD AREA*/
+/* END OF THE COMMON HEAD AREA */
 
 
-/*Hero Text Row*/
+/* Hero Text Row */
+
 .herotext-row {
-  background-color:black;
+  background-color: black;
 }
 
 .herotext {
@@ -144,7 +146,6 @@ width:66%;
 }
 
 /*Hero Area*/
-
 
 .slideroption img {
   width: 100%;
