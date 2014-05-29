@@ -1,0 +1,44 @@
+/* Standard stuff for everything */
+.btn-social {
+  color: #FFF;
+  border-color: rgba(0, 0, 0, 0.2);
+}
+
+/* Facebook */
+.btn-facebook {
+  background-color: #30487B;
+}
+.btn-facebook:hover {
+  color: #FFF;
+  background-color: #3B5998;
+}
+
+/* Twitter */
+.btn-twitter {
+ background-color: #55ACEE;
+}
+
+.btn-twitter:hover {
+  color: #FFF;
+  background-color: #309aea;
+}
+
+/* Google */
+.btn-google {
+  background-color: #dd4b39;
+}
+
+.btn-google:hover {
+  color: #FFF;
+  background-color: #ca3523;
+}
+
+/* Yahoo */
+.btn-yahoo {
+  background-color: #720e9e;
+}
+
+.btn-yahoo:hover {
+  color: #FFF;
+  background-color: #570b79;
+}
