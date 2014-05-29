@@ -10,19 +10,21 @@ import webapp2
 
 class TestAuthService(object):
 
+  requires_https = False
+
   def __init__(self):
-    self.logged_in = False
-    self.user = None
+    self._logged_in = False
+    self._user = None
 
   def _login(self, name, provider):
-    self.logged_in = True
-    self.user = {
+    self._logged_in = True
+    self._user = {
         "user_id": hashlib.md5("%s:%s" % (provider, name)).hexdigest(),
         "name": name,
         "provider": provider}
 
   def _logout(self):
-    self.logged_in = False
+    self._logged_in = False
 
   def _loginLink(self, provider, return_to):
     return "/_testing/auth?%s" % urllib.urlencode({
@@ -31,7 +33,7 @@ class TestAuthService(object):
         "return_to": return_to})
 
   def getAuthResponse(self, auth_token, return_to):
-    if not self.logged_in:
+    if not self._logged_in:
       return {
           "logged_in": False,
           "login_links": {
@@ -41,7 +43,7 @@ class TestAuthService(object):
               "yahoo": self._loginLink("yahoo", return_to)}}
     return {
       "logged_in": True,
-      "user": self.user}
+      "user": self._user}
 
   def getLogoutLink(self, return_to):
     return "/_testing/auth?%s" % urllib.urlencode({
@@ -79,6 +81,8 @@ class TestAuthHandler(webapp2.RequestHandler):
 
 
 class ProdAuthService(object):
+
+  requires_https = True
 
   def __init__(self, service_url):
     self.url = service_url

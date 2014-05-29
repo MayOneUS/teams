@@ -93,7 +93,8 @@ class BaseHandler(webapp2.RequestHandler):
 
   @webapp2.cached_property
   def auth_response(self):
-    self.request.scheme = "https"
+    if config_NOCOMMIT.auth_service.requires_https:
+      self.request.scheme = "https"
     return config_NOCOMMIT.auth_service.getAuthResponse(
         self.request.cookies.get("auth", ""), self.request.url)
 
@@ -111,7 +112,8 @@ class BaseHandler(webapp2.RequestHandler):
 
   @property
   def logout_link(self):
-    self.request.scheme = "https"
+    if config_NOCOMMIT.auth_service.requires_https:
+      self.request.scheme = "https"
     return config_NOCOMMIT.auth_service.getLogoutLink(self.request.url)
 
   def render_template(self, template, **kwargs):
