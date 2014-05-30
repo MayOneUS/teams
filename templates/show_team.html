@@ -14,9 +14,9 @@
     <div class="video-container">{% if team.youtube_id %}
       <iframe src="//www.youtube.com/embed/{{team.youtube_id}}" frameborder="0" allowfullscreen width="420%"></iframe>{% elif team.image_url %}<img src="{{team.image_url}}">{% else %}
       <iframe src="//player.vimeo.com/video/93299391" width="420" height="236" frameborder="0" webkitallowfullscreen mozallowfullscreen allowfullscreen></iframe>{% endif %}
-    </div>{% autoescape false %}
+    </div>
     <p class="word-note">A word from {{team.title}}:</p>
-    <div class="description">{{description_rendered}}</div>{% endautoescape %}
+    <div class="description">{% autoescape false %}{{description_rendered}}{% endautoescape %}</div>
   </div>
   <div class="sidebar col-md-4">
     <p>This page has raised x dollars from y pledges!</p>
