@@ -8,11 +8,10 @@
       .modal-body
         .text-center
           .btn-group-vertical
-              {% for service, service_link in login_links.iteritems() %}
-                a#btn-{{service}}.btn.btn-social.btn-{{service}}(href='{{service_link}}')
-                i.fa.fa-{{service}}
-                  Log in with {{service|title}}
-              {% endfor %}
+            {% for service, service_link in login_links.iteritems() %}
+            a#btn-{{service}}.btn.btn-social.btn-{{service}}(href='{{service_link}}')
+            i.fa.fa-{{service}} Log in with {{service|title}}
+            {% endfor %}
       .modal-footer
         button.btn.btn-default(type='button', data-dismiss='modal') Cancel
     // /.modal-content
