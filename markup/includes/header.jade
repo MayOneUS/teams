@@ -1,4 +1,3 @@
-script(src="/static/login_modal.js")
 
 div.full-width
   div.clearfix.menu-row.row
@@ -8,7 +7,7 @@ div.full-width
     a(href="/dashboard")
       div.topmenu.topmenu_red.col-md-1 Dashboard
     {% else %}
-    a#login_topmenu
+    a(href="/login")
       div.topmenu.topmenu_red.col-md-1 Login
     {% endif %}
     a(href="//mayone.us/contact", title="Contact")
