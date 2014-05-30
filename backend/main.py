@@ -117,6 +117,7 @@ class BaseHandler(webapp2.RequestHandler):
     return config_NOCOMMIT.auth_service.getLogoutLink(self.request.url)
 
   def render_template(self, template, **kwargs):
+    authRoot = config_NOCOMMIT.auth_service.getResourceLink()
     if self.logged_in:
       data = {
         "logged_in": True,

@@ -1,0 +1,21 @@
+<!-- Bootstrap modal to show login links -->
+#login_modal.modal.fade
+  .modal-dialog.modal-sm
+    .modal-content
+      .modal-header
+        button.close(type='button', data-dismiss='modal', aria-hidden='true') ×
+        h4.modal-title Login to My SuperPAC
+      .modal-body
+        .text-center
+          .btn-group-vertical
+              {% for service, service_link in login_links.iteritems() %}
+                a#btn-{{service}}.btn.btn-social.btn-{{service}}(href='{{service_link}}')
+                i.fa.fa-{{service}}
+                  Log in with {{service|title}}
+              {% endfor %}
+      .modal-footer
+        button.btn.btn-default(type='button', data-dismiss='modal') Cancel
+    // /.modal-content
+  // /.modal-dialog
+// /.modal
+script(src='/static/login_modal.js', type='text/javascript')

@@ -53,6 +53,10 @@ class TestAuthService(object):
   def handlers(self):
     return [webapp2.Route(r'/_testing/auth', TestAuthHandler,
                           defaults={"service": self})]
+                          
+                          
+  def getResourceLink(self):
+    return '/_testing/auth'
 
 
 class TestAuthHandler(webapp2.RequestHandler):
@@ -107,6 +111,10 @@ class ProdAuthService(object):
   def getLogoutLink(self, return_to):
     return "%s/v1/logout?%s" % (self.url, urllib.urlencode({
         "return_to": return_to}))
+        
+  def getResourceLink(self):
+    return 'https://auth.mayone.us/v1/'
 
   def handlers(self):
     return []
+    
