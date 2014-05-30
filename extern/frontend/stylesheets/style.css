@@ -737,7 +737,7 @@ display:inline;
 
 }
 
-.description p{
+.description {
   font-family: "Oswald", arial, helvetica, "sans serif";
   color:white;
   font-weight:300;
