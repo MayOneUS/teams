@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>MayOne.us - My SuperPAC</title>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script src="//code.jquery.com/jquery-1.11.0.min.js"></script>
+    <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">
+    <link rel="stylesheet" id="googlefonts-css" type="text/css" media="all" href="https://fonts.googleapis.com/css?family=Oswald:300,400,700|Lato:400,700&amp;amp;subset=latin">
+    <link rel="stylesheet" type="text/css" href="/static/extern/entypo-social.css">
+    <link rel="stylesheet" href="/static/extern/style.css">
+    <link rel="stylesheet" href="/static/style.css">
+    <link rel="stylesheet" href="/static/extern/zocial/zocial.css">
+  </head>
+  <body>
+    <div class="full-width">
+      <div class="clearfix menu-row row">{% if logged_in %}<a href="{{logout_link}}">
+          <div class="topmenu topmenu_red col-md-1">Logout</div></a><a href="/dashboard">
+          <div class="topmenu topmenu_red col-md-1">Dashboard</div></a>{% else %}<a href="/login">
+          <div class="topmenu topmenu_red col-md-1">Login</div></a>{% endif %}<a href="//mayone.us/contact" title="Contact">
+          <div class="topmenu topmenu_red col-md-1">Contact</div></a><a href="//mayone.us/ways" title="Ways to Help">
+          <div class="topmenu col-md-1">Ways to Help</div></a><a href="//mayone.us/faq" title="FAQ">
+          <div class="topmenu col-md-1">FAQ</div></a><a href="//mayone.us/about" title="About Us">
+          <div class="topmenu col-md-1">About Us</div></a></div>
+    </div>
+    <div class="container">
+      <div class="logo-row row"><a href="https://mayone.us"><img src="/static/logo_mayday.png" alt="Logo"></a></div>
+    </div>
+    <div class="container">
+      <div class="page-body">
+        <form method="post">
+          <div class="container">
+            <div class="col-md-6">
+              <h2>Required:</h2>
+              <dl>
+                <dt>{{form.title.label}}</dt>
+                <dd>
+                  <div>{{form.title}}</div>{% if form.title.errors %}
+                  <ul class="errors">{% for error in form.title.errors %}
+                    <li>{{error}}</li>{% endfor %}
+                  </ul>{% endif %}
+                </dd>
+                <dt>{{form.description.label}}</dt>
+                <dd>
+                  <div>{{form.description(rows=10, style="width: 100%;")}}</div>{% if form.description.errors %}
+                  <ul class="errors">{% for error in form.description.errors %}
+                    <li>{{error}}</li>{% endfor %}
+                  </ul>{% endif %}
+                </dd>
+              </dl>
+              <div style="text-align: right;" class="create_team">
+                <input type="submit" value="Publish">
+              </div>
+            </div>
+            <div class="col-md-1"></div>
+            <div class="col-md-5">
+              <h2>Optional:</h2>
+              <dl>
+                <dt>{{form.zip_code.label}}</dt>
+                <dd>
+                  <div>{{form.zip_code}}</div>{% if form.zip_code.errors %}
+                  <ul class="errors">{% for error in form.zip_code.errors %}
+                    <li>{{error}}</li>{% endfor %}
+                  </ul>{% endif %}
+                </dd>
+              </dl>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+    <div id="footer">
+      <div class="social"><a href="https://twitter.com/MayOneUS"><span class="entypo-social twitter"></span></a><a href="https://www.facebook.com/mayonedotus"><span class="entypo-social facebook"></span></a><a href="https://plus.google.com/113369859819907761033/posts"><span class="entypo-social gplus"></span></a><a href="https://vimeo.com/user187904"><span class="entypo-social vimeo"></span></a></div>
+      <div class="notices">
+        <div class="pac_disclaimer">
+          <p>Paid for by MayDay PAC</p>
+          <p>Not authorized by any candidate or candidate's committee</p>
+          <p><a href="//mayone.us/">www.MayOne.us</a>&nbsp; | &nbsp;<a href="//mayone.us/privacy-policy">Privacy Policy</a></p>
+        </div>
+        <div class="copyright">
+          <p>&copy; 2014 May One. <a href="http://creativecommons.org/licenses/by-sa/4.0"><img src="//i.creativecommons.org/l/by-sa/4.0/80x15.png" alt="Creative Commons"></a></p>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

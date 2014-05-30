@@ -1,6 +1,3 @@
 *.pyc
 *~
-/build/
-/.sass-cache/
-/node_modules/
 config_NOCOMMIT.py
