@@ -378,7 +378,6 @@ class NewFromPledgeHandler(BaseHandler):
       form = TeamForm(obj=team)
     self.render_template("new_from_pledge.html", form=form)
 
-  @db.transactional
   def post(self, user_token):
     team = Team.all().filter('user_token =', user_token).get()
     if team is None:
