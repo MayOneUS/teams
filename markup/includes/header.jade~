@@ -1,0 +1,23 @@
+div.full-width
+  div.clearfix.menu-row.row
+    {% if logged_in %}
+    a(href="{{logout_link}}")
+      div.topmenu_red.col-md-1 Logout
+    a(href="/dashboard")
+      div.topmenu_red.col-md-1 Dashboard
+    {% else %}
+    a(href="/login")
+      div.topmenu_red.col-md-1 Login
+    {% endif %}
+    a(href="//mayone.us/contact", title="Contact")
+      div.topmenu_red.col-md-1 Contact
+    a(href="//mayone.us/ways", title="Ways to Help")
+      div.topmenu.col-md-1 Ways to Help
+    a(href="//mayone.us/faq", title="FAQ")
+      div.topmenu.col-md-1 FAQ
+    a(href="//mayone.us/about", title="About Us")
+      div.topmenu.col-md-1 About Us
+div.container
+  div.logo-row.row
+    a(href="/")
+        img(src="/static/logo_mymayday.png", alt="Logo")
