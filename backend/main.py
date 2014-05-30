@@ -272,8 +272,9 @@ def require_login(fn):
 
 class IndexHandler(BaseHandler):
   def get(self):
-    # TODO: shouldn't return all teams, should get list of top n
-    self.render_template("index.jade", teams=list(Team.all()))
+    if self.logged_in:
+      return self.redirect("/dashboard")
+    return self.redirect("https://mayone.us")
 
 
 class NotFoundHandler(BaseHandler):
@@ -367,15 +368,9 @@ class NewFromPledgeHandler(BaseHandler):
   def get(self, user_token):
     team = Team.all().filter('user_token =', user_token).get()
     if team is None:
-      resp = urlfetch.fetch(
-          "%s/user-info/%s" % (PLEDGE_SERVICE_REQ, user_token),
-          follow_redirects=False, validate_certificate=True)
-      if resp.status_code == 404:
-        self.notfound()
-        return
-      if resp.status_code != 200:
-        raise Exception("Unexpected authentication error: %s", resp.content)
-      user_info = json.loads(resp.content)["user"]
+      user_info = config_NOCOMMIT.pledge_service.loadPledgeInfo(user_token)
+      if user_info is None:
+        return self.notfound()
       user_pledge_dollars = int(user_info["pledge_amount_cents"]) / 100
       goal_dollars = user_pledge_dollars * 10
       if user_info["name"]:
@@ -396,6 +391,10 @@ class NewFromPledgeHandler(BaseHandler):
 
   def post(self, user_token):
     team = Team.all().filter('user_token =', user_token).get()
+    if team is None:
+      # just make sure this pledge exists
+      if config_NOCOMMIT.pledge_service.loadPledgeInfo(user_token) is None:
+        return self.notfound()
     form = TeamForm(self.request.POST, team)
     if not form.validate():
       return self.render_template("new_from_pledge.jade", form=form)

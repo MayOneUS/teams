@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>nl2br.py</title>
+  <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+  <link rel="stylesheet" media="all" href="../../../doc-style.css" />
+  <script src="../../../doc-filelist.js"></script>
+  <script>
+    var relativeDir = "../../../", thisFile = "build/markdown/extensions/nl2br.py", defaultSidebar = true;
+  </script>
+  <script src="../../../doc-script.js"></script>
+</head>
+<body>
+  <div id="sidebar_wrapper">
+    <div id="sidebar_switch">
+      <span class="tree">Files</span>
+      <span class="headings">Headings</span>
+    </div>
+    <div id="tree"></div>
+    <div id="headings">
+    </div>
+  </div>
+  <div id="sidebar-toggle"></div>
+  <div id="container"><div class="background highlight"></div>
+<table cellpadding="0" cellspacing="0">
+  <tbody>
+      <tr>
+        <td class="docs">
+          <h1>nl2br.py</h1>
+        </td>
+        <td class="code highlight"></td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-1" id="section-1">&#182;</a>
+</div>
+
+        </td>
+        <td class="code highlight"><div class="highlight"><pre><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">NL2BR Extension</span>
+<span class="sd">===============</span>
+
+<span class="sd">A Python-Markdown extension to treat newlines as hard breaks; like</span>
+<span class="sd">GitHub-flavored Markdown does.</span>
+
+<span class="sd">Usage:</span>
+
+<span class="sd">    &gt;&gt;&gt; import markdown</span>
+<span class="sd">    &gt;&gt;&gt; print markdown.markdown(&#39;line 1\\nline 2&#39;, extensions=[&#39;nl2br&#39;])</span>
+<span class="sd">    &lt;p&gt;line 1&lt;br /&gt;</span>
+<span class="sd">    line 2&lt;/p&gt;</span>
+
+<span class="sd">Copyright 2011 [Brian Neal](http://deathofagremmie.com/)</span>
+
+<span class="sd">Dependencies:</span>
+<span class="sd">* [Python 2.4+](http://python.org)</span>
+<span class="sd">* [Markdown 2.1+](http://packages.python.org/Markdown/)</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">absolute_import</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">unicode_literals</span>
+<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">Extension</span>
+<span class="kn">from</span> <span class="nn">..inlinepatterns</span> <span class="kn">import</span> <span class="n">SubstituteTagPattern</span>
+
+<span class="n">BR_RE</span> <span class="o">=</span> <span class="s">r&#39;\n&#39;</span>
+
+<span class="k">class</span> <span class="nc">Nl2BrExtension</span><span class="p">(</span><span class="n">Extension</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="nf">extendMarkdown</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">md</span><span class="p">,</span> <span class="n">md_globals</span><span class="p">):</span>
+        <span class="n">br_tag</span> <span class="o">=</span> <span class="n">SubstituteTagPattern</span><span class="p">(</span><span class="n">BR_RE</span><span class="p">,</span> <span class="s">&#39;br&#39;</span><span class="p">)</span>
+        <span class="n">md</span><span class="o">.</span><span class="n">inlinePatterns</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s">&#39;nl&#39;</span><span class="p">,</span> <span class="n">br_tag</span><span class="p">,</span> <span class="s">&#39;_end&#39;</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">makeExtension</span><span class="p">(</span><span class="n">configs</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">Nl2BrExtension</span><span class="p">(</span><span class="n">configs</span><span class="p">)</span>
+</pre></div>
+        </td>
+      </tr>
+  </tbody>
+</table>
+  </div>
+</body>
+</html>

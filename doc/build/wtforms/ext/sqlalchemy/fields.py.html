@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>fields.py</title>
+  <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+  <link rel="stylesheet" media="all" href="../../../../doc-style.css" />
+  <script src="../../../../doc-filelist.js"></script>
+  <script>
+    var relativeDir = "../../../../", thisFile = "build/wtforms/ext/sqlalchemy/fields.py", defaultSidebar = true;
+  </script>
+  <script src="../../../../doc-script.js"></script>
+</head>
+<body>
+  <div id="sidebar_wrapper">
+    <div id="sidebar_switch">
+      <span class="tree">Files</span>
+      <span class="headings">Headings</span>
+    </div>
+    <div id="tree"></div>
+    <div id="headings">
+    </div>
+  </div>
+  <div id="sidebar-toggle"></div>
+  <div id="container"><div class="background highlight"></div>
+<table cellpadding="0" cellspacing="0">
+  <tbody>
+      <tr>
+        <td class="docs">
+          <h1>fields.py</h1>
+        </td>
+        <td class="code highlight"></td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-1" id="section-1">&#182;</a>
+</div>
+
+        </td>
+        <td class="code highlight"><div class="highlight"><pre><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Useful form fields for use with SQLAlchemy ORM.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">unicode_literals</span>
+
+<span class="kn">import</span> <span class="nn">operator</span>
+
+<span class="kn">from</span> <span class="nn">wtforms</span> <span class="kn">import</span> <span class="n">widgets</span>
+<span class="kn">from</span> <span class="nn">wtforms.compat</span> <span class="kn">import</span> <span class="n">text_type</span><span class="p">,</span> <span class="n">string_types</span>
+<span class="kn">from</span> <span class="nn">wtforms.fields</span> <span class="kn">import</span> <span class="n">SelectFieldBase</span>
+<span class="kn">from</span> <span class="nn">wtforms.validators</span> <span class="kn">import</span> <span class="n">ValidationError</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">sqlalchemy.orm.util</span> <span class="kn">import</span> <span class="n">identity_key</span>
+    <span class="n">has_identity_key</span> <span class="o">=</span> <span class="bp">True</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+    <span class="n">has_identity_key</span> <span class="o">=</span> <span class="bp">False</span>
+
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="s">&#39;QuerySelectField&#39;</span><span class="p">,</span> <span class="s">&#39;QuerySelectMultipleField&#39;</span><span class="p">,</span>
+<span class="p">)</span>
+
+
+<span class="k">class</span> <span class="nc">QuerySelectField</span><span class="p">(</span><span class="n">SelectFieldBase</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Will display a select drop-down field to choose between ORM results in a</span>
+<span class="sd">    sqlalchemy `Query`.  The `data` property actually will store/keep an ORM</span>
+<span class="sd">    model instance, not the ID. Submitting a choice which is not in the query</span>
+<span class="sd">    will result in a validation error.</span>
+
+<span class="sd">    This field only works for queries on models whose primary key column(s)</span>
+<span class="sd">    have a consistent string representation. This means it mostly only works</span>
+<span class="sd">    for those composed of string, unicode, and integer types. For the most</span>
+<span class="sd">    part, the primary keys will be auto-detected from the model, alternately</span>
+<span class="sd">    pass a one-argument callable to `get_pk` which can return a unique</span>
+<span class="sd">    comparable key.</span>
+
+<span class="sd">    The `query` property on the field can be set from within a view to assign</span>
+<span class="sd">    a query per-instance to the field. If the property is not set, the</span>
+<span class="sd">    `query_factory` callable passed to the field constructor will be called to</span>
+<span class="sd">    obtain a query.</span>
+
+<span class="sd">    Specify `get_label` to customize the label associated with each option. If</span>
+<span class="sd">    a string, this is the name of an attribute on the model object to use as</span>
+<span class="sd">    the label text. If a one-argument callable, this callable will be passed</span>
+<span class="sd">    model instance and expected to return the label text. Otherwise, the model</span>
+<span class="sd">    object&#39;s `__str__` or `__unicode__` will be used.</span>
+
+<span class="sd">    If `allow_blank` is set to `True`, then a blank choice will be added to the</span>
+<span class="sd">    top of the list. Selecting this choice will result in the `data` property</span>
+<span class="sd">    being `None`. The label for this blank choice can be set by specifying the</span>
+<span class="sd">    `blank_text` parameter.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">widget</span> <span class="o">=</span> <span class="n">widgets</span><span class="o">.</span><span class="n">Select</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">validators</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">query_factory</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                 <span class="n">get_pk</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">get_label</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">allow_blank</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
+                 <span class="n">blank_text</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">QuerySelectField</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">label</span><span class="p">,</span> <span class="n">validators</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">query_factory</span> <span class="o">=</span> <span class="n">query_factory</span>
+
+        <span class="k">if</span> <span class="n">get_pk</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">has_identity_key</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s">&#39;The sqlalchemy identity_key function could not be imported.&#39;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">get_pk</span> <span class="o">=</span> <span class="n">get_pk_from_identity</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">get_pk</span> <span class="o">=</span> <span class="n">get_pk</span>
+
+        <span class="k">if</span> <span class="n">get_label</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">get_label</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">get_label</span><span class="p">,</span> <span class="n">string_types</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">get_label</span> <span class="o">=</span> <span class="n">operator</span><span class="o">.</span><span class="n">attrgetter</span><span class="p">(</span><span class="n">get_label</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">get_label</span> <span class="o">=</span> <span class="n">get_label</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">allow_blank</span> <span class="o">=</span> <span class="n">allow_blank</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">blank_text</span> <span class="o">=</span> <span class="n">blank_text</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">query</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_object_list</span> <span class="o">=</span> <span class="bp">None</span>
+
+    <span class="k">def</span> <span class="nf">_get_data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_formdata</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">pk</span><span class="p">,</span> <span class="n">obj</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_object_list</span><span class="p">():</span>
+                <span class="k">if</span> <span class="n">pk</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">_formdata</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_set_data</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
+                    <span class="k">break</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data</span>
+
+    <span class="k">def</span> <span class="nf">_set_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_data</span> <span class="o">=</span> <span class="n">data</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_formdata</span> <span class="o">=</span> <span class="bp">None</span>
+
+    <span class="n">data</span> <span class="o">=</span> <span class="nb">property</span><span class="p">(</span><span class="n">_get_data</span><span class="p">,</span> <span class="n">_set_data</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_get_object_list</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_object_list</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">query</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">query</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">query_factory</span><span class="p">()</span>
+            <span class="n">get_pk</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_pk</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_object_list</span> <span class="o">=</span> <span class="nb">list</span><span class="p">((</span><span class="n">text_type</span><span class="p">(</span><span class="n">get_pk</span><span class="p">(</span><span class="n">obj</span><span class="p">)),</span> <span class="n">obj</span><span class="p">)</span> <span class="k">for</span> <span class="n">obj</span> <span class="ow">in</span> <span class="n">query</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_object_list</span>
+
+    <span class="k">def</span> <span class="nf">iter_choices</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">allow_blank</span><span class="p">:</span>
+            <span class="k">yield</span> <span class="p">(</span><span class="s">&#39;__None&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">blank_text</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">pk</span><span class="p">,</span> <span class="n">obj</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_object_list</span><span class="p">():</span>
+            <span class="k">yield</span> <span class="p">(</span><span class="n">pk</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_label</span><span class="p">(</span><span class="n">obj</span><span class="p">),</span> <span class="n">obj</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">process_formdata</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">valuelist</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">valuelist</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">allow_blank</span> <span class="ow">and</span> <span class="n">valuelist</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s">&#39;__None&#39;</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="bp">None</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_data</span> <span class="o">=</span> <span class="bp">None</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_formdata</span> <span class="o">=</span> <span class="n">valuelist</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="nf">pre_validate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">form</span><span class="p">):</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span>
+        <span class="k">if</span> <span class="n">data</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">pk</span><span class="p">,</span> <span class="n">obj</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_object_list</span><span class="p">():</span>
+                <span class="k">if</span> <span class="n">data</span> <span class="o">==</span> <span class="n">obj</span><span class="p">:</span>
+                    <span class="k">break</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">ValidationError</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">gettext</span><span class="p">(</span><span class="s">&#39;Not a valid choice&#39;</span><span class="p">))</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_formdata</span> <span class="ow">or</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">allow_blank</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ValidationError</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">gettext</span><span class="p">(</span><span class="s">&#39;Not a valid choice&#39;</span><span class="p">))</span>
+
+
+<span class="k">class</span> <span class="nc">QuerySelectMultipleField</span><span class="p">(</span><span class="n">QuerySelectField</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Very similar to QuerySelectField with the difference that this will</span>
+<span class="sd">    display a multiple select. The data property will hold a list with ORM</span>
+<span class="sd">    model instances and will be an empty list when no value is selected.</span>
+
+<span class="sd">    If any of the items in the data list or submitted form data cannot be</span>
+<span class="sd">    found in the query, this will result in a validation error.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">widget</span> <span class="o">=</span> <span class="n">widgets</span><span class="o">.</span><span class="n">Select</span><span class="p">(</span><span class="n">multiple</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">validators</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">default</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">default</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">QuerySelectMultipleField</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">label</span><span class="p">,</span> <span class="n">validators</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="n">default</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;allow_blank&#39;</span><span class="p">,</span> <span class="bp">False</span><span class="p">):</span>
+            <span class="kn">import</span> <span class="nn">warnings</span>
+            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s">&#39;allow_blank=True does not do anything for QuerySelectMultipleField.&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_invalid_formdata</span> <span class="o">=</span> <span class="bp">False</span>
+
+    <span class="k">def</span> <span class="nf">_get_data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">formdata</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_formdata</span>
+        <span class="k">if</span> <span class="n">formdata</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">pk</span><span class="p">,</span> <span class="n">obj</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_object_list</span><span class="p">():</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">formdata</span><span class="p">:</span>
+                    <span class="k">break</span>
+                <span class="k">elif</span> <span class="n">pk</span> <span class="ow">in</span> <span class="n">formdata</span><span class="p">:</span>
+                    <span class="n">formdata</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">pk</span><span class="p">)</span>
+                    <span class="n">data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">formdata</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_invalid_formdata</span> <span class="o">=</span> <span class="bp">True</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_set_data</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data</span>
+
+    <span class="k">def</span> <span class="nf">_set_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_data</span> <span class="o">=</span> <span class="n">data</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_formdata</span> <span class="o">=</span> <span class="bp">None</span>
+
+    <span class="n">data</span> <span class="o">=</span> <span class="nb">property</span><span class="p">(</span><span class="n">_get_data</span><span class="p">,</span> <span class="n">_set_data</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">iter_choices</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">pk</span><span class="p">,</span> <span class="n">obj</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_object_list</span><span class="p">():</span>
+            <span class="k">yield</span> <span class="p">(</span><span class="n">pk</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_label</span><span class="p">(</span><span class="n">obj</span><span class="p">),</span> <span class="n">obj</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">process_formdata</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">valuelist</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_formdata</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">valuelist</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">pre_validate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">form</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_invalid_formdata</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ValidationError</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">gettext</span><span class="p">(</span><span class="s">&#39;Not a valid choice&#39;</span><span class="p">))</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">:</span>
+            <span class="n">obj_list</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_object_list</span><span class="p">())</span>
+            <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">v</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">obj_list</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="n">ValidationError</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">gettext</span><span class="p">(</span><span class="s">&#39;Not a valid choice&#39;</span><span class="p">))</span>
+
+
+<span class="k">def</span> <span class="nf">get_pk_from_identity</span><span class="p">(</span><span class="n">obj</span><span class="p">):</span>
+    <span class="n">cls</span><span class="p">,</span> <span class="n">key</span> <span class="o">=</span> <span class="n">identity_key</span><span class="p">(</span><span class="n">instance</span><span class="o">=</span><span class="n">obj</span><span class="p">)</span>
+    <span class="k">return</span> <span class="s">&#39;:&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">text_type</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">key</span><span class="p">)</span>
+</pre></div>
+        </td>
+      </tr>
+  </tbody>
+</table>
+  </div>
+</body>
+</html>

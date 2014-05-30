@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>serializers.py</title>
+  <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+  <link rel="stylesheet" media="all" href="../../doc-style.css" />
+  <script src="../../doc-filelist.js"></script>
+  <script>
+    var relativeDir = "../../", thisFile = "build/markdown/serializers.py", defaultSidebar = true;
+  </script>
+  <script src="../../doc-script.js"></script>
+</head>
+<body>
+  <div id="sidebar_wrapper">
+    <div id="sidebar_switch">
+      <span class="tree">Files</span>
+      <span class="headings">Headings</span>
+    </div>
+    <div id="tree"></div>
+    <div id="headings">
+      <div class="heading h2">
+        <a href="#of%20this%20software.">OF THIS SOFTWARE.</a>
+      </div>
+    </div>
+  </div>
+  <div id="sidebar-toggle"></div>
+  <div id="container"><div class="background highlight"></div>
+<table cellpadding="0" cellspacing="0">
+  <tbody>
+      <tr>
+        <td class="docs"><p>markdown/searializers.py</p>
+
+<p>Add x/html serialization to Elementree
+Taken from ElementTree 1.3 preview with slight modifications</p>
+
+<p>Copyright (c) 1999-2007 by Fredrik Lundh.  All rights reserved.</p>
+
+<p><a href='mailto:fredrik@pythonware.com'>fredrik@pythonware.com</a>
+<a href='http://www.pythonware.com'>http://www.pythonware.com</a></p>
+
+<hr />
+
+<p>The ElementTree toolkit is</p>
+
+<p>Copyright (c) 1999-2007 by Fredrik Lundh</p>
+
+<p>By obtaining, using, and/or copying this software and/or its
+associated documentation, you agree that you have read, understood,
+and will comply with the following terms and conditions:</p>
+
+<p>Permission to use, copy, modify, and distribute this software and
+its associated documentation for any purpose and without fee is
+hereby granted, provided that the above copyright notice appears in
+all copies, and that both that copyright notice and this permission
+notice appear in supporting documentation, and that the name of
+Secret Labs AB or the author not be used in advertising or publicity
+pertaining to distribution of the software without specific, written
+prior permission.</p>
+
+<p>SECRET LABS AB AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH REGARD
+TO THIS SOFTWARE, INCLUDING ALL IMPLIED WARRANTIES OF MERCHANT-
+ABILITY AND FITNESS.  IN NO EVENT SHALL SECRET LABS AB OR THE AUTHOR
+BE LIABLE FOR ANY SPECIAL, INDIRECT OR CONSEQUENTIAL DAMAGES OR ANY
+DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS,
+WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS
+ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE</p>
+
+
+<div class="pilwrap" id="of%20this%20software.">
+  <h2>
+    <a href="#of%20this%20software." name="of%20this%20software." class="pilcrow">&#182;</a>
+    OF THIS SOFTWARE.
+  </h2>
+</div>
+
+        </td>
+        <td class="code highlight"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">absolute_import</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">unicode_literals</span>
+<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">util</span>
+<span class="n">ElementTree</span> <span class="o">=</span> <span class="n">util</span><span class="o">.</span><span class="n">etree</span><span class="o">.</span><span class="n">ElementTree</span>
+<span class="n">QName</span> <span class="o">=</span> <span class="n">util</span><span class="o">.</span><span class="n">etree</span><span class="o">.</span><span class="n">QName</span>
+<span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">util</span><span class="o">.</span><span class="n">etree</span><span class="p">,</span> <span class="s">&#39;test_comment&#39;</span><span class="p">):</span>
+    <span class="n">Comment</span> <span class="o">=</span> <span class="n">util</span><span class="o">.</span><span class="n">etree</span><span class="o">.</span><span class="n">test_comment</span>
+<span class="k">else</span><span class="p">:</span>
+    <span class="n">Comment</span> <span class="o">=</span> <span class="n">util</span><span class="o">.</span><span class="n">etree</span><span class="o">.</span><span class="n">Comment</span>
+<span class="n">PI</span> <span class="o">=</span> <span class="n">util</span><span class="o">.</span><span class="n">etree</span><span class="o">.</span><span class="n">PI</span>
+<span class="n">ProcessingInstruction</span> <span class="o">=</span> <span class="n">util</span><span class="o">.</span><span class="n">etree</span><span class="o">.</span><span class="n">ProcessingInstruction</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;to_html_string&#39;</span><span class="p">,</span> <span class="s">&#39;to_xhtml_string&#39;</span><span class="p">]</span>
+
+<span class="n">HTML_EMPTY</span> <span class="o">=</span> <span class="p">(</span><span class="s">&quot;area&quot;</span><span class="p">,</span> <span class="s">&quot;base&quot;</span><span class="p">,</span> <span class="s">&quot;basefont&quot;</span><span class="p">,</span> <span class="s">&quot;br&quot;</span><span class="p">,</span> <span class="s">&quot;col&quot;</span><span class="p">,</span> <span class="s">&quot;frame&quot;</span><span class="p">,</span> <span class="s">&quot;hr&quot;</span><span class="p">,</span>
+              <span class="s">&quot;img&quot;</span><span class="p">,</span> <span class="s">&quot;input&quot;</span><span class="p">,</span> <span class="s">&quot;isindex&quot;</span><span class="p">,</span> <span class="s">&quot;link&quot;</span><span class="p">,</span> <span class="s">&quot;meta&quot;</span> <span class="s">&quot;param&quot;</span><span class="p">)</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">HTML_EMPTY</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">HTML_EMPTY</span><span class="p">)</span>
+<span class="k">except</span> <span class="ne">NameError</span><span class="p">:</span>
+    <span class="k">pass</span>
+
+<span class="n">_namespace_map</span> <span class="o">=</span> <span class="p">{</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-2" id="section-2">&#182;</a>
+</div>
+<p>"well-known" namespace prefixes</p>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+    <span class="s">&quot;http://www.w3.org/XML/1998/namespace&quot;</span><span class="p">:</span> <span class="s">&quot;xml&quot;</span><span class="p">,</span>
+    <span class="s">&quot;http://www.w3.org/1999/xhtml&quot;</span><span class="p">:</span> <span class="s">&quot;html&quot;</span><span class="p">,</span>
+    <span class="s">&quot;http://www.w3.org/1999/02/22-rdf-syntax-ns#&quot;</span><span class="p">:</span> <span class="s">&quot;rdf&quot;</span><span class="p">,</span>
+    <span class="s">&quot;http://schemas.xmlsoap.org/wsdl/&quot;</span><span class="p">:</span> <span class="s">&quot;wsdl&quot;</span><span class="p">,</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-3" id="section-3">&#182;</a>
+</div>
+<p>xml schema</p>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+    <span class="s">&quot;http://www.w3.org/2001/XMLSchema&quot;</span><span class="p">:</span> <span class="s">&quot;xs&quot;</span><span class="p">,</span>
+    <span class="s">&quot;http://www.w3.org/2001/XMLSchema-instance&quot;</span><span class="p">:</span> <span class="s">&quot;xsi&quot;</span><span class="p">,</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-4" id="section-4">&#182;</a>
+</div>
+<p>dublic core</p>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+    <span class="s">&quot;http://purl.org/dc/elements/1.1/&quot;</span><span class="p">:</span> <span class="s">&quot;dc&quot;</span><span class="p">,</span>
+<span class="p">}</span>
+
+
+<span class="k">def</span> <span class="nf">_raise_serialization_error</span><span class="p">(</span><span class="n">text</span><span class="p">):</span>
+    <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
+        <span class="s">&quot;cannot serialize </span><span class="si">%r</span><span class="s"> (type </span><span class="si">%s</span><span class="s">)&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="nb">type</span><span class="p">(</span><span class="n">text</span><span class="p">)</span><span class="o">.</span><span class="n">__name__</span><span class="p">)</span>
+        <span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">_encode</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">encoding</span><span class="p">):</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">text</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="n">encoding</span><span class="p">,</span> <span class="s">&quot;xmlcharrefreplace&quot;</span><span class="p">)</span>
+    <span class="k">except</span> <span class="p">(</span><span class="ne">TypeError</span><span class="p">,</span> <span class="ne">AttributeError</span><span class="p">):</span>
+        <span class="n">_raise_serialization_error</span><span class="p">(</span><span class="n">text</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">_escape_cdata</span><span class="p">(</span><span class="n">text</span><span class="p">):</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-5" id="section-5">&#182;</a>
+</div>
+<p>escape character data</p>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+    <span class="k">try</span><span class="p">:</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-6" id="section-6">&#182;</a>
+</div>
+<p>it's worth avoiding do-nothing calls for strings that are
+shorter than 500 character, or so.  assume that's, by far,
+the most common case in most applications.</p>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+        <span class="k">if</span> <span class="s">&quot;&amp;&quot;</span> <span class="ow">in</span> <span class="n">text</span><span class="p">:</span>
+            <span class="n">text</span> <span class="o">=</span> <span class="n">text</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s">&quot;&amp;&quot;</span><span class="p">,</span> <span class="s">&quot;&amp;amp;&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="s">&quot;&lt;&quot;</span> <span class="ow">in</span> <span class="n">text</span><span class="p">:</span>
+            <span class="n">text</span> <span class="o">=</span> <span class="n">text</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s">&quot;&lt;&quot;</span><span class="p">,</span> <span class="s">&quot;&amp;lt;&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="s">&quot;&gt;&quot;</span> <span class="ow">in</span> <span class="n">text</span><span class="p">:</span>
+            <span class="n">text</span> <span class="o">=</span> <span class="n">text</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s">&quot;&gt;&quot;</span><span class="p">,</span> <span class="s">&quot;&amp;gt;&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">text</span>
+    <span class="k">except</span> <span class="p">(</span><span class="ne">TypeError</span><span class="p">,</span> <span class="ne">AttributeError</span><span class="p">):</span>
+        <span class="n">_raise_serialization_error</span><span class="p">(</span><span class="n">text</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">_escape_attrib</span><span class="p">(</span><span class="n">text</span><span class="p">):</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-7" id="section-7">&#182;</a>
+</div>
+<p>escape attribute value</p>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">if</span> <span class="s">&quot;&amp;&quot;</span> <span class="ow">in</span> <span class="n">text</span><span class="p">:</span>
+            <span class="n">text</span> <span class="o">=</span> <span class="n">text</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s">&quot;&amp;&quot;</span><span class="p">,</span> <span class="s">&quot;&amp;amp;&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="s">&quot;&lt;&quot;</span> <span class="ow">in</span> <span class="n">text</span><span class="p">:</span>
+            <span class="n">text</span> <span class="o">=</span> <span class="n">text</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s">&quot;&lt;&quot;</span><span class="p">,</span> <span class="s">&quot;&amp;lt;&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="s">&quot;&gt;&quot;</span> <span class="ow">in</span> <span class="n">text</span><span class="p">:</span>
+            <span class="n">text</span> <span class="o">=</span> <span class="n">text</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s">&quot;&gt;&quot;</span><span class="p">,</span> <span class="s">&quot;&amp;gt;&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="s">&quot;</span><span class="se">\&quot;</span><span class="s">&quot;</span> <span class="ow">in</span> <span class="n">text</span><span class="p">:</span>
+            <span class="n">text</span> <span class="o">=</span> <span class="n">text</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s">&quot;</span><span class="se">\&quot;</span><span class="s">&quot;</span><span class="p">,</span> <span class="s">&quot;&amp;quot;&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span> <span class="ow">in</span> <span class="n">text</span><span class="p">:</span>
+            <span class="n">text</span> <span class="o">=</span> <span class="n">text</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span> <span class="s">&quot;&amp;#10;&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">text</span>
+    <span class="k">except</span> <span class="p">(</span><span class="ne">TypeError</span><span class="p">,</span> <span class="ne">AttributeError</span><span class="p">):</span>
+        <span class="n">_raise_serialization_error</span><span class="p">(</span><span class="n">text</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">_escape_attrib_html</span><span class="p">(</span><span class="n">text</span><span class="p">):</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-8" id="section-8">&#182;</a>
+</div>
+<p>escape attribute value</p>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">if</span> <span class="s">&quot;&amp;&quot;</span> <span class="ow">in</span> <span class="n">text</span><span class="p">:</span>
+            <span class="n">text</span> <span class="o">=</span> <span class="n">text</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s">&quot;&amp;&quot;</span><span class="p">,</span> <span class="s">&quot;&amp;amp;&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="s">&quot;&lt;&quot;</span> <span class="ow">in</span> <span class="n">text</span><span class="p">:</span>
+            <span class="n">text</span> <span class="o">=</span> <span class="n">text</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s">&quot;&lt;&quot;</span><span class="p">,</span> <span class="s">&quot;&amp;lt;&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="s">&quot;&gt;&quot;</span> <span class="ow">in</span> <span class="n">text</span><span class="p">:</span>
+            <span class="n">text</span> <span class="o">=</span> <span class="n">text</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s">&quot;&gt;&quot;</span><span class="p">,</span> <span class="s">&quot;&amp;gt;&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="s">&quot;</span><span class="se">\&quot;</span><span class="s">&quot;</span> <span class="ow">in</span> <span class="n">text</span><span class="p">:</span>
+            <span class="n">text</span> <span class="o">=</span> <span class="n">text</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s">&quot;</span><span class="se">\&quot;</span><span class="s">&quot;</span><span class="p">,</span> <span class="s">&quot;&amp;quot;&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">text</span>
+    <span class="k">except</span> <span class="p">(</span><span class="ne">TypeError</span><span class="p">,</span> <span class="ne">AttributeError</span><span class="p">):</span>
+        <span class="n">_raise_serialization_error</span><span class="p">(</span><span class="n">text</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">_serialize_html</span><span class="p">(</span><span class="n">write</span><span class="p">,</span> <span class="n">elem</span><span class="p">,</span> <span class="n">qnames</span><span class="p">,</span> <span class="n">namespaces</span><span class="p">,</span> <span class="n">format</span><span class="p">):</span>
+    <span class="n">tag</span> <span class="o">=</span> <span class="n">elem</span><span class="o">.</span><span class="n">tag</span>
+    <span class="n">text</span> <span class="o">=</span> <span class="n">elem</span><span class="o">.</span><span class="n">text</span>
+    <span class="k">if</span> <span class="n">tag</span> <span class="ow">is</span> <span class="n">Comment</span><span class="p">:</span>
+        <span class="n">write</span><span class="p">(</span><span class="s">&quot;&lt;!--</span><span class="si">%s</span><span class="s">--&gt;&quot;</span> <span class="o">%</span> <span class="n">_escape_cdata</span><span class="p">(</span><span class="n">text</span><span class="p">))</span>
+    <span class="k">elif</span> <span class="n">tag</span> <span class="ow">is</span> <span class="n">ProcessingInstruction</span><span class="p">:</span>
+        <span class="n">write</span><span class="p">(</span><span class="s">&quot;&lt;?</span><span class="si">%s</span><span class="s">?&gt;&quot;</span> <span class="o">%</span> <span class="n">_escape_cdata</span><span class="p">(</span><span class="n">text</span><span class="p">))</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">tag</span> <span class="o">=</span> <span class="n">qnames</span><span class="p">[</span><span class="n">tag</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">tag</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">text</span><span class="p">:</span>
+                <span class="n">write</span><span class="p">(</span><span class="n">_escape_cdata</span><span class="p">(</span><span class="n">text</span><span class="p">))</span>
+            <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">elem</span><span class="p">:</span>
+                <span class="n">_serialize_html</span><span class="p">(</span><span class="n">write</span><span class="p">,</span> <span class="n">e</span><span class="p">,</span> <span class="n">qnames</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="n">format</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">write</span><span class="p">(</span><span class="s">&quot;&lt;&quot;</span> <span class="o">+</span> <span class="n">tag</span><span class="p">)</span>
+            <span class="n">items</span> <span class="o">=</span> <span class="n">elem</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">items</span> <span class="ow">or</span> <span class="n">namespaces</span><span class="p">:</span>
+                <span class="n">items</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">items</span><span class="p">)</span> <span class="c"># lexical order</span>
+                <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">items</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">QName</span><span class="p">):</span>
+                        <span class="n">k</span> <span class="o">=</span> <span class="n">k</span><span class="o">.</span><span class="n">text</span>
+                    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">QName</span><span class="p">):</span>
+                        <span class="n">v</span> <span class="o">=</span> <span class="n">qnames</span><span class="p">[</span><span class="n">v</span><span class="o">.</span><span class="n">text</span><span class="p">]</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">v</span> <span class="o">=</span> <span class="n">_escape_attrib_html</span><span class="p">(</span><span class="n">v</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">qnames</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">==</span> <span class="n">v</span> <span class="ow">and</span> <span class="n">format</span> <span class="o">==</span> <span class="s">&#39;html&#39;</span><span class="p">:</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-9" id="section-9">&#182;</a>
+</div>
+<p>handle boolean attributes</p>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+                        <span class="n">write</span><span class="p">(</span><span class="s">&quot; </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">v</span><span class="p">)</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">write</span><span class="p">(</span><span class="s">&quot; </span><span class="si">%s</span><span class="s">=</span><span class="se">\&quot;</span><span class="si">%s</span><span class="se">\&quot;</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">qnames</span><span class="p">[</span><span class="n">k</span><span class="p">],</span> <span class="n">v</span><span class="p">))</span>
+                <span class="k">if</span> <span class="n">namespaces</span><span class="p">:</span>
+                    <span class="n">items</span> <span class="o">=</span> <span class="n">namespaces</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+                    <span class="n">items</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="c"># sort on prefix</span>
+                    <span class="k">for</span> <span class="n">v</span><span class="p">,</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">items</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="n">k</span><span class="p">:</span>
+                            <span class="n">k</span> <span class="o">=</span> <span class="s">&quot;:&quot;</span> <span class="o">+</span> <span class="n">k</span>
+                        <span class="n">write</span><span class="p">(</span><span class="s">&quot; xmlns</span><span class="si">%s</span><span class="s">=</span><span class="se">\&quot;</span><span class="si">%s</span><span class="se">\&quot;</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">_escape_attrib</span><span class="p">(</span><span class="n">v</span><span class="p">)))</span>
+            <span class="k">if</span> <span class="n">format</span> <span class="o">==</span> <span class="s">&quot;xhtml&quot;</span> <span class="ow">and</span> <span class="n">tag</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">in</span> <span class="n">HTML_EMPTY</span><span class="p">:</span>
+                <span class="n">write</span><span class="p">(</span><span class="s">&quot; /&gt;&quot;</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">write</span><span class="p">(</span><span class="s">&quot;&gt;&quot;</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">text</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">tag</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">in</span> <span class="p">[</span><span class="s">&quot;script&quot;</span><span class="p">,</span> <span class="s">&quot;style&quot;</span><span class="p">]:</span>
+                        <span class="n">write</span><span class="p">(</span><span class="n">text</span><span class="p">)</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">write</span><span class="p">(</span><span class="n">_escape_cdata</span><span class="p">(</span><span class="n">text</span><span class="p">))</span>
+                <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">elem</span><span class="p">:</span>
+                    <span class="n">_serialize_html</span><span class="p">(</span><span class="n">write</span><span class="p">,</span> <span class="n">e</span><span class="p">,</span> <span class="n">qnames</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="n">format</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">tag</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">HTML_EMPTY</span><span class="p">:</span>
+                    <span class="n">write</span><span class="p">(</span><span class="s">&quot;&lt;/&quot;</span> <span class="o">+</span> <span class="n">tag</span> <span class="o">+</span> <span class="s">&quot;&gt;&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">elem</span><span class="o">.</span><span class="n">tail</span><span class="p">:</span>
+        <span class="n">write</span><span class="p">(</span><span class="n">_escape_cdata</span><span class="p">(</span><span class="n">elem</span><span class="o">.</span><span class="n">tail</span><span class="p">))</span>
+
+<span class="k">def</span> <span class="nf">_write_html</span><span class="p">(</span><span class="n">root</span><span class="p">,</span>
+                <span class="n">encoding</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                <span class="n">default_namespace</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                <span class="n">format</span><span class="o">=</span><span class="s">&quot;html&quot;</span><span class="p">):</span>
+    <span class="k">assert</span> <span class="n">root</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">write</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">append</span>
+    <span class="n">qnames</span><span class="p">,</span> <span class="n">namespaces</span> <span class="o">=</span> <span class="n">_namespaces</span><span class="p">(</span><span class="n">root</span><span class="p">,</span> <span class="n">default_namespace</span><span class="p">)</span>
+    <span class="n">_serialize_html</span><span class="p">(</span><span class="n">write</span><span class="p">,</span> <span class="n">root</span><span class="p">,</span> <span class="n">qnames</span><span class="p">,</span> <span class="n">namespaces</span><span class="p">,</span> <span class="n">format</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">encoding</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s">&quot;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">_encode</span><span class="p">(</span><span class="s">&quot;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">data</span><span class="p">))</span>
+
+
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-10" id="section-10">&#182;</a>
+</div>
+<hr />
+
+<p>serialization support</p>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+
+<span class="k">def</span> <span class="nf">_namespaces</span><span class="p">(</span><span class="n">elem</span><span class="p">,</span> <span class="n">default_namespace</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-11" id="section-11">&#182;</a>
+</div>
+<p>identify namespaces used in this tree</p>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-12" id="section-12">&#182;</a>
+</div>
+<p>maps qnames to <em>encoded</em> prefix:local names</p>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+    <span class="n">qnames</span> <span class="o">=</span> <span class="p">{</span><span class="bp">None</span><span class="p">:</span> <span class="bp">None</span><span class="p">}</span>
+
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-13" id="section-13">&#182;</a>
+</div>
+<p>maps uri:s to prefixes</p>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+    <span class="n">namespaces</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">if</span> <span class="n">default_namespace</span><span class="p">:</span>
+        <span class="n">namespaces</span><span class="p">[</span><span class="n">default_namespace</span><span class="p">]</span> <span class="o">=</span> <span class="s">&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">add_qname</span><span class="p">(</span><span class="n">qname</span><span class="p">):</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-14" id="section-14">&#182;</a>
+</div>
+<p>calculate serialized qname representation</p>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">qname</span><span class="p">[:</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s">&quot;{&quot;</span><span class="p">:</span>
+                <span class="n">uri</span><span class="p">,</span> <span class="n">tag</span> <span class="o">=</span> <span class="n">qname</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&quot;}&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+                <span class="n">prefix</span> <span class="o">=</span> <span class="n">namespaces</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">uri</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">prefix</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+                    <span class="n">prefix</span> <span class="o">=</span> <span class="n">_namespace_map</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">uri</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">prefix</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+                        <span class="n">prefix</span> <span class="o">=</span> <span class="s">&quot;ns</span><span class="si">%d</span><span class="s">&quot;</span> <span class="o">%</span> <span class="nb">len</span><span class="p">(</span><span class="n">namespaces</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">prefix</span> <span class="o">!=</span> <span class="s">&quot;xml&quot;</span><span class="p">:</span>
+                        <span class="n">namespaces</span><span class="p">[</span><span class="n">uri</span><span class="p">]</span> <span class="o">=</span> <span class="n">prefix</span>
+                <span class="k">if</span> <span class="n">prefix</span><span class="p">:</span>
+                    <span class="n">qnames</span><span class="p">[</span><span class="n">qname</span><span class="p">]</span> <span class="o">=</span> <span class="s">&quot;</span><span class="si">%s</span><span class="s">:</span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">prefix</span><span class="p">,</span> <span class="n">tag</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">qnames</span><span class="p">[</span><span class="n">qname</span><span class="p">]</span> <span class="o">=</span> <span class="n">tag</span> <span class="c"># default element</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">default_namespace</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                        <span class="s">&quot;cannot use non-qualified names with &quot;</span>
+                        <span class="s">&quot;default_namespace option&quot;</span>
+                        <span class="p">)</span>
+                <span class="n">qnames</span><span class="p">[</span><span class="n">qname</span><span class="p">]</span> <span class="o">=</span> <span class="n">qname</span>
+        <span class="k">except</span> <span class="ne">TypeError</span><span class="p">:</span>
+            <span class="n">_raise_serialization_error</span><span class="p">(</span><span class="n">qname</span><span class="p">)</span>
+
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-15" id="section-15">&#182;</a>
+</div>
+<p>populate qname and namespaces table</p>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">iterate</span> <span class="o">=</span> <span class="n">elem</span><span class="o">.</span><span class="n">iter</span>
+    <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+        <span class="n">iterate</span> <span class="o">=</span> <span class="n">elem</span><span class="o">.</span><span class="n">getiterator</span> <span class="c"># cET compatibility</span>
+    <span class="k">for</span> <span class="n">elem</span> <span class="ow">in</span> <span class="n">iterate</span><span class="p">():</span>
+        <span class="n">tag</span> <span class="o">=</span> <span class="n">elem</span><span class="o">.</span><span class="n">tag</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">tag</span><span class="p">,</span> <span class="n">QName</span><span class="p">)</span> <span class="ow">and</span> <span class="n">tag</span><span class="o">.</span><span class="n">text</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">qnames</span><span class="p">:</span>
+            <span class="n">add_qname</span><span class="p">(</span><span class="n">tag</span><span class="o">.</span><span class="n">text</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">tag</span><span class="p">,</span> <span class="n">util</span><span class="o">.</span><span class="n">string_type</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">tag</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">qnames</span><span class="p">:</span>
+                <span class="n">add_qname</span><span class="p">(</span><span class="n">tag</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">tag</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">and</span> <span class="n">tag</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">Comment</span> <span class="ow">and</span> <span class="n">tag</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">PI</span><span class="p">:</span>
+            <span class="n">_raise_serialization_error</span><span class="p">(</span><span class="n">tag</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">elem</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">QName</span><span class="p">):</span>
+                <span class="n">key</span> <span class="o">=</span> <span class="n">key</span><span class="o">.</span><span class="n">text</span>
+            <span class="k">if</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">qnames</span><span class="p">:</span>
+                <span class="n">add_qname</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">QName</span><span class="p">)</span> <span class="ow">and</span> <span class="n">value</span><span class="o">.</span><span class="n">text</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">qnames</span><span class="p">:</span>
+                <span class="n">add_qname</span><span class="p">(</span><span class="n">value</span><span class="o">.</span><span class="n">text</span><span class="p">)</span>
+        <span class="n">text</span> <span class="o">=</span> <span class="n">elem</span><span class="o">.</span><span class="n">text</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">QName</span><span class="p">)</span> <span class="ow">and</span> <span class="n">text</span><span class="o">.</span><span class="n">text</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">qnames</span><span class="p">:</span>
+            <span class="n">add_qname</span><span class="p">(</span><span class="n">text</span><span class="o">.</span><span class="n">text</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">qnames</span><span class="p">,</span> <span class="n">namespaces</span>
+
+<span class="k">def</span> <span class="nf">to_html_string</span><span class="p">(</span><span class="n">element</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">_write_html</span><span class="p">(</span><span class="n">ElementTree</span><span class="p">(</span><span class="n">element</span><span class="p">)</span><span class="o">.</span><span class="n">getroot</span><span class="p">(),</span> <span class="n">format</span><span class="o">=</span><span class="s">&quot;html&quot;</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">to_xhtml_string</span><span class="p">(</span><span class="n">element</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">_write_html</span><span class="p">(</span><span class="n">ElementTree</span><span class="p">(</span><span class="n">element</span><span class="p">)</span><span class="o">.</span><span class="n">getroot</span><span class="p">(),</span> <span class="n">format</span><span class="o">=</span><span class="s">&quot;xhtml&quot;</span><span class="p">)</span>
+</pre></div>
+        </td>
+      </tr>
+  </tbody>
+</table>
+  </div>
+</body>
+</html>

@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>validators.py</title>
+  <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+  <link rel="stylesheet" media="all" href="../../doc-style.css" />
+  <script src="../../doc-filelist.js"></script>
+  <script>
+    var relativeDir = "../../", thisFile = "build/wtforms/validators.py", defaultSidebar = true;
+  </script>
+  <script src="../../doc-script.js"></script>
+</head>
+<body>
+  <div id="sidebar_wrapper">
+    <div id="sidebar_switch">
+      <span class="tree">Files</span>
+      <span class="headings">Headings</span>
+    </div>
+    <div id="tree"></div>
+    <div id="headings">
+    </div>
+  </div>
+  <div id="sidebar-toggle"></div>
+  <div id="container"><div class="background highlight"></div>
+<table cellpadding="0" cellspacing="0">
+  <tbody>
+      <tr>
+        <td class="docs">
+          <h1>validators.py</h1>
+        </td>
+        <td class="code highlight"></td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-1" id="section-1">&#182;</a>
+</div>
+
+        </td>
+        <td class="code highlight"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">unicode_literals</span>
+
+<span class="kn">import</span> <span class="nn">re</span>
+<span class="kn">import</span> <span class="nn">warnings</span>
+
+<span class="kn">from</span> <span class="nn">wtforms.compat</span> <span class="kn">import</span> <span class="n">string_types</span><span class="p">,</span> <span class="n">text_type</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="s">&#39;DataRequired&#39;</span><span class="p">,</span> <span class="s">&#39;data_required&#39;</span><span class="p">,</span> <span class="s">&#39;Email&#39;</span><span class="p">,</span> <span class="s">&#39;email&#39;</span><span class="p">,</span> <span class="s">&#39;EqualTo&#39;</span><span class="p">,</span> <span class="s">&#39;equal_to&#39;</span><span class="p">,</span>
+    <span class="s">&#39;IPAddress&#39;</span><span class="p">,</span> <span class="s">&#39;ip_address&#39;</span><span class="p">,</span> <span class="s">&#39;InputRequired&#39;</span><span class="p">,</span> <span class="s">&#39;input_required&#39;</span><span class="p">,</span> <span class="s">&#39;Length&#39;</span><span class="p">,</span>
+    <span class="s">&#39;length&#39;</span><span class="p">,</span> <span class="s">&#39;NumberRange&#39;</span><span class="p">,</span> <span class="s">&#39;number_range&#39;</span><span class="p">,</span> <span class="s">&#39;Optional&#39;</span><span class="p">,</span> <span class="s">&#39;optional&#39;</span><span class="p">,</span>
+    <span class="s">&#39;Required&#39;</span><span class="p">,</span> <span class="s">&#39;required&#39;</span><span class="p">,</span> <span class="s">&#39;Regexp&#39;</span><span class="p">,</span> <span class="s">&#39;regexp&#39;</span><span class="p">,</span> <span class="s">&#39;URL&#39;</span><span class="p">,</span> <span class="s">&#39;url&#39;</span><span class="p">,</span> <span class="s">&#39;AnyOf&#39;</span><span class="p">,</span>
+    <span class="s">&#39;any_of&#39;</span><span class="p">,</span> <span class="s">&#39;NoneOf&#39;</span><span class="p">,</span> <span class="s">&#39;none_of&#39;</span><span class="p">,</span> <span class="s">&#39;MacAddress&#39;</span><span class="p">,</span> <span class="s">&#39;mac_address&#39;</span><span class="p">,</span> <span class="s">&#39;UUID&#39;</span>
+<span class="p">)</span>
+
+
+<span class="k">class</span> <span class="nc">ValidationError</span><span class="p">(</span><span class="ne">ValueError</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Raised when a validator fails to validate its input.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">message</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="ne">ValueError</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">message</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+
+<span class="k">class</span> <span class="nc">StopValidation</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Causes the validation chain to stop.</span>
+
+<span class="sd">    If StopValidation is raised, no more validators in the validation chain are</span>
+<span class="sd">    called. If raised with a message, the message will be added to the errors</span>
+<span class="sd">    list.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">message</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="ne">Exception</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">message</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+
+<span class="k">class</span> <span class="nc">EqualTo</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Compares the values of two fields.</span>
+
+<span class="sd">    :param fieldname:</span>
+<span class="sd">        The name of the other field to compare to.</span>
+<span class="sd">    :param message:</span>
+<span class="sd">        Error message to raise in case of a validation error. Can be</span>
+<span class="sd">        interpolated with `%(other_label)s` and `%(other_name)s` to provide a</span>
+<span class="sd">        more helpful error.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fieldname</span><span class="p">,</span> <span class="n">message</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fieldname</span> <span class="o">=</span> <span class="n">fieldname</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">message</span> <span class="o">=</span> <span class="n">message</span>
+
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">form</span><span class="p">,</span> <span class="n">field</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">other</span> <span class="o">=</span> <span class="n">form</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">fieldname</span><span class="p">]</span>
+        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ValidationError</span><span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">gettext</span><span class="p">(</span><span class="s">&quot;Invalid field name &#39;</span><span class="si">%s</span><span class="s">&#39;.&quot;</span><span class="p">)</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">fieldname</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">field</span><span class="o">.</span><span class="n">data</span> <span class="o">!=</span> <span class="n">other</span><span class="o">.</span><span class="n">data</span><span class="p">:</span>
+            <span class="n">d</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="s">&#39;other_label&#39;</span><span class="p">:</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="s">&#39;label&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">other</span><span class="o">.</span><span class="n">label</span><span class="o">.</span><span class="n">text</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">fieldname</span><span class="p">,</span>
+                <span class="s">&#39;other_name&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">fieldname</span>
+            <span class="p">}</span>
+            <span class="n">message</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">message</span>
+            <span class="k">if</span> <span class="n">message</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="n">message</span> <span class="o">=</span> <span class="n">field</span><span class="o">.</span><span class="n">gettext</span><span class="p">(</span><span class="s">&#39;Field must be equal to </span><span class="si">%(other_name)s</span><span class="s">.&#39;</span><span class="p">)</span>
+
+            <span class="k">raise</span> <span class="n">ValidationError</span><span class="p">(</span><span class="n">message</span> <span class="o">%</span> <span class="n">d</span><span class="p">)</span>
+
+
+<span class="k">class</span> <span class="nc">Length</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Validates the length of a string.</span>
+
+<span class="sd">    :param min:</span>
+<span class="sd">        The minimum required length of the string. If not provided, minimum</span>
+<span class="sd">        length will not be checked.</span>
+<span class="sd">    :param max:</span>
+<span class="sd">        The maximum length of the string. If not provided, maximum length</span>
+<span class="sd">        will not be checked.</span>
+<span class="sd">    :param message:</span>
+<span class="sd">        Error message to raise in case of a validation error. Can be</span>
+<span class="sd">        interpolated using `%(min)d` and `%(max)d` if desired. Useful defaults</span>
+<span class="sd">        are provided depending on the existence of min and max.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">min</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span> <span class="nb">max</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span> <span class="n">message</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="k">assert</span> <span class="nb">min</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span> <span class="ow">or</span> <span class="nb">max</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="s">&#39;At least one of `min` or `max` must be specified.&#39;</span>
+        <span class="k">assert</span> <span class="nb">max</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span> <span class="ow">or</span> <span class="nb">min</span> <span class="o">&lt;=</span> <span class="nb">max</span><span class="p">,</span> <span class="s">&#39;`min` cannot be more than `max`.&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">min</span> <span class="o">=</span> <span class="nb">min</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">max</span> <span class="o">=</span> <span class="nb">max</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">message</span> <span class="o">=</span> <span class="n">message</span>
+
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">form</span><span class="p">,</span> <span class="n">field</span><span class="p">):</span>
+        <span class="n">l</span> <span class="o">=</span> <span class="n">field</span><span class="o">.</span><span class="n">data</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">data</span><span class="p">)</span> <span class="ow">or</span> <span class="mi">0</span>
+        <span class="k">if</span> <span class="n">l</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">min</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">max</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span> <span class="ow">and</span> <span class="n">l</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">max</span><span class="p">:</span>
+            <span class="n">message</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">message</span>
+            <span class="k">if</span> <span class="n">message</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">max</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+                    <span class="n">message</span> <span class="o">=</span> <span class="n">field</span><span class="o">.</span><span class="n">ngettext</span><span class="p">(</span><span class="s">&#39;Field must be at least </span><span class="si">%(min)d</span><span class="s"> character long.&#39;</span><span class="p">,</span>
+                                             <span class="s">&#39;Field must be at least </span><span class="si">%(min)d</span><span class="s"> characters long.&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">min</span><span class="p">)</span>
+                <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">min</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+                    <span class="n">message</span> <span class="o">=</span> <span class="n">field</span><span class="o">.</span><span class="n">ngettext</span><span class="p">(</span><span class="s">&#39;Field cannot be longer than </span><span class="si">%(max)d</span><span class="s"> character.&#39;</span><span class="p">,</span>
+                                             <span class="s">&#39;Field cannot be longer than </span><span class="si">%(max)d</span><span class="s"> characters.&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">max</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">message</span> <span class="o">=</span> <span class="n">field</span><span class="o">.</span><span class="n">gettext</span><span class="p">(</span><span class="s">&#39;Field must be between </span><span class="si">%(min)d</span><span class="s"> and </span><span class="si">%(max)d</span><span class="s"> characters long.&#39;</span><span class="p">)</span>
+
+            <span class="k">raise</span> <span class="n">ValidationError</span><span class="p">(</span><span class="n">message</span> <span class="o">%</span> <span class="nb">dict</span><span class="p">(</span><span class="nb">min</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">min</span><span class="p">,</span> <span class="nb">max</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">max</span><span class="p">,</span> <span class="n">length</span><span class="o">=</span><span class="n">l</span><span class="p">))</span>
+
+
+<span class="k">class</span> <span class="nc">NumberRange</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Validates that a number is of a minimum and/or maximum value, inclusive.</span>
+<span class="sd">    This will work with any comparable number type, such as floats and</span>
+<span class="sd">    decimals, not just integers.</span>
+
+<span class="sd">    :param min:</span>
+<span class="sd">        The minimum required value of the number. If not provided, minimum</span>
+<span class="sd">        value will not be checked.</span>
+<span class="sd">    :param max:</span>
+<span class="sd">        The maximum value of the number. If not provided, maximum value</span>
+<span class="sd">        will not be checked.</span>
+<span class="sd">    :param message:</span>
+<span class="sd">        Error message to raise in case of a validation error. Can be</span>
+<span class="sd">        interpolated using `%(min)s` and `%(max)s` if desired. Useful defaults</span>
+<span class="sd">        are provided depending on the existence of min and max.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">min</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="nb">max</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">message</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">min</span> <span class="o">=</span> <span class="nb">min</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">max</span> <span class="o">=</span> <span class="nb">max</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">message</span> <span class="o">=</span> <span class="n">message</span>
+
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">form</span><span class="p">,</span> <span class="n">field</span><span class="p">):</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">field</span><span class="o">.</span><span class="n">data</span>
+        <span class="k">if</span> <span class="n">data</span> <span class="ow">is</span> <span class="bp">None</span> <span class="ow">or</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">min</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">and</span> <span class="n">data</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">min</span><span class="p">)</span> <span class="ow">or</span> \
+                <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">max</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">and</span> <span class="n">data</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">max</span><span class="p">):</span>
+            <span class="n">message</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">message</span>
+            <span class="k">if</span> <span class="n">message</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-2" id="section-2">&#182;</a>
+</div>
+<p>we use %(min)s interpolation to support floats, None, and
+Decimals without throwing a formatting exception.</p>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">max</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+                    <span class="n">message</span> <span class="o">=</span> <span class="n">field</span><span class="o">.</span><span class="n">gettext</span><span class="p">(</span><span class="s">&#39;Number must be at least </span><span class="si">%(min)s</span><span class="s">.&#39;</span><span class="p">)</span>
+                <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">min</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+                    <span class="n">message</span> <span class="o">=</span> <span class="n">field</span><span class="o">.</span><span class="n">gettext</span><span class="p">(</span><span class="s">&#39;Number must be at most </span><span class="si">%(max)s</span><span class="s">.&#39;</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">message</span> <span class="o">=</span> <span class="n">field</span><span class="o">.</span><span class="n">gettext</span><span class="p">(</span><span class="s">&#39;Number must be between </span><span class="si">%(min)s</span><span class="s"> and </span><span class="si">%(max)s</span><span class="s">.&#39;</span><span class="p">)</span>
+
+            <span class="k">raise</span> <span class="n">ValidationError</span><span class="p">(</span><span class="n">message</span> <span class="o">%</span> <span class="nb">dict</span><span class="p">(</span><span class="nb">min</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">min</span><span class="p">,</span> <span class="nb">max</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">max</span><span class="p">))</span>
+
+
+<span class="k">class</span> <span class="nc">Optional</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Allows empty input and stops the validation chain from continuing.</span>
+
+<span class="sd">    If input is empty, also removes prior errors (such as processing errors)</span>
+<span class="sd">    from the field.</span>
+
+<span class="sd">    :param strip_whitespace:</span>
+<span class="sd">        If True (the default) also stop the validation chain on input which</span>
+<span class="sd">        consists of only whitespace.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">field_flags</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;optional&#39;</span><span class="p">,</span> <span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">strip_whitespace</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">strip_whitespace</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">string_check</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">s</span><span class="p">:</span> <span class="n">s</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">string_check</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">s</span><span class="p">:</span> <span class="n">s</span>
+
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">form</span><span class="p">,</span> <span class="n">field</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">field</span><span class="o">.</span><span class="n">raw_data</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">raw_data</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">string_types</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">string_check</span><span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">raw_data</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
+            <span class="n">field</span><span class="o">.</span><span class="n">errors</span><span class="p">[:]</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">raise</span> <span class="n">StopValidation</span><span class="p">()</span>
+
+
+<span class="k">class</span> <span class="nc">DataRequired</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Checks the field&#39;s data is &#39;truthy&#39; otherwise stops the validation chain.</span>
+
+<span class="sd">    This validator checks that the ``data`` attribute on the field is a &#39;true&#39;</span>
+<span class="sd">    value (effectively, it does ``if field.data``.) Furthermore, if the data</span>
+<span class="sd">    is a string type, a string containing only whitespace characters is</span>
+<span class="sd">    considered false.</span>
+
+<span class="sd">    If the data is empty, also removes prior errors (such as processing errors)</span>
+<span class="sd">    from the field.</span>
+
+<span class="sd">    **NOTE** this validator used to be called `Required` but the way it behaved</span>
+<span class="sd">    (requiring coerced data, not input data) meant it functioned in a way</span>
+<span class="sd">    which was not symmetric to the `Optional` validator and furthermore caused</span>
+<span class="sd">    confusion with certain fields which coerced data to &#39;falsey&#39; values like</span>
+<span class="sd">    ``0``, ``Decimal(0)``, ``time(0)`` etc. Unless a very specific reason</span>
+<span class="sd">    exists, we recommend using the :class:`InputRequired` instead.</span>
+
+<span class="sd">    :param message:</span>
+<span class="sd">        Error message to raise in case of a validation error.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">field_flags</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;required&#39;</span><span class="p">,</span> <span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">message</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">message</span> <span class="o">=</span> <span class="n">message</span>
+
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">form</span><span class="p">,</span> <span class="n">field</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">field</span><span class="o">.</span><span class="n">data</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">string_types</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">field</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">strip</span><span class="p">():</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">message</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="n">message</span> <span class="o">=</span> <span class="n">field</span><span class="o">.</span><span class="n">gettext</span><span class="p">(</span><span class="s">&#39;This field is required.&#39;</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">message</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">message</span>
+
+            <span class="n">field</span><span class="o">.</span><span class="n">errors</span><span class="p">[:]</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">raise</span> <span class="n">StopValidation</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
+
+
+<span class="k">class</span> <span class="nc">Required</span><span class="p">(</span><span class="n">DataRequired</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Legacy alias for DataRequired.</span>
+
+<span class="sd">    This is needed over simple aliasing for those who require that the</span>
+<span class="sd">    class-name of required be &#39;Required.&#39;</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">Required</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s">&#39;Required is going away in WTForms 3.0, use DataRequired&#39;</span><span class="p">,</span> <span class="ne">DeprecationWarning</span><span class="p">)</span>
+
+
+<span class="k">class</span> <span class="nc">InputRequired</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Validates that input was provided for this field.</span>
+
+<span class="sd">    Note there is a distinction between this and DataRequired in that</span>
+<span class="sd">    InputRequired looks that form-input data was provided, and DataRequired</span>
+<span class="sd">    looks at the post-coercion data.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">field_flags</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;required&#39;</span><span class="p">,</span> <span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">message</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">message</span> <span class="o">=</span> <span class="n">message</span>
+
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">form</span><span class="p">,</span> <span class="n">field</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">field</span><span class="o">.</span><span class="n">raw_data</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">field</span><span class="o">.</span><span class="n">raw_data</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">message</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="n">message</span> <span class="o">=</span> <span class="n">field</span><span class="o">.</span><span class="n">gettext</span><span class="p">(</span><span class="s">&#39;This field is required.&#39;</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">message</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">message</span>
+
+            <span class="n">field</span><span class="o">.</span><span class="n">errors</span><span class="p">[:]</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">raise</span> <span class="n">StopValidation</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
+
+
+<span class="k">class</span> <span class="nc">Regexp</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Validates the field against a user provided regexp.</span>
+
+<span class="sd">    :param regex:</span>
+<span class="sd">        The regular expression string to use. Can also be a compiled regular</span>
+<span class="sd">        expression pattern.</span>
+<span class="sd">    :param flags:</span>
+<span class="sd">        The regexp flags to use, for example re.IGNORECASE. Ignored if</span>
+<span class="sd">        `regex` is not a string.</span>
+<span class="sd">    :param message:</span>
+<span class="sd">        Error message to raise in case of a validation error.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">regex</span><span class="p">,</span> <span class="n">flags</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">message</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">regex</span><span class="p">,</span> <span class="n">string_types</span><span class="p">):</span>
+            <span class="n">regex</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="n">regex</span><span class="p">,</span> <span class="n">flags</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">regex</span> <span class="o">=</span> <span class="n">regex</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">message</span> <span class="o">=</span> <span class="n">message</span>
+
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">form</span><span class="p">,</span> <span class="n">field</span><span class="p">,</span> <span class="n">message</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">regex</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">data</span> <span class="ow">or</span> <span class="s">&#39;&#39;</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">message</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">message</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+                    <span class="n">message</span> <span class="o">=</span> <span class="n">field</span><span class="o">.</span><span class="n">gettext</span><span class="p">(</span><span class="s">&#39;Invalid input.&#39;</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">message</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">message</span>
+
+            <span class="k">raise</span> <span class="n">ValidationError</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
+
+
+<span class="k">class</span> <span class="nc">Email</span><span class="p">(</span><span class="n">Regexp</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Validates an email address. Note that this uses a very primitive regular</span>
+<span class="sd">    expression and should only be used in instances where you later verify by</span>
+<span class="sd">    other means, such as email activation or lookups.</span>
+
+<span class="sd">    :param message:</span>
+<span class="sd">        Error message to raise in case of a validation error.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">message</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">Email</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="s">r&#39;^.+@[^.].*\.[a-z]{2,10}$&#39;</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">IGNORECASE</span><span class="p">,</span> <span class="n">message</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">form</span><span class="p">,</span> <span class="n">field</span><span class="p">):</span>
+        <span class="n">message</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">message</span>
+        <span class="k">if</span> <span class="n">message</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">message</span> <span class="o">=</span> <span class="n">field</span><span class="o">.</span><span class="n">gettext</span><span class="p">(</span><span class="s">&#39;Invalid email address.&#39;</span><span class="p">)</span>
+
+        <span class="nb">super</span><span class="p">(</span><span class="n">Email</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__call__</span><span class="p">(</span><span class="n">form</span><span class="p">,</span> <span class="n">field</span><span class="p">,</span> <span class="n">message</span><span class="p">)</span>
+
+
+<span class="k">class</span> <span class="nc">IPAddress</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Validates an IP address.</span>
+
+<span class="sd">    :param ipv4:</span>
+<span class="sd">        If True, accept IPv4 addresses as valid (default True)</span>
+<span class="sd">    :param ipv6:</span>
+<span class="sd">        If True, accept IPv6 addresses as valid (default False)</span>
+<span class="sd">    :param message:</span>
+<span class="sd">        Error message to raise in case of a validation error.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ipv4</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">ipv6</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">message</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">ipv4</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">ipv6</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&#39;IP Address Validator must have at least one of ipv4 or ipv6 enabled.&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ipv4</span> <span class="o">=</span> <span class="n">ipv4</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ipv6</span> <span class="o">=</span> <span class="n">ipv6</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">message</span> <span class="o">=</span> <span class="n">message</span>
+
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">form</span><span class="p">,</span> <span class="n">field</span><span class="p">):</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="n">field</span><span class="o">.</span><span class="n">data</span>
+        <span class="n">valid</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="k">if</span> <span class="n">value</span><span class="p">:</span>
+            <span class="n">valid</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ipv4</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">check_ipv4</span><span class="p">(</span><span class="n">value</span><span class="p">))</span> <span class="ow">or</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ipv6</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">check_ipv6</span><span class="p">(</span><span class="n">value</span><span class="p">))</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">valid</span><span class="p">:</span>
+            <span class="n">message</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">message</span>
+            <span class="k">if</span> <span class="n">message</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="n">message</span> <span class="o">=</span> <span class="n">field</span><span class="o">.</span><span class="n">gettext</span><span class="p">(</span><span class="s">&#39;Invalid IP address.&#39;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">ValidationError</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">check_ipv4</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="n">parts</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39;.&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">parts</span><span class="p">)</span> <span class="o">==</span> <span class="mi">4</span> <span class="ow">and</span> <span class="nb">all</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">isdigit</span><span class="p">()</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">parts</span><span class="p">):</span>
+            <span class="n">numbers</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">parts</span><span class="p">)</span>
+            <span class="k">return</span> <span class="nb">all</span><span class="p">(</span><span class="n">num</span> <span class="o">&gt;=</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">num</span> <span class="o">&lt;</span> <span class="mi">256</span> <span class="k">for</span> <span class="n">num</span> <span class="ow">in</span> <span class="n">numbers</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">False</span>
+
+    <span class="k">def</span> <span class="nf">check_ipv6</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="n">parts</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39;:&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">parts</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">8</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">False</span>
+
+        <span class="n">num_blank</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">part</span> <span class="ow">in</span> <span class="n">parts</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">part</span><span class="p">:</span>
+                <span class="n">num_blank</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">value</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">part</span><span class="p">,</span> <span class="mi">16</span><span class="p">)</span>
+                <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+                    <span class="k">return</span> <span class="bp">False</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">value</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">value</span> <span class="o">&gt;=</span> <span class="mi">65536</span><span class="p">:</span>
+                        <span class="k">return</span> <span class="bp">False</span>
+
+        <span class="k">if</span> <span class="n">num_blank</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">True</span>
+        <span class="k">elif</span> <span class="n">num_blank</span> <span class="o">==</span> <span class="mi">2</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">parts</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">parts</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
+            <span class="k">return</span> <span class="bp">True</span>
+        <span class="k">return</span> <span class="bp">False</span>
+
+
+<span class="k">class</span> <span class="nc">MacAddress</span><span class="p">(</span><span class="n">Regexp</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Validates a MAC address.</span>
+
+<span class="sd">    :param message:</span>
+<span class="sd">        Error message to raise in case of a validation error.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">message</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="n">pattern</span> <span class="o">=</span> <span class="s">r&#39;^(?:[0-9a-fA-F]{2}:){5}[0-9a-fA-F]{2}$&#39;</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">MacAddress</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">pattern</span><span class="p">,</span> <span class="n">message</span><span class="o">=</span><span class="n">message</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">form</span><span class="p">,</span> <span class="n">field</span><span class="p">):</span>
+        <span class="n">message</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">message</span>
+        <span class="k">if</span> <span class="n">message</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">message</span> <span class="o">=</span> <span class="n">field</span><span class="o">.</span><span class="n">gettext</span><span class="p">(</span><span class="s">&#39;Invalid Mac address.&#39;</span><span class="p">)</span>
+
+        <span class="nb">super</span><span class="p">(</span><span class="n">MacAddress</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__call__</span><span class="p">(</span><span class="n">form</span><span class="p">,</span> <span class="n">field</span><span class="p">,</span> <span class="n">message</span><span class="p">)</span>
+
+
+<span class="k">class</span> <span class="nc">URL</span><span class="p">(</span><span class="n">Regexp</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Simple regexp based url validation. Much like the email validator, you</span>
+<span class="sd">    probably want to validate the url later by other means if the url must</span>
+<span class="sd">    resolve.</span>
+
+<span class="sd">    :param require_tld:</span>
+<span class="sd">        If true, then the domain-name portion of the URL must contain a .tld</span>
+<span class="sd">        suffix.  Set this to false if you want to allow domains like</span>
+<span class="sd">        `localhost`.</span>
+<span class="sd">    :param message:</span>
+<span class="sd">        Error message to raise in case of a validation error.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">require_tld</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">message</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="n">tld_part</span> <span class="o">=</span> <span class="p">(</span><span class="n">require_tld</span> <span class="ow">and</span> <span class="s">r&#39;\.[a-z]{2,10}&#39;</span> <span class="ow">or</span> <span class="s">&#39;&#39;</span><span class="p">)</span>
+        <span class="n">regex</span> <span class="o">=</span> <span class="s">r&#39;^[a-z]+://([^/:]+</span><span class="si">%s</span><span class="s">|([0-9]{1,3}\.){3}[0-9]{1,3})(:[0-9]+)?(\/.*)?$&#39;</span> <span class="o">%</span> <span class="n">tld_part</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">URL</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">regex</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">IGNORECASE</span><span class="p">,</span> <span class="n">message</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">form</span><span class="p">,</span> <span class="n">field</span><span class="p">):</span>
+        <span class="n">message</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">message</span>
+        <span class="k">if</span> <span class="n">message</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">message</span> <span class="o">=</span> <span class="n">field</span><span class="o">.</span><span class="n">gettext</span><span class="p">(</span><span class="s">&#39;Invalid URL.&#39;</span><span class="p">)</span>
+
+        <span class="nb">super</span><span class="p">(</span><span class="n">URL</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__call__</span><span class="p">(</span><span class="n">form</span><span class="p">,</span> <span class="n">field</span><span class="p">,</span> <span class="n">message</span><span class="p">)</span>
+
+
+<span class="k">class</span> <span class="nc">UUID</span><span class="p">(</span><span class="n">Regexp</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Validates a UUID.</span>
+
+<span class="sd">    :param message:</span>
+<span class="sd">        Error message to raise in case of a validation error.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">message</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="n">pattern</span> <span class="o">=</span> <span class="s">r&#39;^[0-9a-fA-F]{8}-([0-9a-fA-F]{4}-){3}[0-9a-fA-F]{12}$&#39;</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">UUID</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">pattern</span><span class="p">,</span> <span class="n">message</span><span class="o">=</span><span class="n">message</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">form</span><span class="p">,</span> <span class="n">field</span><span class="p">):</span>
+        <span class="n">message</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">message</span>
+        <span class="k">if</span> <span class="n">message</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">message</span> <span class="o">=</span> <span class="n">field</span><span class="o">.</span><span class="n">gettext</span><span class="p">(</span><span class="s">&#39;Invalid UUID.&#39;</span><span class="p">)</span>
+
+        <span class="nb">super</span><span class="p">(</span><span class="n">UUID</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__call__</span><span class="p">(</span><span class="n">form</span><span class="p">,</span> <span class="n">field</span><span class="p">,</span> <span class="n">message</span><span class="p">)</span>
+
+
+<span class="k">class</span> <span class="nc">AnyOf</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Compares the incoming data to a sequence of valid inputs.</span>
+
+<span class="sd">    :param values:</span>
+<span class="sd">        A sequence of valid inputs.</span>
+<span class="sd">    :param message:</span>
+<span class="sd">        Error message to raise in case of a validation error. `%(values)s`</span>
+<span class="sd">        contains the list of values.</span>
+<span class="sd">    :param values_formatter:</span>
+<span class="sd">        Function used to format the list of values in the error message.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">values</span><span class="p">,</span> <span class="n">message</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">values_formatter</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">values</span> <span class="o">=</span> <span class="n">values</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">message</span> <span class="o">=</span> <span class="n">message</span>
+        <span class="k">if</span> <span class="n">values_formatter</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">values_formatter</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">default_values_formatter</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">values_formatter</span> <span class="o">=</span> <span class="n">values_formatter</span>
+
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">form</span><span class="p">,</span> <span class="n">field</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">field</span><span class="o">.</span><span class="n">data</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">values</span><span class="p">:</span>
+            <span class="n">message</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">message</span>
+            <span class="k">if</span> <span class="n">message</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="n">message</span> <span class="o">=</span> <span class="n">field</span><span class="o">.</span><span class="n">gettext</span><span class="p">(</span><span class="s">&#39;Invalid value, must be one of: </span><span class="si">%(values)s</span><span class="s">.&#39;</span><span class="p">)</span>
+
+            <span class="k">raise</span> <span class="n">ValidationError</span><span class="p">(</span><span class="n">message</span> <span class="o">%</span> <span class="nb">dict</span><span class="p">(</span><span class="n">values</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">values_formatter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">values</span><span class="p">)))</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">default_values_formatter</span><span class="p">(</span><span class="n">values</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">text_type</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">values</span><span class="p">)</span>
+
+
+<span class="k">class</span> <span class="nc">NoneOf</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Compares the incoming data to a sequence of invalid inputs.</span>
+
+<span class="sd">    :param values:</span>
+<span class="sd">        A sequence of invalid inputs.</span>
+<span class="sd">    :param message:</span>
+<span class="sd">        Error message to raise in case of a validation error. `%(values)s`</span>
+<span class="sd">        contains the list of values.</span>
+<span class="sd">    :param values_formatter:</span>
+<span class="sd">        Function used to format the list of values in the error message.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">values</span><span class="p">,</span> <span class="n">message</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">values_formatter</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">values</span> <span class="o">=</span> <span class="n">values</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">message</span> <span class="o">=</span> <span class="n">message</span>
+        <span class="k">if</span> <span class="n">values_formatter</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">values_formatter</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">v</span><span class="p">:</span> <span class="s">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">text_type</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">v</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">values_formatter</span> <span class="o">=</span> <span class="n">values_formatter</span>
+
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">form</span><span class="p">,</span> <span class="n">field</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">field</span><span class="o">.</span><span class="n">data</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">values</span><span class="p">:</span>
+            <span class="n">message</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">message</span>
+            <span class="k">if</span> <span class="n">message</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="n">message</span> <span class="o">=</span> <span class="n">field</span><span class="o">.</span><span class="n">gettext</span><span class="p">(</span><span class="s">&#39;Invalid value, can</span><span class="se">\&#39;</span><span class="s">t be any of: </span><span class="si">%(values)s</span><span class="s">.&#39;</span><span class="p">)</span>
+
+            <span class="k">raise</span> <span class="n">ValidationError</span><span class="p">(</span><span class="n">message</span> <span class="o">%</span> <span class="nb">dict</span><span class="p">(</span><span class="n">values</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">values_formatter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">values</span><span class="p">)))</span>
+
+
+<span class="n">email</span> <span class="o">=</span> <span class="n">Email</span>
+<span class="n">equal_to</span> <span class="o">=</span> <span class="n">EqualTo</span>
+<span class="n">ip_address</span> <span class="o">=</span> <span class="n">IPAddress</span>
+<span class="n">mac_address</span> <span class="o">=</span> <span class="n">MacAddress</span>
+<span class="n">length</span> <span class="o">=</span> <span class="n">Length</span>
+<span class="n">number_range</span> <span class="o">=</span> <span class="n">NumberRange</span>
+<span class="n">optional</span> <span class="o">=</span> <span class="n">Optional</span>
+<span class="n">required</span> <span class="o">=</span> <span class="n">Required</span>
+<span class="n">input_required</span> <span class="o">=</span> <span class="n">InputRequired</span>
+<span class="n">data_required</span> <span class="o">=</span> <span class="n">DataRequired</span>
+<span class="n">regexp</span> <span class="o">=</span> <span class="n">Regexp</span>
+<span class="n">url</span> <span class="o">=</span> <span class="n">URL</span>
+<span class="n">any_of</span> <span class="o">=</span> <span class="n">AnyOf</span>
+<span class="n">none_of</span> <span class="o">=</span> <span class="n">NoneOf</span>
+</pre></div>
+        </td>
+      </tr>
+  </tbody>
+</table>
+  </div>
+</body>
+</html>

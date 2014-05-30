@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>__version__.py</title>
+  <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+  <link rel="stylesheet" media="all" href="../../doc-style.css" />
+  <script src="../../doc-filelist.js"></script>
+  <script>
+    var relativeDir = "../../", thisFile = "backend/markdown/__version__.py", defaultSidebar = true;
+  </script>
+  <script src="../../doc-script.js"></script>
+</head>
+<body>
+  <div id="sidebar_wrapper">
+    <div id="sidebar_switch">
+      <span class="tree">Files</span>
+      <span class="headings">Headings</span>
+    </div>
+    <div id="tree"></div>
+    <div id="headings">
+    </div>
+  </div>
+  <div id="sidebar-toggle"></div>
+  <div id="container"><div class="background highlight"></div>
+<table cellpadding="0" cellspacing="0">
+  <tbody>
+      <tr>
+        <td class="docs">
+          <h1>__version__.py</h1>
+        </td>
+        <td class="code highlight"></td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-1" id="section-1">&#182;</a>
+</div>
+<p>markdown/<strong>version</strong>.py</p>
+
+<p>version_info should conform to PEP 386 
+(major, minor, micro, alpha/beta/rc/final, #)
+(1, 1, 2, 'alpha', 0) => "1.1.2.dev"
+(1, 2, 0, 'beta', 2) => "1.2b2"</p>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre><span class="n">version_info</span> <span class="o">=</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="s">&#39;final&#39;</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">_get_version</span><span class="p">():</span>
+    <span class="s">&quot; Returns a PEP 386-compliant version number from version_info. &quot;</span>
+    <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">version_info</span><span class="p">)</span> <span class="o">==</span> <span class="mi">5</span>
+    <span class="k">assert</span> <span class="n">version_info</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="ow">in</span> <span class="p">(</span><span class="s">&#39;alpha&#39;</span><span class="p">,</span> <span class="s">&#39;beta&#39;</span><span class="p">,</span> <span class="s">&#39;rc&#39;</span><span class="p">,</span> <span class="s">&#39;final&#39;</span><span class="p">)</span>
+
+    <span class="n">parts</span> <span class="o">=</span> <span class="mi">2</span> <span class="k">if</span> <span class="n">version_info</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span> <span class="k">else</span> <span class="mi">3</span>
+    <span class="n">main</span> <span class="o">=</span> <span class="s">&#39;.&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">version_info</span><span class="p">[:</span><span class="n">parts</span><span class="p">]))</span>
+
+    <span class="n">sub</span> <span class="o">=</span> <span class="s">&#39;&#39;</span>
+    <span class="k">if</span> <span class="n">version_info</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">==</span> <span class="s">&#39;alpha&#39;</span> <span class="ow">and</span> <span class="n">version_info</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-2" id="section-2">&#182;</a>
+</div>
+<p>TODO: maybe append some sort of git info here??</p>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+        <span class="n">sub</span> <span class="o">=</span> <span class="s">&#39;.dev&#39;</span>
+    <span class="k">elif</span> <span class="n">version_info</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">!=</span> <span class="s">&#39;final&#39;</span><span class="p">:</span>
+        <span class="n">mapping</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;alpha&#39;</span><span class="p">:</span> <span class="s">&#39;a&#39;</span><span class="p">,</span> <span class="s">&#39;beta&#39;</span><span class="p">:</span> <span class="s">&#39;b&#39;</span><span class="p">,</span> <span class="s">&#39;rc&#39;</span><span class="p">:</span> <span class="s">&#39;c&#39;</span><span class="p">}</span>
+        <span class="n">sub</span> <span class="o">=</span> <span class="n">mapping</span><span class="p">[</span><span class="n">version_info</span><span class="p">[</span><span class="mi">3</span><span class="p">]]</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">version_info</span><span class="p">[</span><span class="mi">4</span><span class="p">])</span>
+
+    <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">main</span> <span class="o">+</span> <span class="n">sub</span><span class="p">)</span>
+
+<span class="n">version</span> <span class="o">=</span> <span class="n">_get_version</span><span class="p">()</span>
+</pre></div>
+        </td>
+      </tr>
+  </tbody>
+</table>
+  </div>
+</body>
+</html>

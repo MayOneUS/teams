@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>attr_list.py</title>
+  <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+  <link rel="stylesheet" media="all" href="../../../doc-style.css" />
+  <script src="../../../doc-filelist.js"></script>
+  <script>
+    var relativeDir = "../../../", thisFile = "backend/markdown/extensions/attr_list.py", defaultSidebar = true;
+  </script>
+  <script src="../../../doc-script.js"></script>
+</head>
+<body>
+  <div id="sidebar_wrapper">
+    <div id="sidebar_switch">
+      <span class="tree">Files</span>
+      <span class="headings">Headings</span>
+    </div>
+    <div id="tree"></div>
+    <div id="headings">
+    </div>
+  </div>
+  <div id="sidebar-toggle"></div>
+  <div id="container"><div class="background highlight"></div>
+<table cellpadding="0" cellspacing="0">
+  <tbody>
+      <tr>
+        <td class="docs">
+          <h1>attr_list.py</h1>
+        </td>
+        <td class="code highlight"></td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-1" id="section-1">&#182;</a>
+</div>
+
+        </td>
+        <td class="code highlight"><div class="highlight"><pre><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Attribute List Extension for Python-Markdown</span>
+<span class="sd">============================================</span>
+
+<span class="sd">Adds attribute list syntax. Inspired by </span>
+<span class="sd">[maruku](http://maruku.rubyforge.org/proposal.html#attribute_lists)&#39;s</span>
+<span class="sd">feature of the same name.</span>
+
+<span class="sd">Copyright 2011 [Waylan Limberg](http://achinghead.com/).</span>
+
+<span class="sd">Contact: markdown@freewisdom.org</span>
+
+<span class="sd">License: BSD (see ../LICENSE.md for details) </span>
+
+<span class="sd">Dependencies:</span>
+<span class="sd">* [Python 2.4+](http://python.org)</span>
+<span class="sd">* [Markdown 2.1+](http://packages.python.org/Markdown/)</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">absolute_import</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">unicode_literals</span>
+<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">Extension</span>
+<span class="kn">from</span> <span class="nn">..treeprocessors</span> <span class="kn">import</span> <span class="n">Treeprocessor</span>
+<span class="kn">from</span> <span class="nn">..util</span> <span class="kn">import</span> <span class="n">isBlockLevel</span>
+<span class="kn">import</span> <span class="nn">re</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">Scanner</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">Scanner</span>
+<span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-2" id="section-2">&#182;</a>
+</div>
+<p>must be on Python 2.4</p>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+    <span class="kn">from</span> <span class="nn">sre</span> <span class="kn">import</span> <span class="n">Scanner</span>
+
+<span class="k">def</span> <span class="nf">_handle_double_quote</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">t</span><span class="p">):</span>
+    <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="o">=</span> <span class="n">t</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39;=&#39;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s">&#39;&quot;&#39;</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">_handle_single_quote</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">t</span><span class="p">):</span>
+    <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="o">=</span> <span class="n">t</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39;=&#39;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s">&quot;&#39;&quot;</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">_handle_key_value</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">t</span><span class="p">):</span> 
+    <span class="k">return</span> <span class="n">t</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39;=&#39;</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">_handle_word</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">t</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">t</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s">&#39;.&#39;</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s">&#39;.&#39;</span><span class="p">,</span> <span class="n">t</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
+    <span class="k">if</span> <span class="n">t</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s">&#39;#&#39;</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s">&#39;id&#39;</span><span class="p">,</span> <span class="n">t</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
+    <span class="k">return</span> <span class="n">t</span><span class="p">,</span> <span class="n">t</span>
+
+<span class="n">_scanner</span> <span class="o">=</span> <span class="n">Scanner</span><span class="p">([</span>
+    <span class="p">(</span><span class="s">r&#39;[^ ]+=&quot;.*?&quot;&#39;</span><span class="p">,</span> <span class="n">_handle_double_quote</span><span class="p">),</span>
+    <span class="p">(</span><span class="s">r&quot;[^ ]+=&#39;.*?&#39;&quot;</span><span class="p">,</span> <span class="n">_handle_single_quote</span><span class="p">),</span>
+    <span class="p">(</span><span class="s">r&#39;[^ ]+=[^ ]*&#39;</span><span class="p">,</span> <span class="n">_handle_key_value</span><span class="p">),</span>
+    <span class="p">(</span><span class="s">r&#39;[^ ]+&#39;</span><span class="p">,</span> <span class="n">_handle_word</span><span class="p">),</span>
+    <span class="p">(</span><span class="s">r&#39; &#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+<span class="p">])</span>
+
+<span class="k">def</span> <span class="nf">get_attrs</span><span class="p">(</span><span class="nb">str</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Parse attribute list and return a list of attribute tuples. &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">_scanner</span><span class="o">.</span><span class="n">scan</span><span class="p">(</span><span class="nb">str</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+
+<span class="k">def</span> <span class="nf">isheader</span><span class="p">(</span><span class="n">elem</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">elem</span><span class="o">.</span><span class="n">tag</span> <span class="ow">in</span> <span class="p">[</span><span class="s">&#39;h1&#39;</span><span class="p">,</span> <span class="s">&#39;h2&#39;</span><span class="p">,</span> <span class="s">&#39;h3&#39;</span><span class="p">,</span> <span class="s">&#39;h4&#39;</span><span class="p">,</span> <span class="s">&#39;h5&#39;</span><span class="p">,</span> <span class="s">&#39;h6&#39;</span><span class="p">]</span>
+
+<span class="k">class</span> <span class="nc">AttrListTreeprocessor</span><span class="p">(</span><span class="n">Treeprocessor</span><span class="p">):</span>
+    
+    <span class="n">BASE_RE</span> <span class="o">=</span> <span class="s">r&#39;\{\:?([^\}]*)\}&#39;</span>
+    <span class="n">HEADER_RE</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="s">r&#39;[ ]+</span><span class="si">%s</span><span class="s">[ ]*$&#39;</span> <span class="o">%</span> <span class="n">BASE_RE</span><span class="p">)</span>
+    <span class="n">BLOCK_RE</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="s">r&#39;\n[ ]*</span><span class="si">%s</span><span class="s">[ ]*$&#39;</span> <span class="o">%</span> <span class="n">BASE_RE</span><span class="p">)</span>
+    <span class="n">INLINE_RE</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="s">r&#39;^</span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">BASE_RE</span><span class="p">)</span>
+    <span class="n">NAME_RE</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="s">r&#39;[^A-Z_a-z\u00c0-\u00d6\u00d8-\u00f6\u00f8-\u02ff\u0370-\u037d&#39;</span>
+                         <span class="s">r&#39;\u037f-\u1fff\u200c-\u200d\u2070-\u218f\u2c00-\u2fef&#39;</span>
+                         <span class="s">r&#39;\u3001-\ud7ff\uf900-\ufdcf\ufdf0-\ufffd&#39;</span>
+                         <span class="s">r&#39;\:\-\.0-9\u00b7\u0300-\u036f\u203f-\u2040]+&#39;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">doc</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">elem</span> <span class="ow">in</span> <span class="n">doc</span><span class="o">.</span><span class="n">getiterator</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">isBlockLevel</span><span class="p">(</span><span class="n">elem</span><span class="o">.</span><span class="n">tag</span><span class="p">):</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-3" id="section-3">&#182;</a>
+</div>
+<p>Block level: check for attrs on last line of text</p>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+                <span class="n">RE</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">BLOCK_RE</span>
+                <span class="k">if</span> <span class="n">isheader</span><span class="p">(</span><span class="n">elem</span><span class="p">)</span> <span class="ow">or</span> <span class="n">elem</span><span class="o">.</span><span class="n">tag</span> <span class="o">==</span> <span class="s">&#39;dt&#39;</span><span class="p">:</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-4" id="section-4">&#182;</a>
+</div>
+<p>header or def-term: check for attrs at end of line</p>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+                    <span class="n">RE</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">HEADER_RE</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">elem</span><span class="p">)</span> <span class="ow">and</span> <span class="n">elem</span><span class="o">.</span><span class="n">tag</span> <span class="o">==</span> <span class="s">&#39;li&#39;</span><span class="p">:</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-5" id="section-5">&#182;</a>
+</div>
+<p>special case list items. children may include a ul or ol.</p>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+                    <span class="n">pos</span> <span class="o">=</span> <span class="bp">None</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-6" id="section-6">&#182;</a>
+</div>
+<p>find the ul or ol position</p>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+                    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">child</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">elem</span><span class="p">):</span>
+                        <span class="k">if</span> <span class="n">child</span><span class="o">.</span><span class="n">tag</span> <span class="ow">in</span> <span class="p">[</span><span class="s">&#39;ul&#39;</span><span class="p">,</span> <span class="s">&#39;ol&#39;</span><span class="p">]:</span>
+                            <span class="n">pos</span> <span class="o">=</span> <span class="n">i</span>
+                            <span class="k">break</span>
+                    <span class="k">if</span> <span class="n">pos</span> <span class="ow">is</span> <span class="bp">None</span> <span class="ow">and</span> <span class="n">elem</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">tail</span><span class="p">:</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-7" id="section-7">&#182;</a>
+</div>
+<p>use tail of last child. no ul or ol.</p>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+                        <span class="n">m</span> <span class="o">=</span> <span class="n">RE</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">elem</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">tail</span><span class="p">)</span>
+                        <span class="k">if</span> <span class="n">m</span><span class="p">:</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">assign_attrs</span><span class="p">(</span><span class="n">elem</span><span class="p">,</span> <span class="n">m</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span>
+                            <span class="n">elem</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">tail</span> <span class="o">=</span> <span class="n">elem</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">tail</span><span class="p">[:</span><span class="n">m</span><span class="o">.</span><span class="n">start</span><span class="p">()]</span>
+                    <span class="k">elif</span> <span class="n">pos</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">and</span> <span class="n">pos</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">elem</span><span class="p">[</span><span class="n">pos</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">tail</span><span class="p">:</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-8" id="section-8">&#182;</a>
+</div>
+<p>use tail of last child before ul or ol</p>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+                        <span class="n">m</span> <span class="o">=</span> <span class="n">RE</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">elem</span><span class="p">[</span><span class="n">pos</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">tail</span><span class="p">)</span>
+                        <span class="k">if</span> <span class="n">m</span><span class="p">:</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">assign_attrs</span><span class="p">(</span><span class="n">elem</span><span class="p">,</span> <span class="n">m</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span>
+                            <span class="n">elem</span><span class="p">[</span><span class="n">pos</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">tail</span> <span class="o">=</span> <span class="n">elem</span><span class="p">[</span><span class="n">pos</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">tail</span><span class="p">[:</span><span class="n">m</span><span class="o">.</span><span class="n">start</span><span class="p">()]</span>
+                    <span class="k">elif</span> <span class="n">elem</span><span class="o">.</span><span class="n">text</span><span class="p">:</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-9" id="section-9">&#182;</a>
+</div>
+<p>use text. ul is first child.</p>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+                        <span class="n">m</span> <span class="o">=</span> <span class="n">RE</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">elem</span><span class="o">.</span><span class="n">text</span><span class="p">)</span>
+                        <span class="k">if</span> <span class="n">m</span><span class="p">:</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">assign_attrs</span><span class="p">(</span><span class="n">elem</span><span class="p">,</span> <span class="n">m</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span>
+                            <span class="n">elem</span><span class="o">.</span><span class="n">text</span> <span class="o">=</span> <span class="n">elem</span><span class="o">.</span><span class="n">text</span><span class="p">[:</span><span class="n">m</span><span class="o">.</span><span class="n">start</span><span class="p">()]</span>
+                <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">elem</span><span class="p">)</span> <span class="ow">and</span> <span class="n">elem</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">tail</span><span class="p">:</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-10" id="section-10">&#182;</a>
+</div>
+<p>has children. Get from tail of last child</p>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+                    <span class="n">m</span> <span class="o">=</span> <span class="n">RE</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">elem</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">tail</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">m</span><span class="p">:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">assign_attrs</span><span class="p">(</span><span class="n">elem</span><span class="p">,</span> <span class="n">m</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span>
+                        <span class="n">elem</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">tail</span> <span class="o">=</span> <span class="n">elem</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">tail</span><span class="p">[:</span><span class="n">m</span><span class="o">.</span><span class="n">start</span><span class="p">()]</span>
+                        <span class="k">if</span> <span class="n">isheader</span><span class="p">(</span><span class="n">elem</span><span class="p">):</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-11" id="section-11">&#182;</a>
+</div>
+<p>clean up trailing #s</p>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+                            <span class="n">elem</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">tail</span> <span class="o">=</span> <span class="n">elem</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">tail</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span><span class="s">&#39;#&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">rstrip</span><span class="p">()</span>
+                <span class="k">elif</span> <span class="n">elem</span><span class="o">.</span><span class="n">text</span><span class="p">:</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-12" id="section-12">&#182;</a>
+</div>
+<p>no children. Get from text.</p>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+                    <span class="n">m</span> <span class="o">=</span> <span class="n">RE</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">elem</span><span class="o">.</span><span class="n">text</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="ow">not</span> <span class="n">m</span> <span class="ow">and</span> <span class="n">elem</span><span class="o">.</span><span class="n">tag</span> <span class="o">==</span> <span class="s">&#39;td&#39;</span><span class="p">:</span>
+                        <span class="n">m</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">BASE_RE</span><span class="p">,</span> <span class="n">elem</span><span class="o">.</span><span class="n">text</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">m</span><span class="p">:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">assign_attrs</span><span class="p">(</span><span class="n">elem</span><span class="p">,</span> <span class="n">m</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span>
+                        <span class="n">elem</span><span class="o">.</span><span class="n">text</span> <span class="o">=</span> <span class="n">elem</span><span class="o">.</span><span class="n">text</span><span class="p">[:</span><span class="n">m</span><span class="o">.</span><span class="n">start</span><span class="p">()]</span>
+                        <span class="k">if</span> <span class="n">isheader</span><span class="p">(</span><span class="n">elem</span><span class="p">):</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-13" id="section-13">&#182;</a>
+</div>
+<p>clean up trailing #s</p>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+                            <span class="n">elem</span><span class="o">.</span><span class="n">text</span> <span class="o">=</span> <span class="n">elem</span><span class="o">.</span><span class="n">text</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span><span class="s">&#39;#&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">rstrip</span><span class="p">()</span>
+            <span class="k">else</span><span class="p">:</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-14" id="section-14">&#182;</a>
+</div>
+<p>inline: check for attrs at start of tail</p>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+                <span class="k">if</span> <span class="n">elem</span><span class="o">.</span><span class="n">tail</span><span class="p">:</span>
+                    <span class="n">m</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">INLINE_RE</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">elem</span><span class="o">.</span><span class="n">tail</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">m</span><span class="p">:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">assign_attrs</span><span class="p">(</span><span class="n">elem</span><span class="p">,</span> <span class="n">m</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span>
+                        <span class="n">elem</span><span class="o">.</span><span class="n">tail</span> <span class="o">=</span> <span class="n">elem</span><span class="o">.</span><span class="n">tail</span><span class="p">[</span><span class="n">m</span><span class="o">.</span><span class="n">end</span><span class="p">():]</span>
+
+    <span class="k">def</span> <span class="nf">assign_attrs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">elem</span><span class="p">,</span> <span class="n">attrs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Assign attrs to element. &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">get_attrs</span><span class="p">(</span><span class="n">attrs</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">k</span> <span class="o">==</span> <span class="s">&#39;.&#39;</span><span class="p">:</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-15" id="section-15">&#182;</a>
+</div>
+<p>add to class</p>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+                <span class="n">cls</span> <span class="o">=</span> <span class="n">elem</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;class&#39;</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">cls</span><span class="p">:</span>
+                    <span class="n">elem</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s">&#39;class&#39;</span><span class="p">,</span> <span class="s">&#39;</span><span class="si">%s</span><span class="s"> </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">v</span><span class="p">))</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">elem</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s">&#39;class&#39;</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-16" id="section-16">&#182;</a>
+</div>
+<p>assign attr k with v</p>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+                <span class="n">elem</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sanitize_name</span><span class="p">(</span><span class="n">k</span><span class="p">),</span> <span class="n">v</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">sanitize_name</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Sanitize name as &#39;an XML Name, minus the &quot;:&quot;&#39;.</span>
+<span class="sd">        See http://www.w3.org/TR/REC-xml-names/#NT-NCName</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">NAME_RE</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s">&#39;_&#39;</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+
+
+<span class="k">class</span> <span class="nc">AttrListExtension</span><span class="p">(</span><span class="n">Extension</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">extendMarkdown</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">md</span><span class="p">,</span> <span class="n">md_globals</span><span class="p">):</span>
+        <span class="n">md</span><span class="o">.</span><span class="n">treeprocessors</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s">&#39;attr_list&#39;</span><span class="p">,</span> <span class="n">AttrListTreeprocessor</span><span class="p">(</span><span class="n">md</span><span class="p">),</span> <span class="s">&#39;&gt;prettify&#39;</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">makeExtension</span><span class="p">(</span><span class="n">configs</span><span class="o">=</span><span class="p">{}):</span>
+    <span class="k">return</span> <span class="n">AttrListExtension</span><span class="p">(</span><span class="n">configs</span><span class="o">=</span><span class="n">configs</span><span class="p">)</span>
+</pre></div>
+        </td>
+      </tr>
+  </tbody>
+</table>
+  </div>
+</body>
+</html>

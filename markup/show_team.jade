@@ -5,43 +5,46 @@ html
   body
     include includes/header
 
-    .container
-      .page-header
-        .col-md-2
-        .col-md-5
-          h1 {{team.title}}
+  .makebackground
+      .container
+        .page-header
+          .col-md-8
+            h1 {{team.title}}'s 
+              span.apostrophe-pp pledge page
 
-        .col-md-3(style="text-align:right;")
-          {% if edit_url %}
-          a(href="{{edit_url}}") Edit
+          .col-md-4(style="text-align:right;")
+            {% if edit_url %}
+            a(href="{{edit_url}}") Edit
+            {% endif %}
+        .main-content.col-md-8
+          {% if team.youtube_id %}
+          {% else %}
+          p.word-note A word from Professor Lawrence Lessig about the Mayday PAC:
           {% endif %}
-        .col-md-2
 
-    .container
-      .col-md-2
-      .main-content.col-md-5
-        {% if team.youtube_id %}
-        iframe(src="//www.youtube.com/embed/{{team.youtube_id}}",
-               frameborder="0", allowfullscreen, width="420", height="315")
-        {% elif team.image_url %}
-        img(src="{{team.image_url}}")
-        {% else %}
-        iframe(src="//player.vimeo.com/video/93299391", width="420",
-               height="236", frameborder="0", webkitallowfullscreen,
-               mozallowfullscreen, allowfullscreen)
-        {% endif %}
-        {% autoescape false %}
-        div.description {{description_rendered}}
-        {% endautoescape %}
+          .video-container
+            {% if team.youtube_id %}
+            iframe(src="//www.youtube.com/embed/{{team.youtube_id}}",
+                   frameborder="0", allowfullscreen, width="420%")
+            {% elif team.image_url %}
+            img(src="{{team.image_url}}")
+            {% else %}
+            iframe(src="//player.vimeo.com/video/93299391", width="420",
+                   height="236", frameborder="0", webkitallowfullscreen,
+                   mozallowfullscreen, allowfullscreen)
+            {% endif %}
+          {% autoescape false %}
+          p.word-note A word from {{team.title}}:
+          div.description {{description_rendered}}
+          {% endautoescape %}
 
-      .sidebar.col-md-3
-        iframe(src="https://pledge.mayone.us/embed.html",
-               width="260px", height="260px", frameborder="0",
-               scrolling="no")
-        div.social
-          a.facebook
-          a.twitter
-          a.email
-      .col-md-2
+        .sidebar.col-md-4
+          p This page has raised x dollars from y pledges!
+          div.pledge
+            a(href="https://pledge.mayone.us/pledge?team={{team.key()}}") pledge!
+          div.social
+            a.facebook
+            a.twitter
+            a.email
 
     include includes/footer

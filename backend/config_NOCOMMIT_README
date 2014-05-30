@@ -2,9 +2,12 @@
 #  cp config_NOCOMMIT_README to config_NOCOMMIT.py
 
 from auth import TestAuthService, ProdAuthService
+from pledge import TestPledgeService, ProdPledgeService
 
 # For testing.
 auth_service = TestAuthService()
+pledge_service = TestPledgeService()
 
 ## For production.
 #auth_service = ProdAuthService("https://auth.mayone.us")
+#pledge_service = ProdPledgeService("https://pledge.mayone.us")

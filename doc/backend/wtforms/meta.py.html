@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>meta.py</title>
+  <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+  <link rel="stylesheet" media="all" href="../../doc-style.css" />
+  <script src="../../doc-filelist.js"></script>
+  <script>
+    var relativeDir = "../../", thisFile = "backend/wtforms/meta.py", defaultSidebar = true;
+  </script>
+  <script src="../../doc-script.js"></script>
+</head>
+<body>
+  <div id="sidebar_wrapper">
+    <div id="sidebar_switch">
+      <span class="tree">Files</span>
+      <span class="headings">Headings</span>
+    </div>
+    <div id="tree"></div>
+    <div id="headings">
+    </div>
+  </div>
+  <div id="sidebar-toggle"></div>
+  <div id="container"><div class="background highlight"></div>
+<table cellpadding="0" cellspacing="0">
+  <tbody>
+      <tr>
+        <td class="docs">
+          <h1>meta.py</h1>
+        </td>
+        <td class="code highlight"></td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-1" id="section-1">&#182;</a>
+</div>
+
+        </td>
+        <td class="code highlight"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">wtforms.utils</span> <span class="kn">import</span> <span class="n">WebobInputWrapper</span>
+<span class="kn">from</span> <span class="nn">wtforms</span> <span class="kn">import</span> <span class="n">i18n</span>
+
+
+<span class="k">class</span> <span class="nc">DefaultMeta</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This is the default Meta class which defines all the default values and</span>
+<span class="sd">    therefore also the &#39;API&#39; of the class Meta interface.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-2" id="section-2">&#182;</a>
+</div>
+<p>-- Basic form primitives</p>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+
+    <span class="k">def</span> <span class="nf">bind_field</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">form</span><span class="p">,</span> <span class="n">unbound_field</span><span class="p">,</span> <span class="n">options</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        bind_field allows potential customization of how fields are bound.</span>
+
+<span class="sd">        The default implementation simply passes the options to</span>
+<span class="sd">        :meth:`UnboundField.bind`.</span>
+
+<span class="sd">        :param form: The form.</span>
+<span class="sd">        :param unbound_field: The unbound field.</span>
+<span class="sd">        :param options:</span>
+<span class="sd">            A dictionary of options which are typically passed to the field.</span>
+
+<span class="sd">        :return: A bound field</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">unbound_field</span><span class="o">.</span><span class="n">bind</span><span class="p">(</span><span class="n">form</span><span class="o">=</span><span class="n">form</span><span class="p">,</span> <span class="o">**</span><span class="n">options</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">wrap_formdata</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">form</span><span class="p">,</span> <span class="n">formdata</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        wrap_formdata allows doing custom wrappers of WTForms formdata.</span>
+
+<span class="sd">        The default implementation detects webob-style multidicts and wraps</span>
+<span class="sd">        them, otherwise passes formdata back un-changed.</span>
+
+<span class="sd">        :param form: The form.</span>
+<span class="sd">        :param formdata: Form data.</span>
+<span class="sd">        :return: A form-input wrapper compatible with WTForms.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">formdata</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">formdata</span><span class="p">,</span> <span class="s">&#39;getlist&#39;</span><span class="p">):</span>
+            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">formdata</span><span class="p">,</span> <span class="s">&#39;getall&#39;</span><span class="p">):</span>
+                <span class="k">return</span> <span class="n">WebobInputWrapper</span><span class="p">(</span><span class="n">formdata</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s">&quot;formdata should be a multidict-type wrapper that supports the &#39;getlist&#39; method&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">formdata</span>
+
+    <span class="k">def</span> <span class="nf">render_field</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">field</span><span class="p">,</span> <span class="n">render_kw</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        render_field allows customization of how widget rendering is done.</span>
+
+<span class="sd">        The default implementation calls ``field.widget(field, **render_kw)``</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">field</span><span class="o">.</span><span class="n">widget</span><span class="p">(</span><span class="n">field</span><span class="p">,</span> <span class="o">**</span><span class="n">render_kw</span><span class="p">)</span>
+
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-3" id="section-3">&#182;</a>
+</div>
+<p>-- CSRF</p>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+
+    <span class="n">csrf</span> <span class="o">=</span> <span class="bp">False</span>
+    <span class="n">csrf_field_name</span> <span class="o">=</span> <span class="s">&#39;csrf_token&#39;</span>
+    <span class="n">csrf_secret</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="n">csrf_context</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="n">csrf_class</span> <span class="o">=</span> <span class="bp">None</span>
+
+    <span class="k">def</span> <span class="nf">build_csrf</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">form</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Build a CSRF implementation. This is called once per form instance.</span>
+
+<span class="sd">        The default implementation builds the class referenced to by</span>
+<span class="sd">        :attr:`csrf_class` with zero arguments. If `csrf_class` is ``None``,</span>
+<span class="sd">        will instead use the default implementation</span>
+<span class="sd">        :class:`wtforms.csrf.session.SessionCSRF`.</span>
+
+<span class="sd">        :param form: The form.</span>
+<span class="sd">        :return: A CSRF implementation.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">csrf_class</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">csrf_class</span><span class="p">()</span>
+
+        <span class="kn">from</span> <span class="nn">wtforms.csrf.session</span> <span class="kn">import</span> <span class="n">SessionCSRF</span>
+        <span class="k">return</span> <span class="n">SessionCSRF</span><span class="p">()</span>
+
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-4" id="section-4">&#182;</a>
+</div>
+<p>-- i18n</p>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+
+    <span class="n">locales</span> <span class="o">=</span> <span class="bp">False</span>
+    <span class="n">cache_translations</span> <span class="o">=</span> <span class="bp">True</span>
+    <span class="n">translations_cache</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="k">def</span> <span class="nf">get_translations</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">form</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Override in subclasses to provide alternate translations factory.</span>
+<span class="sd">        See the i18n documentation for more.</span>
+
+<span class="sd">        :param form: The form.</span>
+<span class="sd">        :return: An object that provides gettext() and ngettext() methods.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">locales</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">locales</span>
+        <span class="k">if</span> <span class="n">locales</span> <span class="ow">is</span> <span class="bp">False</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">None</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">cache_translations</span><span class="p">:</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-5" id="section-5">&#182;</a>
+</div>
+<p>Make locales be a hashable value</p>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+            <span class="n">locales</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">locales</span><span class="p">)</span> <span class="k">if</span> <span class="n">locales</span> <span class="k">else</span> <span class="bp">None</span>
+
+            <span class="n">translations</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">translations_cache</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">locales</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">translations</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="n">translations</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">translations_cache</span><span class="p">[</span><span class="n">locales</span><span class="p">]</span> <span class="o">=</span> <span class="n">i18n</span><span class="o">.</span><span class="n">get_translations</span><span class="p">(</span><span class="n">locales</span><span class="p">)</span>
+
+            <span class="k">return</span> <span class="n">translations</span>
+
+        <span class="k">return</span> <span class="n">i18n</span><span class="o">.</span><span class="n">get_translations</span><span class="p">(</span><span class="n">locales</span><span class="p">)</span>
+
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-6" id="section-6">&#182;</a>
+</div>
+<p>-- General</p>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+
+    <span class="k">def</span> <span class="nf">update_values</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">values</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Given a dictionary of values, update values on this `Meta` instance.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">values</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+</pre></div>
+        </td>
+      </tr>
+  </tbody>
+</table>
+  </div>
+</body>
+</html>

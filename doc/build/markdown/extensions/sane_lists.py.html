@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>sane_lists.py</title>
+  <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+  <link rel="stylesheet" media="all" href="../../../doc-style.css" />
+  <script src="../../../doc-filelist.js"></script>
+  <script>
+    var relativeDir = "../../../", thisFile = "build/markdown/extensions/sane_lists.py", defaultSidebar = true;
+  </script>
+  <script src="../../../doc-script.js"></script>
+</head>
+<body>
+  <div id="sidebar_wrapper">
+    <div id="sidebar_switch">
+      <span class="tree">Files</span>
+      <span class="headings">Headings</span>
+    </div>
+    <div id="tree"></div>
+    <div id="headings">
+    </div>
+  </div>
+  <div id="sidebar-toggle"></div>
+  <div id="container"><div class="background highlight"></div>
+<table cellpadding="0" cellspacing="0">
+  <tbody>
+      <tr>
+        <td class="docs">
+          <h1>sane_lists.py</h1>
+        </td>
+        <td class="code highlight"></td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-1" id="section-1">&#182;</a>
+</div>
+
+        </td>
+        <td class="code highlight"><div class="highlight"><pre><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Sane List Extension for Python-Markdown</span>
+<span class="sd">=======================================</span>
+
+<span class="sd">Modify the behavior of Lists in Python-Markdown t act in a sane manor.</span>
+
+<span class="sd">In standard Markdown syntax, the following would constitute a single </span>
+<span class="sd">ordered list. However, with this extension, the output would include </span>
+<span class="sd">two lists, the first an ordered list and the second and unordered list.</span>
+
+<span class="sd">    1. ordered</span>
+<span class="sd">    2. list</span>
+
+<span class="sd">    * unordered</span>
+<span class="sd">    * list</span>
+
+<span class="sd">Copyright 2011 - [Waylan Limberg](http://achinghead.com)</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">absolute_import</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">unicode_literals</span>
+<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">Extension</span>
+<span class="kn">from</span> <span class="nn">..blockprocessors</span> <span class="kn">import</span> <span class="n">OListProcessor</span><span class="p">,</span> <span class="n">UListProcessor</span>
+<span class="kn">import</span> <span class="nn">re</span>
+
+
+<span class="k">class</span> <span class="nc">SaneOListProcessor</span><span class="p">(</span><span class="n">OListProcessor</span><span class="p">):</span>
+    
+    <span class="n">CHILD_RE</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="s">r&#39;^[ ]{0,3}((\d+\.))[ ]+(.*)&#39;</span><span class="p">)</span>
+    <span class="n">SIBLING_TAGS</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;ol&#39;</span><span class="p">]</span>
+
+
+<span class="k">class</span> <span class="nc">SaneUListProcessor</span><span class="p">(</span><span class="n">UListProcessor</span><span class="p">):</span>
+    
+    <span class="n">CHILD_RE</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="s">r&#39;^[ ]{0,3}(([*+-]))[ ]+(.*)&#39;</span><span class="p">)</span>
+    <span class="n">SIBLING_TAGS</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;ul&#39;</span><span class="p">]</span>
+
+
+<span class="k">class</span> <span class="nc">SaneListExtension</span><span class="p">(</span><span class="n">Extension</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Add sane lists to Markdown. &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">extendMarkdown</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">md</span><span class="p">,</span> <span class="n">md_globals</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Override existing Processors. &quot;&quot;&quot;</span>
+        <span class="n">md</span><span class="o">.</span><span class="n">parser</span><span class="o">.</span><span class="n">blockprocessors</span><span class="p">[</span><span class="s">&#39;olist&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">SaneOListProcessor</span><span class="p">(</span><span class="n">md</span><span class="o">.</span><span class="n">parser</span><span class="p">)</span>
+        <span class="n">md</span><span class="o">.</span><span class="n">parser</span><span class="o">.</span><span class="n">blockprocessors</span><span class="p">[</span><span class="s">&#39;ulist&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">SaneUListProcessor</span><span class="p">(</span><span class="n">md</span><span class="o">.</span><span class="n">parser</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">makeExtension</span><span class="p">(</span><span class="n">configs</span><span class="o">=</span><span class="p">{}):</span>
+    <span class="k">return</span> <span class="n">SaneListExtension</span><span class="p">(</span><span class="n">configs</span><span class="o">=</span><span class="n">configs</span><span class="p">)</span>
+</pre></div>
+        </td>
+      </tr>
+  </tbody>
+</table>
+  </div>
+</body>
+</html>

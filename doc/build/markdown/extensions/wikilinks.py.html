@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>wikilinks.py</title>
+  <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+  <link rel="stylesheet" media="all" href="../../../doc-style.css" />
+  <script src="../../../doc-filelist.js"></script>
+  <script>
+    var relativeDir = "../../../", thisFile = "build/markdown/extensions/wikilinks.py", defaultSidebar = true;
+  </script>
+  <script src="../../../doc-script.js"></script>
+</head>
+<body>
+  <div id="sidebar_wrapper">
+    <div id="sidebar_switch">
+      <span class="tree">Files</span>
+      <span class="headings">Headings</span>
+    </div>
+    <div id="tree"></div>
+    <div id="headings">
+    </div>
+  </div>
+  <div id="sidebar-toggle"></div>
+  <div id="container"><div class="background highlight"></div>
+<table cellpadding="0" cellspacing="0">
+  <tbody>
+      <tr>
+        <td class="docs">
+          <h1>wikilinks.py</h1>
+        </td>
+        <td class="code highlight"></td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-1" id="section-1">&#182;</a>
+</div>
+
+        </td>
+        <td class="code highlight"><div class="highlight"><pre><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">WikiLinks Extension for Python-Markdown</span>
+<span class="sd">======================================</span>
+
+<span class="sd">Converts [[WikiLinks]] to relative links.  Requires Python-Markdown 2.0+</span>
+
+<span class="sd">Basic usage:</span>
+
+<span class="sd">    &gt;&gt;&gt; import markdown</span>
+<span class="sd">    &gt;&gt;&gt; text = &quot;Some text with a [[WikiLink]].&quot;</span>
+<span class="sd">    &gt;&gt;&gt; html = markdown.markdown(text, [&#39;wikilinks&#39;])</span>
+<span class="sd">    &gt;&gt;&gt; print html</span>
+<span class="sd">    &lt;p&gt;Some text with a &lt;a class=&quot;wikilink&quot; href=&quot;/WikiLink/&quot;&gt;WikiLink&lt;/a&gt;.&lt;/p&gt;</span>
+
+<span class="sd">Whitespace behavior:</span>
+
+<span class="sd">    &gt;&gt;&gt; print markdown.markdown(&#39;[[ foo bar_baz ]]&#39;, [&#39;wikilinks&#39;])</span>
+<span class="sd">    &lt;p&gt;&lt;a class=&quot;wikilink&quot; href=&quot;/foo_bar_baz/&quot;&gt;foo bar_baz&lt;/a&gt;&lt;/p&gt;</span>
+<span class="sd">    &gt;&gt;&gt; print markdown.markdown(&#39;foo [[ ]] bar&#39;, [&#39;wikilinks&#39;])</span>
+<span class="sd">    &lt;p&gt;foo  bar&lt;/p&gt;</span>
+
+<span class="sd">To define custom settings the simple way:</span>
+
+<span class="sd">    &gt;&gt;&gt; print markdown.markdown(text, </span>
+<span class="sd">    ...     [&#39;wikilinks(base_url=/wiki/,end_url=.html,html_class=foo)&#39;]</span>
+<span class="sd">    ... )</span>
+<span class="sd">    &lt;p&gt;Some text with a &lt;a class=&quot;foo&quot; href=&quot;/wiki/WikiLink.html&quot;&gt;WikiLink&lt;/a&gt;.&lt;/p&gt;</span>
+<span class="sd">    </span>
+<span class="sd">Custom settings the complex way:</span>
+
+<span class="sd">    &gt;&gt;&gt; md = markdown.Markdown(</span>
+<span class="sd">    ...     extensions = [&#39;wikilinks&#39;], </span>
+<span class="sd">    ...     extension_configs = {&#39;wikilinks&#39;: [</span>
+<span class="sd">    ...                                 (&#39;base_url&#39;, &#39;http://example.com/&#39;), </span>
+<span class="sd">    ...                                 (&#39;end_url&#39;, &#39;.html&#39;),</span>
+<span class="sd">    ...                                 (&#39;html_class&#39;, &#39;&#39;) ]},</span>
+<span class="sd">    ...     safe_mode = True)</span>
+<span class="sd">    &gt;&gt;&gt; print md.convert(text)</span>
+<span class="sd">    &lt;p&gt;Some text with a &lt;a href=&quot;http://example.com/WikiLink.html&quot;&gt;WikiLink&lt;/a&gt;.&lt;/p&gt;</span>
+
+<span class="sd">Use MetaData with mdx_meta.py (Note the blank html_class in MetaData):</span>
+
+<span class="sd">    &gt;&gt;&gt; text = &quot;&quot;&quot;wiki_base_url: http://example.com/</span>
+<span class="sd">    ... wiki_end_url:   .html</span>
+<span class="sd">    ... wiki_html_class:</span>
+<span class="sd">    ...</span>
+<span class="sd">    ... Some text with a [[WikiLink]].&quot;&quot;&quot;</span>
+<span class="sd">    &gt;&gt;&gt; md = markdown.Markdown(extensions=[&#39;meta&#39;, &#39;wikilinks&#39;])</span>
+<span class="sd">    &gt;&gt;&gt; print md.convert(text)</span>
+<span class="sd">    &lt;p&gt;Some text with a &lt;a href=&quot;http://example.com/WikiLink.html&quot;&gt;WikiLink&lt;/a&gt;.&lt;/p&gt;</span>
+
+<span class="sd">MetaData should not carry over to next document:</span>
+
+<span class="sd">    &gt;&gt;&gt; print md.convert(&quot;No [[MetaData]] here.&quot;)</span>
+<span class="sd">    &lt;p&gt;No &lt;a class=&quot;wikilink&quot; href=&quot;/MetaData/&quot;&gt;MetaData&lt;/a&gt; here.&lt;/p&gt;</span>
+
+<span class="sd">Define a custom URL builder:</span>
+
+<span class="sd">    &gt;&gt;&gt; def my_url_builder(label, base, end):</span>
+<span class="sd">    ...     return &#39;/bar/&#39;</span>
+<span class="sd">    &gt;&gt;&gt; md = markdown.Markdown(extensions=[&#39;wikilinks&#39;], </span>
+<span class="sd">    ...         extension_configs={&#39;wikilinks&#39; : [(&#39;build_url&#39;, my_url_builder)]})</span>
+<span class="sd">    &gt;&gt;&gt; print md.convert(&#39;[[foo]]&#39;)</span>
+<span class="sd">    &lt;p&gt;&lt;a class=&quot;wikilink&quot; href=&quot;/bar/&quot;&gt;foo&lt;/a&gt;&lt;/p&gt;</span>
+
+<span class="sd">From the command line:</span>
+
+<span class="sd">    python markdown.py -x wikilinks(base_url=http://example.com/,end_url=.html,html_class=foo) src.txt</span>
+
+<span class="sd">By [Waylan Limberg](http://achinghead.com/).</span>
+
+<span class="sd">License: [BSD](http://www.opensource.org/licenses/bsd-license.php) </span>
+
+<span class="sd">Dependencies:</span>
+<span class="sd">* [Python 2.3+](http://python.org)</span>
+<span class="sd">* [Markdown 2.0+](http://packages.python.org/Markdown/)</span>
+<span class="sd">&#39;&#39;&#39;</span>
+
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">absolute_import</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">unicode_literals</span>
+<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">Extension</span>
+<span class="kn">from</span> <span class="nn">..inlinepatterns</span> <span class="kn">import</span> <span class="n">Pattern</span>
+<span class="kn">from</span> <span class="nn">..util</span> <span class="kn">import</span> <span class="n">etree</span>
+<span class="kn">import</span> <span class="nn">re</span>
+
+<span class="k">def</span> <span class="nf">build_url</span><span class="p">(</span><span class="n">label</span><span class="p">,</span> <span class="n">base</span><span class="p">,</span> <span class="n">end</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Build a url from the label, a base, and an end. &quot;&quot;&quot;</span>
+    <span class="n">clean_label</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s">r&#39;([ ]+_)|(_[ ]+)|([ ]+)&#39;</span><span class="p">,</span> <span class="s">&#39;_&#39;</span><span class="p">,</span> <span class="n">label</span><span class="p">)</span>
+    <span class="k">return</span> <span class="s">&#39;</span><span class="si">%s%s%s</span><span class="s">&#39;</span><span class="o">%</span> <span class="p">(</span><span class="n">base</span><span class="p">,</span> <span class="n">clean_label</span><span class="p">,</span> <span class="n">end</span><span class="p">)</span>
+
+
+<span class="k">class</span> <span class="nc">WikiLinkExtension</span><span class="p">(</span><span class="n">Extension</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">configs</span><span class="p">):</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-2" id="section-2">&#182;</a>
+</div>
+<p>set extension defaults</p>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+        <span class="bp">self</span><span class="o">.</span><span class="n">config</span> <span class="o">=</span> <span class="p">{</span>
+                        <span class="s">&#39;base_url&#39;</span> <span class="p">:</span> <span class="p">[</span><span class="s">&#39;/&#39;</span><span class="p">,</span> <span class="s">&#39;String to append to beginning or URL.&#39;</span><span class="p">],</span>
+                        <span class="s">&#39;end_url&#39;</span> <span class="p">:</span> <span class="p">[</span><span class="s">&#39;/&#39;</span><span class="p">,</span> <span class="s">&#39;String to append to end of URL.&#39;</span><span class="p">],</span>
+                        <span class="s">&#39;html_class&#39;</span> <span class="p">:</span> <span class="p">[</span><span class="s">&#39;wikilink&#39;</span><span class="p">,</span> <span class="s">&#39;CSS hook. Leave blank for none.&#39;</span><span class="p">],</span>
+                        <span class="s">&#39;build_url&#39;</span> <span class="p">:</span> <span class="p">[</span><span class="n">build_url</span><span class="p">,</span> <span class="s">&#39;Callable formats URL from label.&#39;</span><span class="p">],</span>
+        <span class="p">}</span>
+        <span class="n">configs</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">configs</span><span class="p">)</span> <span class="ow">or</span> <span class="p">{}</span>
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-3" id="section-3">&#182;</a>
+</div>
+<p>Override defaults with user settings</p>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">configs</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">setConfig</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+        
+    <span class="k">def</span> <span class="nf">extendMarkdown</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">md</span><span class="p">,</span> <span class="n">md_globals</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">md</span> <span class="o">=</span> <span class="n">md</span>
+    
+
+</pre></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="docs">
+<div class="pilwrap">
+  <a class="pilcrow" href="#section-4" id="section-4">&#182;</a>
+</div>
+<p>append to end of inline patterns</p>
+        </td>
+        <td class="code highlight"><div class="highlight"><pre>
+        <span class="n">WIKILINK_RE</span> <span class="o">=</span> <span class="s">r&#39;\[\[([\w0-9_ -]+)\]\]&#39;</span>
+        <span class="n">wikilinkPattern</span> <span class="o">=</span> <span class="n">WikiLinks</span><span class="p">(</span><span class="n">WIKILINK_RE</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">getConfigs</span><span class="p">())</span>
+        <span class="n">wikilinkPattern</span><span class="o">.</span><span class="n">md</span> <span class="o">=</span> <span class="n">md</span>
+        <span class="n">md</span><span class="o">.</span><span class="n">inlinePatterns</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s">&#39;wikilink&#39;</span><span class="p">,</span> <span class="n">wikilinkPattern</span><span class="p">,</span> <span class="s">&quot;&lt;not_strong&quot;</span><span class="p">)</span>
+
+
+<span class="k">class</span> <span class="nc">WikiLinks</span><span class="p">(</span><span class="n">Pattern</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pattern</span><span class="p">,</span> <span class="n">config</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">WikiLinks</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">pattern</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">config</span> <span class="o">=</span> <span class="n">config</span>
+  
+    <span class="k">def</span> <span class="nf">handleMatch</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">m</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">m</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">():</span>
+            <span class="n">base_url</span><span class="p">,</span> <span class="n">end_url</span><span class="p">,</span> <span class="n">html_class</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_getMeta</span><span class="p">()</span>
+            <span class="n">label</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+            <span class="n">url</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s">&#39;build_url&#39;</span><span class="p">](</span><span class="n">label</span><span class="p">,</span> <span class="n">base_url</span><span class="p">,</span> <span class="n">end_url</span><span class="p">)</span>
+            <span class="n">a</span> <span class="o">=</span> <span class="n">etree</span><span class="o">.</span><span class="n">Element</span><span class="p">(</span><span class="s">&#39;a&#39;</span><span class="p">)</span>
+            <span class="n">a</span><span class="o">.</span><span class="n">text</span> <span class="o">=</span> <span class="n">label</span> 
+            <span class="n">a</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s">&#39;href&#39;</span><span class="p">,</span> <span class="n">url</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">html_class</span><span class="p">:</span>
+                <span class="n">a</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s">&#39;class&#39;</span><span class="p">,</span> <span class="n">html_class</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">a</span> <span class="o">=</span> <span class="s">&#39;&#39;</span>
+        <span class="k">return</span> <span class="n">a</span>
+
+    <span class="k">def</span> <span class="nf">_getMeta</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Return meta data or config data. &quot;&quot;&quot;</span>
+        <span class="n">base_url</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s">&#39;base_url&#39;</span><span class="p">]</span>
+        <span class="n">end_url</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s">&#39;end_url&#39;</span><span class="p">]</span>
+        <span class="n">html_class</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s">&#39;html_class&#39;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">md</span><span class="p">,</span> <span class="s">&#39;Meta&#39;</span><span class="p">):</span>
+            <span class="k">if</span> <span class="s">&#39;wiki_base_url&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">md</span><span class="o">.</span><span class="n">Meta</span><span class="p">:</span>
+                <span class="n">base_url</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">md</span><span class="o">.</span><span class="n">Meta</span><span class="p">[</span><span class="s">&#39;wiki_base_url&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+            <span class="k">if</span> <span class="s">&#39;wiki_end_url&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">md</span><span class="o">.</span><span class="n">Meta</span><span class="p">:</span>
+                <span class="n">end_url</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">md</span><span class="o">.</span><span class="n">Meta</span><span class="p">[</span><span class="s">&#39;wiki_end_url&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+            <span class="k">if</span> <span class="s">&#39;wiki_html_class&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">md</span><span class="o">.</span><span class="n">Meta</span><span class="p">:</span>
+                <span class="n">html_class</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">md</span><span class="o">.</span><span class="n">Meta</span><span class="p">[</span><span class="s">&#39;wiki_html_class&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">base_url</span><span class="p">,</span> <span class="n">end_url</span><span class="p">,</span> <span class="n">html_class</span>
+    
+
+<span class="k">def</span> <span class="nf">makeExtension</span><span class="p">(</span><span class="n">configs</span><span class="o">=</span><span class="bp">None</span><span class="p">)</span> <span class="p">:</span>
+    <span class="k">return</span> <span class="n">WikiLinkExtension</span><span class="p">(</span><span class="n">configs</span><span class="o">=</span><span class="n">configs</span><span class="p">)</span>
+</pre></div>
+        </td>
+      </tr>
+  </tbody>
+</table>
+  </div>
+</body>
+</html>
