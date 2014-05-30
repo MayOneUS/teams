@@ -35,9 +35,9 @@ html
         {% endautoescape %}
 
       .sidebar.col-md-3
-        iframe(src="https://pledge.mayone.us/embed.html",
-               width="260px", height="260px", frameborder="0",
-               scrolling="no")
+        p This page has raised x dollars from y pledges!
+        div.pledge
+          a(href="https://pledge.mayone.us/pledge?team={{team.key()}}") pledge!
         div.social
           a.facebook
           a.twitter

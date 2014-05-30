@@ -353,19 +353,10 @@ class NewFromPledgeHandler(BaseHandler):
           .filter("team =", team).get() is None:
         AdminToTeam(user=self.current_user["user_id"], team=team).put()
 
-  def _loadPledgeInfo(self, user_token):
-    resp = urlfetch.fetch("%s/user-info/%s" % (PLEDGE_SERVICE_REQ, user_token),
-        follow_redirects=False, validate_certificate=True)
-    if resp.status_code == 404:
-      return None
-    if resp.status_code != 200:
-      raise Exception("Unexpected authentication error: %s", resp.content)
-    return json.loads(resp.content)["user"]
-
   def get(self, user_token):
     team = Team.all().filter('user_token =', user_token).get()
     if team is None:
-      user_info = self._loadPledgeInfo(user_token)
+      user_info = config_NOCOMMIT.pledge_service.loadPledgeInfo(user_token)
       if user_info is None:
         return self.notfound()
       user_pledge_dollars = int(user_info["pledge_amount_cents"]) / 100
@@ -391,7 +382,7 @@ class NewFromPledgeHandler(BaseHandler):
     team = Team.all().filter('user_token =', user_token).get()
     if team is None:
       # just make sure this pledge exists
-      if self._loadPledgeInfo(user_token) is None:
+      if config_NOCOMMIT.pledge_service.loadPledgeInfo(user_token) is None:
         return self.notfound()
     form = TeamForm(self.request.POST, team)
     if not form.validate():
