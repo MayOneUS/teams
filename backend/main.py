@@ -353,18 +353,21 @@ class NewFromPledgeHandler(BaseHandler):
           .filter("team =", team).get() is None:
         AdminToTeam(user=self.current_user["user_id"], team=team).put()
 
+  def _loadPledgeInfo(self, user_token):
+    resp = urlfetch.fetch("%s/user-info/%s" % (PLEDGE_SERVICE_REQ, user_token),
+        follow_redirects=False, validate_certificate=True)
+    if resp.status_code == 404:
+      return None
+    if resp.status_code != 200:
+      raise Exception("Unexpected authentication error: %s", resp.content)
+    return json.loads(resp.content)["user"]
+
   def get(self, user_token):
     team = Team.all().filter('user_token =', user_token).get()
     if team is None:
-      resp = urlfetch.fetch(
-          "%s/user-info/%s" % (PLEDGE_SERVICE_REQ, user_token),
-          follow_redirects=False, validate_certificate=True)
-      if resp.status_code == 404:
-        self.notfound()
-        return
-      if resp.status_code != 200:
-        raise Exception("Unexpected authentication error: %s", resp.content)
-      user_info = json.loads(resp.content)["user"]
+      user_info = self._loadPledgeInfo(user_token)
+      if user_info is None:
+        return self.notfound()
       user_pledge_dollars = int(user_info["pledge_amount_cents"]) / 100
       goal_dollars = user_pledge_dollars * 10
       if user_info["name"]:
@@ -383,8 +386,13 @@ class NewFromPledgeHandler(BaseHandler):
       form = TeamForm(obj=team)
     self.render_template("new_from_pledge.html", form=form)
 
+  @db.transactional
   def post(self, user_token):
     team = Team.all().filter('user_token =', user_token).get()
+    if team is None:
+      # just make sure this pledge exists
+      if self._loadPledgeInfo(user_token) is None:
+        return self.notfound()
     form = TeamForm(self.request.POST, team)
     if not form.validate():
       return self.render_template("new_from_pledge.html", form=form)
