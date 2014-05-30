@@ -6,6 +6,7 @@ module.exports = function(grunt) {
                 files: [
                     {cwd: 'backend/', src: '**', dest: 'build/', expand: true },
                     {cwd: 'assets/', src: '**', dest: 'build/static/', expand: true },
+                    {cwd: 'markup/', src: '**', dest: 'build/templates/', expand: true }
                 ],
             },
             extern: {
@@ -28,22 +29,6 @@ module.exports = function(grunt) {
                     'build/static/style.css': ['stylesheets/style.scss']
                 }
             }
-        },
-
-        jade: {
-          compile: {
-            options: {
-              data: {
-                debug: false
-              }
-            },
-            files: [
-              {cwd: 'markup/', src: '*.jade.j2', dest: 'build/templates/',
-               expand: true, ext: '.html'},
-              {cwd: 'markup/', src: '*.jade', dest: 'build/static/', expand: true,
-               ext: '.html'},
-            ]
-          }
         },
 
         autoprefixer: {
@@ -85,12 +70,8 @@ module.exports = function(grunt) {
                 files: ['stylesheets/**', 'extern/frontend/stylesheets/**'],
                 tasks: [ 'css' ]
             },
-            markup: {
-                files: 'markup/**',
-                tasks: [ 'jade' ]
-            },
             copy: {
-                files: [ '{js/src,resources,assets,templates,backend}/**' ],
+                files: [ '{js/src,markup,resources,assets,templates,backend}/**' ],
                 tasks: [ 'copy' ]
             }
         },
@@ -102,7 +83,6 @@ module.exports = function(grunt) {
     grunt.loadNpmTasks('grunt-contrib-copy');
     grunt.loadNpmTasks('grunt-contrib-sass');
     grunt.loadNpmTasks('grunt-contrib-watch');
-    grunt.loadNpmTasks('grunt-contrib-jade');
     grunt.loadNpmTasks('grunt-shell-spawn');
     grunt.loadNpmTasks('grunt-contrib-cssmin');
     grunt.loadNpmTasks('grunt-combine-media-queries');
@@ -115,7 +95,7 @@ module.exports = function(grunt) {
     grunt.registerTask(
         'build',
         'Compiles all of the assets and copies the files to the build directory.',
-        [ 'clean', 'copy:main', 'css', 'jade']
+        [ 'clean', 'copy:main', 'css']
     );
     grunt.registerTask(
         'dev',

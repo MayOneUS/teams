@@ -4,10 +4,11 @@ import os
 import re
 import urlparse
 
-import jinja2
 import markdown
 import webapp2
 import wtforms
+
+from webapp2_extras import jinja2
 from wtforms.fields.html5 import IntegerField
 from wtforms.widgets.html5 import URLInput
 
@@ -16,12 +17,8 @@ from google.appengine.ext import db
 
 import config_NOCOMMIT
 
-PLEDGE_SERVICE_REQ = "https://pledge.mayone.us"
 
-JINJA = jinja2.Environment(
-  loader=jinja2.FileSystemLoader('templates/'),
-  extensions=['jinja2.ext.autoescape'],
-  autoescape=True)
+PLEDGE_SERVICE_REQ = "https://pledge.mayone.us"
 
 YOUTUBE_ID_VALIDATOR = re.compile(r'^[\w\-]+$')
 INVALID_SLUG_CHARS = re.compile(r'[^\w-]')
@@ -127,11 +124,25 @@ class BaseHandler(webapp2.RequestHandler):
         "logged_in": False,
         "login_links": self.login_links}
     data.update(kwargs)
-    self.response.write(JINJA.get_template(template).render(data))
+    self.response.write(self.jinja2.render_template(template, **data))
 
   def notfound(self):
     self.response.status = 404
-    self.render_template("404.html")
+    self.render_template("404.jade")
+
+  @staticmethod
+  def jade_factory(app):
+    j = jinja2.Jinja2(app)
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+    search_path = os.path.join(current_dir, 'templates')
+    j.environment.loader.searchpath = [search_path]
+    j.environment.autoescape = False
+    j.environment.add_extension('pyjade.ext.jinja.PyJadeExtension')
+    return j
+
+  @webapp2.cached_property
+  def jinja2(self):
+    return jinja2.get_jinja2(app=self.app, factory=BaseHandler.jade_factory)
 
 
 class Team(db.Model):
@@ -262,7 +273,7 @@ def require_login(fn):
 class IndexHandler(BaseHandler):
   def get(self):
     # TODO: shouldn't return all teams, should get list of top n
-    self.render_template("index.html", teams=list(Team.all()))
+    self.render_template("index.jade", teams=list(Team.all()))
 
 
 class NotFoundHandler(BaseHandler):
@@ -303,7 +314,7 @@ class TeamHandler(TeamBaseHandler):
     else:
       edit_url = None
     self.render_template(
-        "show_team.html", team=team, edit_url=edit_url,
+        "show_team.jade", team=team, edit_url=edit_url,
         description_rendered=markdown.markdown(
             jinja2.escape(team.description)))
 
@@ -312,7 +323,7 @@ class LoginHandler(BaseHandler):
   def get(self):
     if self.logged_in:
       return self.redirect("/dashboard")
-    self.render_template("login.html")
+    self.render_template("login.jade")
 
 
 class DashboardHandler(BaseHandler):
@@ -321,19 +332,19 @@ class DashboardHandler(BaseHandler):
     teams = [a.team for a in
              AdminToTeam.all().filter('user =',
                 self.current_user["user_id"])]
-    self.render_template("dashboard.html", teams=teams)
+    self.render_template("dashboard.jade", teams=teams)
 
 
 class NewTeamHandler(BaseHandler):
   @require_login
   def get(self):
-    self.render_template("new_team.html", form=TeamForm())
+    self.render_template("new_team.jade", form=TeamForm())
 
   @require_login
   def post(self):
     form = TeamForm(self.request.POST)
     if not form.validate():
-      return self.render_template("new_team.html", form=form)
+      return self.render_template("new_team.jade", form=form)
     team = Team(title=form.title.data, description=form.description.data,
                 goal_dollars=form.goal_dollars.data,
                 youtube_id=form.youtube_id.data, zip_code=form.zip_code.data)
@@ -381,13 +392,13 @@ class NewFromPledgeHandler(BaseHandler):
     else:
       self.add_to_user(team)
       form = TeamForm(obj=team)
-    self.render_template("new_from_pledge.html", form=form)
+    self.render_template("new_from_pledge.jade", form=form)
 
   def post(self, user_token):
     team = Team.all().filter('user_token =', user_token).get()
     form = TeamForm(self.request.POST, team)
     if not form.validate():
-      return self.render_template("new_from_pledge.html", form=form)
+      return self.render_template("new_from_pledge.jade", form=form)
     if team is None:
       team = Team(title=form.title.data, description=form.description.data,
                   zip_code=form.zip_code.data, user_token=user_token)
@@ -410,7 +421,7 @@ class EditTeamHandler(TeamBaseHandler):
       return self.redirect("/t/%s/edit" % team.primary_slug, permanent=True)
     if not is_admin:
       return self.redirect("/t/%s" % team.primary_slug)
-    self.render_template("edit_team.html", form=TeamForm(obj=team))
+    self.render_template("edit_team.jade", form=TeamForm(obj=team))
 
   # require_login unneeded because we do the checking ourselves with validate
   def post(self, slug):
@@ -421,7 +432,7 @@ class EditTeamHandler(TeamBaseHandler):
       return self.redirect("/t/%s" % team.primary_slug)
     form = TeamForm(self.request.POST, team)
     if not form.validate():
-      return self.render_template("edit_team.html", form=form)
+      return self.render_template("edit_team.jade", form=form)
     form.populate_obj(team)
     team.primary_slug = Slug.new(team)
     team.put()
