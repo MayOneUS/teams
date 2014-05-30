@@ -6,7 +6,7 @@ from google.appengine.api import urlfetch
 class TestPledgeService(object):
 
   def loadPledgeInfo(self, user_token):
-    if user_token == "abcd":
+    if user_token.startswith("valid"):
       return {"zip_code": "55555",
               "name": "Test User",
               "pledge_amount_cents": 10000}

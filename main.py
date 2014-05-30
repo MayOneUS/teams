@@ -28,7 +28,11 @@ INVALID_SLUG_CHARS = re.compile(r'[^\w-]')
 MULTIDASH_RE = re.compile(r'-+')
 SLUG_TOKEN_AMOUNT = 2
 
+DEFAULT_TITLE = "Team Awesome"
+
 DEFAULT_DESC = u"""\
+## A word from {title}:
+
 Giving money to a super PAC is one of the last things I thought I'd ever \
 do... but I just did.
 
@@ -55,10 +59,12 @@ page here. This is a totally crazy plan, but now that we've raised $1 million \
 I'm beginning to think it's so crazy that it just might work. It'd mean the \
 world to have your support.
 
-Thank you!
+_Thank you!_
 """
 
 PREVIOUS_PLEDGE_DESC = u"""\
+## A word from {title}:
+
 Giving money to a super PAC is one of the last things I thought I'd ever \
 do... but I just gave ${pledge_dollars}!
 
@@ -206,9 +212,10 @@ class ZipcodeField(wtforms.Field):
 
 class TeamForm(wtforms.Form):
   title = wtforms.StringField("Title", [
-      wtforms.validators.Length(min=1, max=500)], default=u'My Pledge Page')
-  description = wtforms.TextAreaField("Description", [
-      wtforms.validators.Length(min=1)], default=DEFAULT_DESC)
+      wtforms.validators.Length(min=1, max=500)], default=DEFAULT_TITLE)
+  description = wtforms.TextAreaField("Description",
+      [wtforms.validators.Length(min=1)],
+      default=DEFAULT_DESC.format(title=DEFAULT_TITLE))
 
   goal_dollars = IntegerField("Goal", [wtforms.validators.optional()])
   youtube_id = YoutubeIdField("Youtube Video URL", [
@@ -363,16 +370,18 @@ class NewFromPledgeHandler(BaseHandler):
       user_pledge_dollars = int(user_info["pledge_amount_cents"]) / 100
       goal_dollars = user_pledge_dollars * 10
       if user_info["name"]:
-        signature = "Thank you,\n%s" % user_info["name"]
+        signature = "_Thank you,_\n\n_%s_" % user_info["name"]
       else:
         signature = "Thank you!"
+      title = user_info["name"] or DEFAULT_TITLE
       form = TeamForm(data={
           "goal_dollars": str(goal_dollars),
-          "title": user_info["name"] or "My Pledge Page",
+          "title": title,
           "zip_code": str(user_info["zip_code"] or ""),
           "description": PREVIOUS_PLEDGE_DESC.format(
               pledge_dollars=user_pledge_dollars,
-              signature=signature)})
+              signature=signature,
+              title=title)})
     else:
       self.add_to_user(team)
       form = TeamForm(obj=team)
