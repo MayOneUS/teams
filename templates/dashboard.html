@@ -1,0 +1,14 @@
+{% extends "includes/base.html" %}
+{% block body %}
+  <div class="page-header">
+    <h2>My Pages</h2>
+  </div>
+  <div class="page-body">
+    <ul>
+      {% for team in teams %}
+      {% if team.primary_slug %}
+      <li><a href="/t/{{team.primary_slug}}/">{{team.title}}</a></li>{% endif %}
+      {% endfor %}
+    </ul><a href="/dashboard/new">Create new</a>
+  </div>
+{% endblock %}

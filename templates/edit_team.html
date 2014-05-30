@@ -1,0 +1,61 @@
+{% extends "includes/base.html" %}
+{% block body %}
+  <div class="page-header">
+    <h1>Edit your page</h1>
+  </div>
+  <div class="page-body">
+    <form method="post">
+      <div class="container">
+        <div class="col-md-6">
+          <h2>Required:</h2>
+          <dl>
+            <dt>{{form.title.label}}</dt>
+            <dd>
+              <div>{{form.title}}</div>{% if form.title.errors %}
+              <ul class="errors">{% for error in form.title.errors %}
+                <li>{{error}}</li>{% endfor %}
+              </ul>{% endif %}
+            </dd>
+            <dt>{{form.description.label}}</dt>
+            <dd>
+              <div>{{form.description(rows=10, style="width: 100%;")}}</div>{% if form.description.errors %}
+              <ul class="errors">{% for error in form.description.errors %}
+                <li>{{error}}</li>{% endfor %}
+              </ul>{% endif %}
+            </dd>
+          </dl>
+          <div style="text-align: right;" class="create_team">
+            <input type="submit" value="Publish">
+          </div>
+        </div>
+        <div class="col-md-1"></div>
+        <div class="col-md-5">
+          <h2>Optional:</h2>
+          <dl>
+            <dt>{{form.goal_dollars.label}}</dt>
+            <dd>
+              <div>${{form.goal_dollars}}</div>{% if form.goal_dollars.errors %}
+              <ul class="errors">{% for error in form.goal_dollars.errors %}
+                <li>{{error}}</li>{% endfor %}
+              </ul>{% endif %}
+            </dd>
+            <dt>{{form.youtube_id.label}}</dt>
+            <dd>
+              <div>{{form.youtube_id}}</div>{% if form.youtube_id.errors %}
+              <ul class="errors">{% for error in form.youtube_id.errors %}
+                <li>{{error}}</li>{% endfor %}
+              </ul>{% endif %}
+            </dd>
+            <dt>{{form.zip_code.label}}</dt>
+            <dd>
+              <div>{{form.zip_code}}</div>{% if form.zip_code.errors %}
+              <ul class="errors">{% for error in form.zip_code.errors %}
+                <li>{{error}}</li>{% endfor %}
+              </ul>{% endif %}
+            </dd>
+          </dl>
+        </div>
+      </div>
+    </form>
+  </div>
+{% endblock %}

@@ -1,0 +1,11 @@
+{% extends "includes/base.html" %}
+{% block body %}
+  <div class="page-header">
+    <h2>Login</h2>
+  </div>
+  <div class="page-body">
+    <ul>{% for service, service_link in login_links.iteritems() %}
+      <li><a href="{{service_link}}" class="zocial {{service}}">Log in with {{service}}</a></li>{% endfor %}
+    </ul>
+  </div>
+{% endblock %}
