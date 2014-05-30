@@ -261,8 +261,9 @@ def require_login(fn):
 
 class IndexHandler(BaseHandler):
   def get(self):
-    # TODO: shouldn't return all teams, should get list of top n
-    self.render_template("index.html", teams=list(Team.all()))
+    if self.logged_in:
+      return self.redirect("/dashboard")
+    return self.redirect("https://mayone.us")
 
 
 class NotFoundHandler(BaseHandler):
