@@ -1,5 +1,18 @@
 {% set body_class = "makebackground" %}
 {% extends "includes/base.html" %}
+{% block head %}
+  <script>
+    function updatePledges(total_cents, total_pledges) {
+      $("#total_dollars").text("$" + (total_cents/100));
+      if (total_pledges == 1) {
+        $("#total_pledges").text("" + total_pledges + " pledge");
+      } else {
+        $("#total_pledges").text("" + total_pledges + " pledges");
+      }
+    }
+  </script>
+  <script src="https://pledge.mayone.us/total?callback=updatePledges&team={{team.key()}}"></script>
+{% endblock %}
 {% block body %}
   <div class="page-header">
     <div class="col-md-8">
@@ -31,7 +44,10 @@
     </div>
   </div>
   <div class="sidebar col-md-4">
-    <p>This page has raised x dollars from y pledges!</p>
+    <p>
+      This page has raised <span id="total_dollars">$$</span>
+      from <span id="total_pledges">pledges</span>!
+    </p>
     <div class="pledge"><a href="https://pledge.mayone.us/pledge?team={{team.key()}}">pledge!</a></div>
     <div class="social"><a class="facebook"></a><a class="twitter"></a><a class="email"></a></div>
   </div>
