@@ -1,3 +1,5 @@
+script(src="/static/login_modal.js")
+
 div.full-width
   div.clearfix.menu-row.row
     {% if logged_in %}
@@ -6,7 +8,7 @@ div.full-width
     a(href="/dashboard")
       div.topmenu.topmenu_red.col-md-1 Dashboard
     {% else %}
-    a(href="/login")
+    a#login_topmenu
       div.topmenu.topmenu_red.col-md-1 Login
     {% endif %}
     a(href="//mayone.us/contact", title="Contact")
@@ -21,3 +23,5 @@ div.container
   div.logo-row.row
     a(href="/")
       img(src="/static/logo_mayday.png", alt="Logo")
+      
+

@@ -18,9 +18,8 @@ html
         .col-md-2
 
     .container
-      .col-md-2
-      .main-content.col-md-5
-        {% if team.youtube_id %}
+      .main-content.col-md-8
+        {% if team.youtube_id %}  
         iframe(src="//www.youtube.com/embed/{{team.youtube_id}}",
                frameborder="0", allowfullscreen, width="420", height="315")
         {% elif team.image_url %}
@@ -34,7 +33,7 @@ html
         div.description {{description_rendered}}
         {% endautoescape %}
 
-      .sidebar.col-md-3
+      .sidebar.col-md-5
         iframe(src="https://pledge.mayone.us/embed.html",
                width="260px", height="260px", frameborder="0",
                scrolling="no")
