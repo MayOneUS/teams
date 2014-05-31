@@ -4,10 +4,12 @@
   <script>
     function updatePledges(total_cents, total_pledges) {
       $("#total_dollars").text("$" + (total_cents/100));
+      $("#total_pledges").text("" + total_pledges);
+      $("#total_dollars_text").text("pledged");
       if (total_pledges == 1) {
-        $("#total_pledges").text("" + total_pledges + " pledge");
+        $("#total_pledges_text").text("backer");
       } else {
-        $("#total_pledges").text("" + total_pledges + " pledges");
+        $("#total_pledges_text").text("backers");
       }
     }
     $(function() {
@@ -57,11 +59,17 @@
     </div>
   </div>
   <div class="sidebar col-md-4">
-    <p>
-      This page has raised <span id="total_dollars">$$</span>
-      from <span id="total_pledges">pledges</span>!
-    </p>
-    <div class="pledge"><a href="https://pledge.mayone.us/pledge?team={{team.key()}}">pledge!</a></div>
+    <div class="team_statistic">
+      <div class="amount" id="total_pledges"></div>
+      <div class="subtext" id="total_pledges_text">backers</div>
+    </div>
+    <div class="team_statistic">
+      <div class="amount" id="total_dollars"></div>
+      <div class="subtext" id="total_dollars_text">pledged</div>
+    </div>
+    <div class="pledge_button">
+      <a href="https://pledge.mayone.us/pledge?team={{team.key()}}">Pledge Now</a>
+    </div>
     <div class="social"><a class="facebook"></a><a class="twitter"></a><a class="email"></a></div>
   </div>
 {% endblock %}
