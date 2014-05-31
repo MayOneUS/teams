@@ -10,8 +10,21 @@
         $("#total_pledges").text("" + total_pledges + " pledges");
       }
     }
+    $(function() {
+      var reload = function() {
+        $.ajax({
+          dataType: "jsonp",
+          // TODO: we're doing a crazy thing where we pass multiple arguments
+          // back via jsonp, and jquery doesn't know how to handle it. once
+          // the pledge service has a better endpoint we'll use it.
+          callback: "ignored_callback",
+          url: "https://pledge.mayone.us/total?team={{team.key()}}&callback=updatePledges"
+        });
+      };
+      reload();
+      setInterval(reload, 15000);
+    });
   </script>
-  <script src="https://pledge.mayone.us/total?callback=updatePledges&team={{team.key()}}"></script>
 {% endblock %}
 {% block body %}
   <div class="page-header">
