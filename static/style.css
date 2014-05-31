@@ -93,3 +93,8 @@ form ul.errors {
     margin-top: 30px;
   }
 }
+
+p.markdown-note {
+  font-size: small;
+  font-style: italic;
+}
