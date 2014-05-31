@@ -100,21 +100,28 @@ background-color: #9e0b0f;
 	text-align:left;
 	top:-30px;
 	z-index:-20;
+    max-width: 310px;
+}
+.logo-row a {
+    display: block;
+    cursor: pointer;
 }
 .logo-row img{
-width:33%;
-max-width:310px;
+    width: 100%;
+    height: auto;
 }
 
 @media only screen and (max-width: 767px) {
-.logo-row {
-	text-align:center;
-	top:0px;
-	margin-bottom: 20px;
-}
-.logo-row img{
-width:66%;
-}
+    .logo-row {
+    	text-align:center;
+    	top: 0;
+        margin: 20px auto;
+    }
+
+    .logo-row a {
+        width: 66%;
+        margin: 0 auto;
+    }
 }
 
 
@@ -123,13 +130,15 @@ width:66%;
     color: #999999;
     font-size: 22px;
 }
-
 /*END OF THE COMMON HEAD AREA*/
 
+/* END OF THE COMMON HEAD AREA */
 
-/*Hero Text Row*/
+
+/* Hero Text Row */
+
 .herotext-row {
-  background-color:black;
+  background-color: black;
 }
 
 .herotext {
@@ -688,3 +697,73 @@ display:inline;
    font-size: 1.4em !important;
 }
 
+/* PLEDGE PAGE STUFF */
+
+.makebackground {
+ background-image:url('/static/pledgepage_background.jpg');
+ background-size:cover;
+ padding-bottom:100px;
+}
+
+.page-header{
+  color:white;
+  border-bottom:0;
+  padding:0;
+  margin-top:0;
+  margin-bottom: 20px;
+}
+
+.apostrophe-pp {
+  font-weight:300;
+}
+
+.video-container {
+    position: relative;
+    padding-bottom: 50%;
+    padding-top: 30px; height: 0; overflow: hidden;
+    margin-top:10px;
+    margin-bottom:15px;
+    border: 15px solid rgba(255, 255, 255, 0.3);
+}
+ 
+.video-container iframe,
+.video-container object,
+.video-container embed {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+
+}
+
+.description {
+  font-family: "Oswald", arial, helvetica, "sans serif";
+  color:white;
+  font-weight:300;
+}
+
+.main-content{
+  padding-right:150px;
+}
+
+.word-note{
+  position:relative;
+  font-family: "Oswald", arial, helvetica, "sans serif";
+  color:white;
+  font-weight:300;
+  font-size:25px;
+}
+
+.socialcircle {
+  border-radius: 50%;
+  width: 60px;
+  height: 60px; 
+  color: rgba(255, 255, 255, 0.3);
+}
+.socialcircle:hover {
+  
+}
+
+
+/* END PLEDGE PAGE STUFF */
