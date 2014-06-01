@@ -749,6 +749,11 @@ display:inline;
   font-weight:300;
 }
 
+.description img{
+  float:left;
+  margin:10px;
+}
+
 
 .main-content{
   padding-right:150px;
