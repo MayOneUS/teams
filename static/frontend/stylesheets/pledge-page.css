@@ -1,0 +1,196 @@
+.flag-header {
+  background: #204659 url(../../flag-header.jpg) -510px 0 no-repeat;
+  height: 158px;
+}
+.flag-header * {
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+}
+.flag-header h1 {
+  text-transform: uppercase;
+  color: #fff;
+  font-size: 77px;
+  font-weight: 900;
+  letter-spacing: -2px;
+  margin-bottom: 0;
+}
+.flag-header h1 span {
+  font-weight: 300;
+}
+.flag-header h2 {
+  color: #fff;
+  font-size: 25px;
+  font-weight: 300;
+  margin-top: 0;
+}
+.flag-header .top-menu a {
+  color: #FFF;
+  color: rgba(255, 255, 255, 0.6);
+  display: inline-block;
+  margin: 1em;
+  font-weight: 900;
+}
+.flag-header .top-menu a span {
+  font-weight: 300;
+}
+.pledgepage * {
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+}
+.pledgepage h2,
+.pledgepage h3 {
+  font-weight: 700;
+}
+.pledgepage button {
+  display: block;
+  background: #d2393c;
+  color: #fff;
+  font-size: 18px;
+  font-weight: 700;
+  padding: 10px 24px;
+  margin: 40px 0;
+  transition: background 0.15s;
+}
+.pledgepage button:hover {
+  color: #fff;
+  background: #db6365;
+}
+.pledgepage #pledgecol-main {
+  padding-right: 40px;
+}
+.pledgepage #pledgecol-main .edit-menu {
+  margin: 40px 0;
+}
+.pledgepage #pledgecol-main .edit-menu a {
+  color: #2680a0;
+  font-size: 18px;
+  padding: 0 0.5em;
+}
+.pledgepage #pledgecol-main .edit-menu a:first-of-type {
+  padding-left: 0;
+}
+.pledgepage #pledgecol-main h3 {
+  font-size: 16px;
+}
+.pledgepage #pledgecol-main .pledge-copy {
+  font-size: 16px;
+}
+.pledgepage #pledgecol-main .video-container {
+  border: 0;
+  padding-top: 50px;
+}
+.pledgepage #pledgecol-sidebar button {
+  width: 100%;
+  font-size: 30px;
+}
+.pledgepage #pledgecol-sidebar .progress {
+  border-radius: 0;
+  border: 1px solid #9dbbc8;
+  padding: 4px;
+  height: 40px;
+  margin-bottom: 0;
+  -webkit-box-shadow: none;
+  -moz-box-shadow: none;
+  box-shadow: none;
+}
+.pledgepage #pledgecol-sidebar .progress .progress-bar {
+  background-color: #bcd6aa;
+  -webkit-box-shadow: none;
+  -moz-box-shadow: none;
+  box-shadow: none;
+}
+.pledgepage #pledgecol-sidebar .progress-info {
+  text-transform: uppercase;
+}
+.pledgepage #pledgecol-sidebar .progress-info .raised span {
+  font-weight: 700;
+}
+.pledgepage #pledgecol-sidebar .progress-info .goal {
+  color: #888;
+}
+.pledgepage #pledgecol-sidebar .panel {
+  margin: 40px 0;
+  border: 1px solid #5990a9;
+  border-radius: 0;
+}
+.pledgepage #pledgecol-sidebar .panel .panel-heading {
+  background: #d9e6ec;
+}
+.pledgepage #pledgecol-sidebar .panel .panel-heading h3 {
+  color: #005982;
+  text-transform: uppercase;
+  font-size: 20px;
+  text-align: center;
+  padding: 10px 0;
+}
+.pledgepage #pledgecol-sidebar .panel .panel-body {
+  text-align: center;
+  text-transform: uppercase;
+  color: #888;
+}
+.pledgepage #pledgecol-sidebar .panel .panel-body * {
+  font-weight: 700;
+}
+.pledgepage #pledgecol-sidebar .panel .panel-body h6 {
+  margin-bottom: 0;
+}
+.pledgepage #pledgecol-sidebar .panel .panel-body h5.amount {
+  font-size: 45px;
+  margin-top: 0;
+  color: #000000;
+}
+.pledgepage #pledgecol-sidebar .panel .panel-body h5.pledges {
+  font-size: 36px;
+  margin-top: 0;
+}
+.pledgepage #pledgecol-sidebar .social-icons a {
+  display: inline-block;
+  width: 32%;
+  padding-top: 65px;
+  background: 50% 0 no-repeat;
+  background-size: contain;
+  position: relative;
+  margin-bottom: 100px;
+}
+.pledgepage #pledgecol-sidebar .social-icons a:after {
+  position: absolute;
+  top: 100%;
+  color: #8eb0bf;
+  text-align: center;
+  width: 100%;
+  white-space: pre;
+  left: 0;
+}
+.pledgepage #pledgecol-sidebar .social-icons a.twitter {
+  background-image: url(../../social/twitter.png);
+}
+.pledgepage #pledgecol-sidebar .social-icons a.twitter:after {
+  content: "Share with \A Twitter";
+}
+.pledgepage #pledgecol-sidebar .social-icons a.facebook {
+  background-image: url(../../social/facebook.png);
+}
+.pledgepage #pledgecol-sidebar .social-icons a.facebook:after {
+  content: "Share with \A Facebook";
+}
+.pledgepage #pledgecol-sidebar .social-icons a.email {
+  background-image: url(../../social/email.png);
+}
+.pledgepage #pledgecol-sidebar .social-icons a.email:after {
+  content: "Share with \A Email";
+}
+.footer {
+  background: #c6c8ca;
+  text-align: center;
+}
+.footer .pac_disclaimer {
+  color: #606062;
+  width: 100%;
+  text-transform: uppercase;
+  border: 1px solid #606062;
+}
+.footer .pac_disclaimer a {
+  color: #606062;
+}
+.footer .copyright {
+  margin: 40px 0;
+  color: #606062;
+}
