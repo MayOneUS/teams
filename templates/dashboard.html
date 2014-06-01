@@ -29,12 +29,13 @@
 
       {% endif %}
 
-    <ul>
-      
-      {% if teams|length == 0 %}
-        Just the teams
-      {% endif %}
-      
+{% if teams|length != 0 %}
+
+<P class="dashboard-intro">Here's a list of all your current pledge pages. Just click on the name in order to visit or edit it, or click on the button below to create another page.</P>
+
+{% endif %}
+
+      <UL class="teamslist">
       {% for team in teams %}
         {% if team.primary_slug %}
         <li><a href="/t/{{team.primary_slug}}/">{{team.title}}</a></li>{% endif %}

@@ -789,4 +789,21 @@ display:inline;
     text-decoration:none;
   }
 
+.teamslist li{
+  font-size:30px;
+}
+
+.teamslist li:first-child{
+  margin-top:20px;
+}
+
+.teamslist {
+  margin-bottom:20px;
+}
+
+.dashboard-intro{
+  margin-top:20px;
+  font-size:20px;
+}
+
 /* END PLEDGE PAGE STUFF */
