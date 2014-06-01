@@ -767,15 +767,26 @@ display:inline;
   font-size:25px;
 }
 
-.socialcircle {
-  border-radius: 50%;
-  width: 60px;
-  height: 60px; 
-  color: rgba(255, 255, 255, 0.3);
-}
-.socialcircle:hover {
-  
-}
+.btn-cta {
+  color:#fff;
+  background-color:#428bca;
+  border-color:#357cbd;
+  font-size:30px;
+  margin-bottom:50px;
+  margin-top:10px;
+  padding:10px 20px;
 
+    -webkit-border-radius: 4px;
+    -moz-border-radius: 4px;
+    border-radius: 4px;
+  width:50%;
+  text-align:center;
+  margin-left:auto;
+  margin-right:auto;
+}
+.btn-cta:hover {
+    background-color:#8EB9DF;
+    text-decoration:none;
+  }
 
 /* END PLEDGE PAGE STUFF */
