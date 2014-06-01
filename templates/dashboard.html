@@ -30,9 +30,14 @@
       {% endif %}
 
     <ul>
+      
+      {% if teams|length == 0 %}
+        Just the teams
+      {% endif %}
+      
       {% for team in teams %}
-      {% if team.primary_slug %}
-      <li><a href="/t/{{team.primary_slug}}/">{{team.title}}</a></li>{% endif %}
+        {% if team.primary_slug %}
+        <li><a href="/t/{{team.primary_slug}}/">{{team.title}}</a></li>{% endif %}
       {% endfor %}
     </ul><a style="text-decoration:none;" href="/dashboard/new"><div class="btn-cta">CREATE NEW PLEDGE PAGE</div></a>
   </div>

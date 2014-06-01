@@ -6,15 +6,19 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <script src="//code.jquery.com/jquery-1.11.0.min.js"></script>
+    <script src="//netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script>
+    
     <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">
     <link rel="stylesheet" id="googlefonts-css" type="text/css" media="all" href="https://fonts.googleapis.com/css?family=Oswald:300,400,700|Lato:400,700&amp;amp;subset=latin">
     <link rel="stylesheet" type="text/css" href="/static/frontend/stylesheets/entypo-social.css">
     <link rel="stylesheet" href="/static/frontend/stylesheets/style.css">
-    <link rel="stylesheet" href="/static/style.css">
-    <link rel="stylesheet" href="/static/zocial/zocial.css">
+    <link rel="stylesheet" href="/static/frontend/stylesheets/share.css">
+    <link rel="stylesheet" href="/static/frontend/stylesheets/entypo-social.css">
+        
     {% block head %}{% endblock %}
   </head>
   <body>
+    {% include "includes/login_modal.html" %}
     <div class="full-width">
       <div class="clearfix menu-row row">
       {% if logged_in %}
@@ -24,7 +28,7 @@
             {% endif %}
           <a href="/dashboard"><div class="topmenu col-md-2">Dashboard</div></a>
       {% else %}
-          <a href="/login"><div class="topmenu topmenu_red col-md-1">Login</div></a>
+          <button class="topmenu topmenu_red col-md-1" data-toggle="modal" data-target="#login_modal">Login</button>
       {% endif %}
           <a href="http://mayday.us/"><div class="topmenu col-md-2">Back to Main Page</div></a>
 
