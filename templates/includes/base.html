@@ -16,14 +16,18 @@
   </head>
   <body>
     <div class="full-width">
-      <div class="clearfix menu-row row">{% if logged_in %}<a href="{{logout_link}}">
-          <div class="topmenu topmenu_red col-md-1">Logout</div></a><a href="/dashboard">
-          <div class="topmenu topmenu_red col-md-1">Dashboard</div></a>{% else %}<a href="/login">
-          <div class="topmenu topmenu_red col-md-1">Login</div></a>{% endif %}<a href="//mayone.us/contact" title="Contact">
-          <div class="topmenu topmenu_red col-md-1">Contact</div></a><a href="//mayone.us/ways" title="Ways to Help">
-          <div class="topmenu col-md-1">Ways to Help</div></a><a href="//mayone.us/faq" title="FAQ">
-          <div class="topmenu col-md-1">FAQ</div></a><a href="//mayone.us/about" title="About Us">
-          <div class="topmenu col-md-1">About Us</div></a></div>
+      <div class="clearfix menu-row row">
+      {% if logged_in %}
+          <a href="{{logout_link}}"><div class="topmenu topmenu_red col-md-1">Logout</div></a>
+            {% if edit_url %}
+               <a href="/dashboard/new"><div class="topmenu col-md-2">Create New Pledge Page</div></a>
+            {% endif %}
+          <a href="/dashboard"><div class="topmenu col-md-2">Dashboard</div></a>
+      {% else %}
+          <a href="/login"><div class="topmenu topmenu_red col-md-1">Login</div></a>
+      {% endif %}
+          <a href="http://mayday.us/"><div class="topmenu col-md-2">Back to Main Page</div></a>
+
     </div>
     <div class="container">
       <div class="logo-row row"><a href="https://mayone.us"><img src="/static/logo_mayday.png" alt="Logo"></a></div>
@@ -32,19 +36,31 @@
       <div class="container">
         {% block body %}{% endblock %}
       </div>
-      <div class="spacing"></div>
-    </div>
     <div id="footer">
-      <div class="social"><a href="https://twitter.com/MayOneUS"><span class="entypo-social twitter"></span></a><a href="https://www.facebook.com/mayonedotus"><span class="entypo-social facebook"></span></a><a href="https://plus.google.com/113369859819907761033/posts"><span class="entypo-social gplus"></span></a><a href="https://vimeo.com/user187904"><span class="entypo-social vimeo"></span></a></div>
-      <div class="notices">
-        <div class="pac_disclaimer">
-          <p>Paid for by MayDay PAC</p>
-          <p>Not authorized by any candidate or candidate's committee</p>
-          <p><a href="//mayone.us/">www.MayOne.us</a>&nbsp; | &nbsp;<a href="//mayone.us/privacy-policy">Privacy Policy</a></p>
-        </div>
-        <div class="copyright">
-          <p>&copy; 2014 May One. <a href="http://creativecommons.org/licenses/by-sa/4.0"><img src="//i.creativecommons.org/l/by-sa/4.0/80x15.png" alt="Creative Commons"></a></p>
-        </div>
+        <div class="footer row">
+    <div style="text-align:center;" class="col-md-8">
+      <div class="pac_disclaimer">Paid for by Mayday PAC
+      <br>Not authorized by any candidate or candidate's committee
+      <br><a href="/">www.MayOne.us</a>
+      </div>
+    </div>
+  <div class="col-md-1">&nbsp;</div>
+    <div class="col-md-2">        <a class="twitter no-underline" href="https://twitter.com/MayOneUS"><i class="icon-twitter"></i>
+          </a>
+          <a class="facebook no-underline" href="https://www.facebook.com/mayonedotus"><i class="icon-facebook"></i>
+          </a>
+          <a class="gplus no-underline" href="https://plus.google.com/113369859819907761033/posts"><i class="icon-googleplus"></i></a>
+          <a class="vimeo no-underline" href="https://vimeo.com/user187904"><i class="icon-vimeo"></i>
+          </a>
+    
+      <div class="copyright">&copy; 2014 Mayday PAC<BR>Some Rights Reserved <a href="http://creativecommons.org/licenses/by-sa/4.0">
+        <img src="http://i.creativecommons.org/l/by/4.0/80x15.png">
+        </a> CC-BY
+       
+      
+       </div>
+     </div>
+    <div class="col-md-1">&nbsp;</div>
       </div>
     </div>
   </body>

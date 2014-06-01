@@ -702,7 +702,6 @@ display:inline;
 .makebackground {
  background-image:url('/static/pledgepage_background.jpg');
  background-size:cover;
- padding-bottom:100px;
 }
 
 .page-header{
@@ -741,7 +740,15 @@ display:inline;
   font-family: "Oswald", arial, helvetica, "sans serif";
   color:white;
   font-weight:300;
+  padding-bottom:30px;
 }
+
+.description p{
+  font-family: "Oswald", arial, helvetica, "sans serif";
+  color:white;
+  font-weight:300;
+}
+
 
 .main-content{
   padding-right:150px;
