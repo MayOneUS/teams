@@ -121,17 +121,23 @@ class BaseHandler(webapp2.RequestHandler):
     if config_NOCOMMIT.auth_service.requires_https:
       self.request.scheme = "https"
     return config_NOCOMMIT.auth_service.getLogoutLink(self.request.url)
+    
+  @property
+  def pledge_root_url(self):
+    return config_NOCOMMIT.pledge_service.url     
 
   def render_template(self, template, **kwargs):
     if self.logged_in:
       data = {
         "logged_in": True,
         "current_user": self.current_user,
-        "logout_link": self.logout_link}
+        "logout_link": self.logout_link,
+        "pledge_root_url": self.pledge_root_url}
     else:
       data = {
         "logged_in": False,
-        "login_links": self.login_links}
+        "login_links": self.login_links,
+        "pledge_root_url": self.pledge_root_url}
     data.update(kwargs)
     self.response.write(JINJA.get_template(template).render(data))
 

@@ -20,7 +20,7 @@
           // back via jsonp, and jquery doesn't know how to handle it. once
           // the pledge service has a better endpoint we'll use it.
           callback: "ignored_callback",
-          url: "https://pledge.mayone.us/total?team={{team.key()}}&callback=updatePledges"
+          url: "{{pledge_root_url}}/total?team={{team.key()}}&callback=updatePledges"
         });
       };
       reload();
@@ -68,7 +68,7 @@
       <div class="subtext" id="total_dollars_text">pledged</div>
     </div>
     <div class="pledge_button">
-      <a href="https://pledge.mayone.us/pledge?team={{team.key()}}">Pledge Now</a>
+      <a href="{{pledge_root_url}}/pledge?team={{team.key()}}">Pledge Now</a>
     </div>
     <div class="social"><a class="facebook"></a><a class="twitter"></a><a class="email"></a></div>
   </div>
