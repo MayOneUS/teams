@@ -1,7 +1,9 @@
 import functools
+import hashlib
 import json
 import os
 import re
+import urllib
 import urlparse
 
 import jinja2
@@ -155,8 +157,9 @@ class Team(db.Model):
   youtube_id = db.StringProperty()
   zip_code = db.StringProperty()
 
-  # for use with google.appengine.api.imagesget_serving_url
+  # for use with google.appengine.api.images get_serving_url
   image = db.BlobProperty()
+  gravatar = db.StringProperty()
 
   user_token = db.StringProperty()
 
@@ -397,14 +400,19 @@ class NewFromPledgeHandler(BaseHandler):
     team = Team.all().filter('user_token =', user_token).get()
     if team is None:
       # just make sure this pledge exists
-      if config_NOCOMMIT.pledge_service.loadPledgeInfo(user_token) is None:
+      user_info = config_NOCOMMIT.pledge_service.loadPledgeInfo(user_token)
+      if user_info is None:
         return self.notfound()
     form = TeamForm(self.request.POST, team)
     if not form.validate():
       return self.render_template("new_from_pledge.html", form=form)
     if team is None:
+      gravatar = "https://secure.gravatar.com/avatar/%s?%s" % (
+        hashlib.md5(user_info['email'].lower()).hexdigest(),
+        urllib.urlencode({'s': str('120')}))
       team = Team(title=form.title.data, description=form.description.data,
-                  zip_code=form.zip_code.data, user_token=user_token)
+                  zip_code=form.zip_code.data, user_token=user_token,
+                  gravatar=gravatar)
       team.put()
     else:
       form.populate_obj(team)
