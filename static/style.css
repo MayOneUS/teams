@@ -74,6 +74,11 @@ div.description {
   padding-top: 10px;
 }
 
+div.description img.avatar {
+    float: left;
+    margin: 20px 20px 20px 0;
+}
+
 form ul.errors {
   color: red;
 }

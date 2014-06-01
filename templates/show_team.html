@@ -55,6 +55,9 @@
       {% endif %}
     </div>
     <div class="description">
+      {% if team.gravatar %}
+        <img class="avatar" src="{{ team.gravatar }}" alt="Team Avatar"/>
+      {% endif %}
       {% autoescape false %}{{description_rendered}}{% endautoescape %}
     </div>
   </div>
