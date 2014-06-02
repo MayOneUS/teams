@@ -2,16 +2,38 @@
         <!--pledgepage-->
 {% extends "includes/base.html" %}
 {% block head %}
+  <!-- for facebook sharing -->
+  <meta property="og:title" content="{{team.title|escape}}'s pledge page"/>
+  <meta property="og:type" content="website"/>
+  <meta property="og:site_name" content="myMaydayPAC"/>
+  <meta property="og:description"
+        content="Our democracy needs an upgrade."/>
+
   <script>
-    function updatePledges(total_cents, total_pledges) {
-      $("#total_dollars").text("$" + (total_cents/100));
-      $("#total_pledges").text("" + total_pledges);
-      $("#total_dollars_text").text("pledged");
-      if (total_pledges == 1) {
-        $("#total_pledges_text").text("pledger through this page");
-      } else {
-        $("#total_pledges_text").text("pledgers through this page");
+    function addCommas(nStr) {
+      nStr += '';
+      x = nStr.split('.');
+      x1 = x[0];
+      x2 = x.length > 1 ? '.' + x[1] : '';
+      var rgx = /(\d+)(\d{3})/;
+      while (rgx.test(x1)) {
+        x1 = x1.replace(rgx, '$1' + ',' + '$2');
       }
+      return x1 + x2;
+    }
+    var GOAL_DOLLARS = 2000000;
+    function updateTeam(total_cents, total_pledges) {
+      $("#team_total_dollars").text("$" + addCommas(total_cents/100));
+      $("#team_total_pledges").text("" + total_pledges);
+    }
+    function updateTotal(total_cents) {
+      var total_dollars = total_cents/100;
+      var progress = Math.floor((total_dollars * 100) / GOAL_DOLLARS);
+      $("#total_dollars").text("$" + addCommas(total_dollars));
+      $("#goal_dollars").text("$" + addCommas(GOAL_DOLLARS));
+      $("#progressbar-bar").width(progress + "%");
+      $("#progressbar-bar").attr("aria-valuenow", "" + progress);
+      $("#progressbar-text").text(progress + "% Complete");
     }
     $(function() {
       var reload = function() {
@@ -21,7 +43,15 @@
           // back via jsonp, and jquery doesn't know how to handle it. once
           // the pledge service has a better endpoint we'll use it.
           callback: "ignored_callback",
-          url: "{{pledge_root_url}}/total?team={{team.key()}}&callback=updatePledges"
+          url: "{{pledge_root_url}}/total?team={{team.key()}}&callback=updateTeam"
+        });
+        $.ajax({
+          dataType: "jsonp",
+          // TODO: we're doing a crazy thing where we pass multiple arguments
+          // back via jsonp, and jquery doesn't know how to handle it. once
+          // the pledge service has a better endpoint we'll use it.
+          callback: "ignored_callback",
+          url: "{{pledge_root_url}}/total?callback=updateTotal"
         });
       };
       reload();
@@ -30,96 +60,124 @@
   </script>
 {% endblock %}
 {% block body %}
-<div class="pledgepage">
-<div class="container">
+  <div class="pledgepage">
+    <div class="container">
 
-<div class="row">
-    <div class="col-md-8" id="pledgecol-main">
+      <div class="row">
+        <div class="col-md-8" id="pledgecol-main">
 
-        <!--&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&-->
-        <!-- links shown only if you're logged in -->
-       {% if edit_url and logged_in %}      
-        <div class="edit-menu">
-            <a href="#">Edit this page</a> |
-            <a href="/dashboard/new">Create another page</a> |
-            <a href="/dashboard">Dashboard</a>
-        </div>
-      {% endif %}
-        <!--&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&-->
-
-
-        <h2>{{team.title}}’s pledge page</h2>
-   {% if not team.youtube_id and not team.image_url %}
-        <h3>A word from Professor Lawrence Lessig about the Mayday PAC:</h3>
-
-        <div class="video-container">
-                    <iframe src="//player.vimeo.com/video/93299391" width="420" height="236" frameborder="0" webkitallowfullscreen mozallowfullscreen allowfullscreen></iframe>
-        </div>
-        
-   {% elif team.youtube_id %}
-        <div class="video-container">
-                    <iframe src="//www.youtube.com/embed/{{team.youtube_id}}" frameborder="0" allowfullscreen width="420"></iframe>
-        </div>
-   {% elif team.image_url %}
-        <div class="video-container">
-             <img src="{{team.image_url}}">
-        </div>
-        
-   {% endif %}
-
-
-
-     {% if team.gravatar %}
-        <img class="avatar" src="{{ team.gravatar }}" alt="Team Avatar"/>
-      {% endif %}
-      {% autoescape false %}{{description_rendered}}{% endautoescape %}
-
-            <a href="{{pledge_root_url}}/pledge?team={{team.key()}}"><button class="btn">Pledge Now</button></a>
-        </div>
- 
-   <div class="col-md-4" id="pledgecol-sidebar">
-
-         <a href="{{pledge_root_url}}/pledge?team={{team.key()}}"><button class="btn" href="{{pledge_root_url}}/pledge?team={{team.key()}}">Pledge Now</button></a>
-
-        <!-- progress bar -->
-        <div class="progress">
-            <div class="progress-bar" role="progressbar" aria-valuenow="60" aria-valuemin="0" aria-valuemax="100" style="width: 60%;">
-                <span class="sr-only">60% Complete</span>
+          <!--&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&-->
+          <!-- links shown only if you're logged in -->
+          {% if logged_in %}
+            <div class="edit-menu">
+              {% if edit_url %}
+                <a href="{{edit_url}}">Edit this page</a> |
+                <a href="/dashboard/new">Create another page</a> |
+              {% else %}
+                <a href="/dashboard/new">Create your own page</a> |
+              {% endif %}
+              <a href="/dashboard">Dashboard</a>
             </div>
-        </div>
-        <div class="progress-info">
-            <div class="raised pull-left">Raised: <span>$1,000,000</span></div>
-            <div class="goal pull-right">Next Goal: <span>$2,000,000</span></div>
-            <div class="clearfix"></div>
+          {% endif %}
+
+          <!--&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&-->
+
+
+          <h2>{{team.title}}’s pledge page</h2>
+
+          {% if not team.youtube_id and not team.image_url %}
+            <h3>A word from Professor Lawrence Lessig about the Mayday PAC:</h3>
+
+            <div class="video-container">
+              <iframe src="//player.vimeo.com/video/93299391" width="420"
+                  height="236" frameborder="0" webkitallowfullscreen
+                  mozallowfullscreen allowfullscreen></iframe>
+            </div>
+
+          {% elif team.youtube_id %}
+            <div class="video-container">
+              <iframe src="//www.youtube.com/embed/{{team.youtube_id}}"
+                  frameborder="0" allowfullscreen width="420"></iframe>
+            </div>
+          {% elif team.image_url %}
+            <div class="video-container">
+              <img src="{{team.image_url}}" />
+            </div>
+
+          {% endif %}
+
+          {% if team.gravatar %}
+            <img class="avatar" src="{{ team.gravatar }}" alt="Team Avatar" />
+          {% endif %}
+
+          {{description_rendered|safe}}
+
+          <a href="{{pledge_root_url}}/pledge?team={{team.key()}}"
+              class="pledge-link">
+            <button class="btn">Pledge Now</button>
+          </a>
         </div>
 
-        <!-- page stats -->
-        <div class="panel panel-default">
+        <div class="col-md-4" id="pledgecol-sidebar">
+
+          <a href="{{pledge_root_url}}/pledge?team={{team.key()}}"
+              class="pledge-link">
+            <button class="btn">Pledge Now</button>
+          </a>
+
+          <!-- progress bar -->
+          <div class="progress">
+            <div class="progress-bar" role="progressbar" aria-valuenow="0"
+                aria-valuemin="0" aria-valuemax="100" style="width: 0%;"
+                id="progressbar-bar">
+              <span class="sr-only" id="progressbar-text"></span>
+            </div>
+          </div>
+          <div class="progress-info">
+            <div class="raised pull-left">Raised: <span id="total_dollars"></span></div>
+            <div class="goal pull-right">Next Goal: <span id="goal_dollars"></span></div>
+            <div class="clearfix"></div>
+          </div>
+
+          <!-- page stats -->
+          <div class="panel panel-default">
             <div class="panel-heading">
-                <h3 class="panel-title">Page Stats</h3>
+              <h3 class="panel-title">Page Stats</h3>
             </div>
             <div class="panel-body">
-                 <H6>AMOUNT RAISED</H6>
-                 <H5 class="amount" id="total_dollars"></h5>
+              <H6>AMOUNT RAISED</H6>
+              <H5 class="amount" id="team_total_dollars"></h5>
 
-                 <H6>PLEDGES</H6>
-                 <H5 class="pledges" id="total_pledges"></h5>
-                
-          
+              <H6>PLEDGES</H6>
+              <H5 class="pledges" id="team_total_pledges"></h5>
+
             </div>
+          </div>
+
+          <!-- social buttons -->
+          <div class="social-icons">
+            <a href="https://twitter.com/intent/tweet?text={{
+              ("Money has corrupted our democracy. I pledged to fix it. Check out my #MAYDAYUS page -- " + current_url) | urlencode }}"
+                class="twitter" target="_blank"></a>
+            <a href="http://www.facebook.com/sharer.php?u={{current_url|urlencode}}" class="facebook" target="_blank"></a>
+            <a href="mailto:?to=&subject={{"Money has corrupted our democracy"|urlencode}}&body={{("""Friend,
+
+Money has corrupted our democracy. Now what?
+
+We need an upgrade.
+
+Visit my page at MAYDAY.US -- A grassroots political experiment created to fix government for all of us:
+""" + current_url + """
+
+Please join me and other Americans who want to shift the influence of money in politics.
+
+Thank you,
+""" + team.title)|urlencode}}" class="email" target="_blank"></a>
+          </div>
         </div>
 
-        <!-- social buttons -->
-        <div class="social-icons">
-            <a href="#" class="twitter"></a>
-            <a href="#" class="facebook"></a>
-            <a href="#" class="email"></a>
-        </div>
+      </div>
+
     </div>
-
-
-</div>
-
-
-</div>
+  </div>
 {% endblock %}

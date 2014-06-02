@@ -6,40 +6,58 @@
   </div>
   <div class="page-body">
 
-<div class="herotext full-width">Your Super PAC Dashboard</div>
+    <div class="herotext full-width">Your Super PAC Dashboard</div>
 
       {% if teams|length == 0 %}
 
-      <P>&nbsp;</P>
-  
-<p>Welcome to myMaydayPAC. Here you can <a href="/dashboard/new">create your own pledge page</a> so you can track the pledges of your and your friends.</P>
+        <P>&nbsp;</P>
 
-<P>You can create a page or multiple pages for:
-<UL>
-  <LI>Yourself (Joan Samplename)
-  <LI>Your family (The Samplename Family)
-  <LI>Your co-workers (J&J Widgets & Flanges)
-  <LI>Your group: (Holy Rollers Bowling Team)
-  <LI>Or even for a subreddit! (/r/rootstrikers)
-</UL>
+        <p>
+          Welcome to myMaydayPAC. Here you can
+          <a href="/dashboard/new">create your own pledge page</a>
+          so you can track the pledges of your and your friends.
+        </p>
 
-<P>On your page, you can upload a video if you wish, or use our default from Professor Lessig. You can also include formatted text, images, and links, using Markdown, which is a simple system for creating pages without having to know any programming.  And you can always log back in and change it. </P>
+        <p>You can create a page or multiple pages for:</p>
+        <ul>
+          <li>Yourself (Joan Samplename)</li>
+          <li>Your family (The Samplename Family)</li>
+          <li>Your co-workers (J&J Widgets & Flanges)</li>
+          <li>Your group: (Holy Rollers Bowling Team)</li>
+          <li>Or even for a subreddit! (/r/rootstrikers)</li>
+        </ul>
 
-<P>Try it out!<p>
+        <p>
+          On your page, you can upload a video if you wish, or use our
+          default from Professor Lessig. You can also include formatted text,
+          images, and links, using Markdown, which is a simple system for
+          creating pages without having to know any programming. And you can
+          always log back in and change it.
+        </p>
+
+        <p>Try it out!</p>
+
+      {% else %}
+
+        <p class="dashboard-intro">
+          Here's a list of all your current pledge pages. Just click on the
+          name in order to visit or edit it, or click on the button below to
+          create another page.
+        </p>
+
+        <ul class="teamslist">
+          {% for team in teams %}
+            {% if team.primary_slug %}
+              <li><a href="/t/{{team.primary_slug}}/">{{team.title}}</a></li>
+            {% endif %}
+          {% endfor %}
+        </ul>
 
       {% endif %}
 
-{% if teams|length != 0 %}
-
-<P class="dashboard-intro">Here's a list of all your current pledge pages. Just click on the name in order to visit or edit it, or click on the button below to create another page.</P>
-
-{% endif %}
-
-      <UL class="teamslist">
-      {% for team in teams %}
-        {% if team.primary_slug %}
-        <li><a href="/t/{{team.primary_slug}}/">{{team.title}}</a></li>{% endif %}
-      {% endfor %}
-    </ul><a style="text-decoration:none;" href="/dashboard/new"><div class="btn-cta">CREATE NEW PLEDGE PAGE</div></a>
+      <a style="text-decoration:none;" href="/dashboard/new">
+        <div class="btn-cta">CREATE NEW PLEDGE PAGE</div>
+      </a>
+    </div>
   </div>
 {% endblock %}

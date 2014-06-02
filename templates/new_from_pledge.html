@@ -9,19 +9,30 @@
           <dl>
             <dt>{{form.title.label}}</dt>
             <dd>
-              <div>{{form.title}}</div>{% if form.title.errors %}
-              <ul class="errors">{% for error in form.title.errors %}
-                <li>{{error}}</li>{% endfor %}
-              </ul>{% endif %}
+              <div>{{form.title}}</div>
+              {% if form.title.errors %}
+                <ul class="errors">
+                  {% for error in form.title.errors %}
+                    <li>{{error}}</li>
+                  {% endfor %}
+                </ul>
+              {% endif %}
             </dd>
             <dt>{{form.description.label}}</dt>
             <dd>
-              <div>{{form.description(rows=10, style="width: 100%;")}}</div>{% if form.description.errors %}
-              <ul class="errors">{% for error in form.description.errors %}
-                <li>{{error}}</li>{% endfor %}
-              </ul>{% endif %}
+              <div>{{form.description(rows=10, style="width: 100%;")}}</div>
+              {% if form.description.errors %}
+                <ul class="errors">
+                  {% for error in form.description.errors %}
+                    <li>{{error}}</li>
+                  {% endfor %}
+                </ul>
+              {% endif %}
               <p class="markdown-note">This form supports the
-                <a href="http://daringfireball.net/projects/markdown/syntax">Markdown syntax</a>.</p>
+                <a href="http://daringfireball.net/projects/markdown/syntax">
+                  Markdown syntax
+                </a>, for including text formatting, links, and images.
+              </p>
             </dd>
           </dl>
           <div style="text-align: right;" class="create_team">
@@ -34,10 +45,14 @@
           <dl>
             <dt>{{form.zip_code.label}}</dt>
             <dd>
-              <div>{{form.zip_code}}</div>{% if form.zip_code.errors %}
-              <ul class="errors">{% for error in form.zip_code.errors %}
-                <li>{{error}}</li>{% endfor %}
-              </ul>{% endif %}
+              <div>{{form.zip_code}}</div>
+              {% if form.zip_code.errors %}
+                <ul class="errors">
+                  {% for error in form.zip_code.errors %}
+                    <li>{{error}}</li>
+                  {% endfor %}
+                </ul>
+              {% endif %}
             </dd>
           </dl>
         </div>

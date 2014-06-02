@@ -16,7 +16,7 @@
 //---------------- HEADER
 
 .flag-header {
-  background: #204659 url(../../flag-header.jpg) -510px 0 no-repeat;
+  background: #204659 url(flag-header.jpg) -510px 0 no-repeat;
   height: 158px;
   * { .helv() }
 
@@ -75,6 +75,10 @@
     }
   }
 
+  a.pledge-link:hover {
+    text-decoration: none;
+  }
+
   //---------------- BODY COLUMN
 
   #pledgecol-main {
@@ -98,6 +102,11 @@
     .video-container {
       border: 0;
       padding-top: 50px;
+    }
+
+    img.avatar {
+      float: left;
+      margin: 20px 20px 20px 0;
     }
   }
 
@@ -182,20 +191,33 @@
         }
 
         &.twitter {
-          background-image: url(../../social/twitter.png);
+          background-image: url(social/twitter.png);
           &:after { content: "Share with \A Twitter"}
         }
         &.facebook {
-          background-image: url(../../social/facebook.png);
+          background-image: url(social/facebook.png);
           &:after { content: "Share with \A Facebook"}
         }
         &.email {
-          background-image: url(../../social/email.png);
+          background-image: url(social/email.png);
           &:after { content: "Share with \A Email"}
         }
       }
     }
   }
+}
+
+//---------------- FORMS
+
+form {
+  ul.errors {
+    color: red;
+  }
+}
+
+p.markdown-note {
+  font-size: small;
+  font-style: italic;
 }
 
 //---------------- FOOTER

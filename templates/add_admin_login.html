@@ -4,8 +4,10 @@
     <h2>Login to allow editing your pledge page later</h2>
   </div>
   <div class="page-body">
-    <ul>{% for service, service_link in login_links.iteritems() %}
-      <li><a href="{{service_link}}" class="zocial {{service}}">Log in with {{service}}</a></li>{% endfor %}
+    <ul>
+      {% for service, service_link in login_links.iteritems() %}
+        <li><a href="{{service_link}}">Log in with {{service}}</a></li>
+      {% endfor %}
     </ul>
 
     <a href="/t/{{team.primary_slug}}">Continue without logging in</a>

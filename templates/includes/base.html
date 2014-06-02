@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
-<head>
-    <title>MayOne.us - My SuperPAC</title>
+  <head>
+    <title>Mayday.us - My SuperPAC</title>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -14,50 +14,55 @@
     <link rel="stylesheet" href="/static/frontend/stylesheets/style.css">
     <link rel="stylesheet" href="/static/frontend/stylesheets/share.css">
     <link rel="stylesheet" href="/static/frontend/stylesheets/entypo-social.css">
-    <link rel="stylesheet" href="/static/frontend/stylesheets/pledge-page.css">
-        {% block head %}{% endblock %}
-</head>
-<body>
+    <link rel="stylesheet" href="/static/teams.css">
+
+    {% block head %}{% endblock %}
+  </head>
+  <body>
 
     {% include "includes/login_modal.html" %}
-<div class="full-width">
 
-    <!--&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&-->
-    <div class="row flag-header">
+    <div class="full-width">
+
+      <!--&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&-->
+      <div class="row flag-header">
         <div class="container">
-            <div class="top-menu pull-right">
+          <div class="top-menu pull-right">
             <a href="http://www.mayday.us">MAYDAY<span>.US</span></a>
             {% if logged_in %}
-                <a href="{{logout_link}}">Logout</a>
+              <a href="{{logout_link}}">Logout</a>
             {% else %}
-                <button data-toggle="modal" data-target="#login_modal">Login</button>
+              <button data-toggle="modal" data-target="#login_modal">Login</button>
             {% endif %}
-            </div>
-            <h1>MayDay<span>.us</span></h1>
-            <h2>An experiment to reclaim our democracy</h2>
+          </div>
+          <h1>MayDay<span>.us</span></h1>
+          <h2>An experiment to reclaim our democracy</h2>
         </div>
-    </div>
-    <div class="{{body_class}}">
-      <div class="container">
-        {% block body %}{% endblock %}
-      </div></div>
-        <div id="footer">
-            <div class="footer row">
-
-                <div class="pac_disclaimer">Paid for by Mayday PAC
-                    <br>Not authorized by any candidate or candidate's committee
-                    <br><a href="/">www.MayOne.us</a>
-                </div>
-
-                <div class="copyright">&copy; 2014 Mayday PAC<BR>Some Rights Reserved<br>
-                    <a href="http://creativecommons.org/licenses/by-sa/4.0">
-                    <img src="http://i.creativecommons.org/l/by/4.0/80x15.png">
-                    </a> CC-BY
-                </div>
-       </div>
-     </div>
-    <div class="col-md-1">&nbsp;</div>
       </div>
+      <div class="{{body_class}}">
+        <div class="container">
+          {% block body %}{% endblock %}
+        </div>
+      </div>
+      <div id="footer">
+        <div class="footer row">
+
+          <div class="pac_disclaimer">
+            Paid for by Mayday PAC<br/>
+            Not authorized by any candidate or candidate's committee<br/>
+            <a href="/">www.mayday.us</a>
+          </div>
+
+          <div class="copyright">
+            &copy; 2014 Mayday PAC<br/>
+            Some Rights Reserved<br/>
+            <a href="http://creativecommons.org/licenses/by-sa/4.0">
+              <img src="http://i.creativecommons.org/l/by/4.0/80x15.png">
+            </a> CC-BY
+          </div>
+        </div>
+      </div>
+      <div class="col-md-1">&nbsp;</div>
     </div>
   </body>
 </html>

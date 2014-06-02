@@ -1,5 +1,5 @@
 .flag-header {
-  background: #204659 url(../../flag-header.jpg) -510px 0 no-repeat;
+  background: #204659 url(flag-header.jpg) -510px 0 no-repeat;
   height: 158px;
 }
 .flag-header * {
@@ -35,8 +35,7 @@
 .pledgepage * {
   font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
 }
-.pledgepage h2,
-.pledgepage h3 {
+.pledgepage h2, .pledgepage h3 {
   font-weight: 700;
 }
 .pledgepage button {
@@ -48,12 +47,13 @@
   padding: 10px 24px;
   margin: 40px 0;
   transition: background 0.15s;
-    text-decoration:none;
 }
 .pledgepage button:hover {
   color: #fff;
   background: #db6365;
-  text-decoration:none;
+}
+.pledgepage a.pledge-link:hover {
+  text-decoration: none;
 }
 .pledgepage #pledgecol-main {
   padding-right: 40px;
@@ -79,10 +79,13 @@
   border: 0;
   padding-top: 50px;
 }
+.pledgepage #pledgecol-main img.avatar {
+  float: left;
+  margin: 20px 20px 20px 0;
+}
 .pledgepage #pledgecol-sidebar button {
   width: 100%;
   font-size: 30px;
-  text-decoration:none;
 }
 .pledgepage #pledgecol-sidebar .progress {
   border-radius: 0;
@@ -163,31 +166,29 @@
   left: 0;
 }
 .pledgepage #pledgecol-sidebar .social-icons a.twitter {
-  background-image: url(../../social/twitter.png);
-}
-.pledgepage #pledgecol-sidebar .social-icons a.twitter:hover {
-  background-image: url(../../social/twitter_hover.png);
+  background-image: url(social/twitter.png);
 }
 .pledgepage #pledgecol-sidebar .social-icons a.twitter:after {
   content: "Share with \A Twitter";
 }
 .pledgepage #pledgecol-sidebar .social-icons a.facebook {
-  background-image: url(../../social/facebook.png);
-}
-.pledgepage #pledgecol-sidebar .social-icons a.facebook:hover {
-  background-image: url(../../social/facebook_hover.png);
+  background-image: url(social/facebook.png);
 }
 .pledgepage #pledgecol-sidebar .social-icons a.facebook:after {
   content: "Share with \A Facebook";
 }
 .pledgepage #pledgecol-sidebar .social-icons a.email {
-  background-image: url(../../social/email.png);
-}
-.pledgepage #pledgecol-sidebar .social-icons a.email:hover {
-  background-image: url(../../social/email_hover.png);
+  background-image: url(social/email.png);
 }
 .pledgepage #pledgecol-sidebar .social-icons a.email:after {
   content: "Share with \A Email";
+}
+form ul.errors {
+  color: red;
+}
+p.markdown-note {
+  font-size: small;
+  font-style: italic;
 }
 .footer {
   background: #c6c8ca;

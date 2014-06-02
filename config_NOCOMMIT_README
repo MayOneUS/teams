@@ -5,12 +5,12 @@ from auth import TestAuthService, ProdAuthService
 from pledge import TestPledgeService, ProdPledgeService
 
 # Both testing and production (for client-side templates)
-PLEDGE_SERVICE_URL = "https://pledge.mayone.us"
+PLEDGE_SERVICE_URL = "https://pledge.mayday.us"
 
 # For testing.
 auth_service = TestAuthService()
 pledge_service = TestPledgeService()
 
 ## For production.
-#auth_service = ProdAuthService("https://auth.mayone.us")
+#auth_service = ProdAuthService("https://auth.mayday.us")
 #pledge_service = ProdPledgeService(PLEDGE_SERVICE_URL)

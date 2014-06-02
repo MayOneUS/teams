@@ -23,6 +23,7 @@ JINJA = jinja2.Environment(
   loader=jinja2.FileSystemLoader('templates/'),
   extensions=['jinja2.ext.autoescape'],
   autoescape=True)
+JINJA.filters["urlencode"] = lambda s: urllib.quote(s, safe="")
 
 YOUTUBE_ID_VALIDATOR = re.compile(r'^[\w\-]+$')
 INVALID_SLUG_CHARS = re.compile(r'[^\w-]')
@@ -97,6 +98,11 @@ world to have your support.
 
 
 class BaseHandler(webapp2.RequestHandler):
+  def dispatch(self, *args, **kwargs):
+    if self.request.host == "my.mayone.us" and self.request.method == "GET":
+      self.request.host = "my.mayday.us"
+      return self.redirect(self.request.url)
+    return webapp2.RequestHandler.dispatch(self, *args, **kwargs)
 
   @webapp2.cached_property
   def auth_response(self):
@@ -133,12 +139,14 @@ class BaseHandler(webapp2.RequestHandler):
         "logged_in": True,
         "current_user": self.current_user,
         "logout_link": self.logout_link,
-        "pledge_root_url": self.pledge_root_url}
+        "pledge_root_url": self.pledge_root_url,
+        "current_url": self.request.url}
     else:
       data = {
         "logged_in": False,
         "login_links": self.login_links,
-        "pledge_root_url": self.pledge_root_url}
+        "pledge_root_url": self.pledge_root_url,
+        "current_url": self.request.url}
     data.update(kwargs)
     self.response.write(JINJA.get_template(template).render(data))
 
@@ -282,7 +290,7 @@ class IndexHandler(BaseHandler):
   def get(self):
     if self.logged_in:
       return self.redirect("/dashboard")
-    return self.redirect("https://mayone.us")
+    return self.redirect("/login")
 
 
 class NotFoundHandler(BaseHandler):
