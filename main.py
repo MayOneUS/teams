@@ -98,6 +98,11 @@ world to have your support.
 
 
 class BaseHandler(webapp2.RequestHandler):
+  def dispatch(self, *args, **kwargs):
+    if self.request.host == "my.mayone.us" and self.request.method == "GET":
+      self.request.host = "my.mayday.us"
+      return self.redirect(self.request.url)
+    return webapp2.RequestHandler.dispatch(self, *args, **kwargs)
 
   @webapp2.cached_property
   def auth_response(self):
