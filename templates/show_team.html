@@ -2,6 +2,13 @@
         <!--pledgepage-->
 {% extends "includes/base.html" %}
 {% block head %}
+  <!-- for facebook sharing -->
+  <meta property="og:title" content="{{team.title|escape}}'s pledge page"/>
+  <meta property="og:type" content="website"/>
+  <meta property="og:site_name" content="myMaydayPAC"/>
+  <meta property="og:description"
+        content="Our democracy needs an upgrade."/>
+
   <script>
     function updatePledges(total_cents, total_pledges) {
       $("#total_dollars").text("$" + (total_cents/100));
@@ -80,7 +87,7 @@
             <img class="avatar" src="{{ team.gravatar }}" alt="Team Avatar" />
           {% endif %}
 
-          {% autoescape false %}{{description_rendered}}{% endautoescape %}
+          {{description_rendered|safe}}
 
           <a href="{{pledge_root_url}}/pledge?team={{team.key()}}"
               class="pledge-link">
@@ -125,9 +132,23 @@
 
           <!-- social buttons -->
           <div class="social-icons">
-            <a href="#" class="twitter"></a>
-            <a href="#" class="facebook"></a>
-            <a href="#" class="email"></a>
+            <a href="https://twitter.com/intent/tweet?text={{
+              ("Money has corrupted our democracy. I pledged to fix it. Check out my #MAYDAYUS page -- " + current_url) | urlencode }}"
+                class="twitter" target="_blank"></a>
+            <a href="http://www.facebook.com/sharer.php?u={{current_url|urlencode}}" class="facebook" target="_blank"></a>
+            <a href="mailto:?to=&subject={{"Money has corrupted our democracy"|urlencode}}&body={{("""Friend,
+
+Money has corrupted our democracy. Now what?
+
+We need an upgrade.
+
+Visit my page at MAYDAY.US -- A grassroots political experiment created to fix government for all of us:
+""" + current_url + """
+
+Please join me and other Americans who want to shift the influence of money in politics.
+
+Thank you,
+""" + team.title)|urlencode}}" class="email" target="_blank"></a>
           </div>
         </div>
 

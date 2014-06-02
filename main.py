@@ -23,6 +23,7 @@ JINJA = jinja2.Environment(
   loader=jinja2.FileSystemLoader('templates/'),
   extensions=['jinja2.ext.autoescape'],
   autoescape=True)
+JINJA.filters["urlencode"] = urllib.quote_plus
 
 YOUTUBE_ID_VALIDATOR = re.compile(r'^[\w\-]+$')
 INVALID_SLUG_CHARS = re.compile(r'[^\w-]')
@@ -133,12 +134,14 @@ class BaseHandler(webapp2.RequestHandler):
         "logged_in": True,
         "current_user": self.current_user,
         "logout_link": self.logout_link,
-        "pledge_root_url": self.pledge_root_url}
+        "pledge_root_url": self.pledge_root_url,
+        "current_url": self.request.url}
     else:
       data = {
         "logged_in": False,
         "login_links": self.login_links,
-        "pledge_root_url": self.pledge_root_url}
+        "pledge_root_url": self.pledge_root_url,
+        "current_url": self.request.url}
     data.update(kwargs)
     self.response.write(JINJA.get_template(template).render(data))
 
