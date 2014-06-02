@@ -110,6 +110,8 @@
             <img class="avatar" src="{{ team.gravatar }}" alt="Team Avatar" />
           {% endif %}
 
+          <H2>A word from {{team.title}}:</H2>
+
           {{description_rendered|safe}}
 
           <a href="{{pledge_root_url}}/pledge?team={{team.key()}}"
