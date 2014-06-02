@@ -74,12 +74,12 @@
       {% endif %}
       {% autoescape false %}{{description_rendered}}{% endautoescape %}
 
-            <button class="btn">Pledge Now</button>
+            <a href="{{pledge_root_url}}/pledge?team={{team.key()}}"><button class="btn">Pledge Now</button></a>
         </div>
  
    <div class="col-md-4" id="pledgecol-sidebar">
 
-        <button class="btn">Pledge Now</button>
+         <a href="{{pledge_root_url}}/pledge?team={{team.key()}}"><button class="btn" href="{{pledge_root_url}}/pledge?team={{team.key()}}">Pledge Now</button></a>
 
         <!-- progress bar -->
         <div class="progress">
