@@ -4,17 +4,16 @@ from google.appengine.api import urlfetch
 
 
 class TestPledgeService(object):
-
   def loadPledgeInfo(self, user_token):
     if user_token.startswith("valid"):
       return {"zip_code": "55555",
               "name": "Test User",
+              "email": "testuser@example.com",
               "pledge_amount_cents": 10000}
     return None
 
 
 class ProdPledgeService(object):
-
   def __init__(self, url):
     self.url = url
 

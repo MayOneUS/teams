@@ -13,12 +13,11 @@ import wtforms
 from wtforms.fields.html5 import IntegerField
 from wtforms.widgets.html5 import URLInput
 
+from google.appengine.api import memcache
 from google.appengine.api import urlfetch
 from google.appengine.ext import db
 
 import config_NOCOMMIT
-
-PLEDGE_SERVICE_REQ = "https://pledge.mayone.us"
 
 JINJA = jinja2.Environment(
   loader=jinja2.FileSystemLoader('templates/'),
@@ -123,10 +122,10 @@ class BaseHandler(webapp2.RequestHandler):
     if config_NOCOMMIT.auth_service.requires_https:
       self.request.scheme = "https"
     return config_NOCOMMIT.auth_service.getLogoutLink(self.request.url)
-    
+
   @property
   def pledge_root_url(self):
-    return config_NOCOMMIT.pledge_service.url     
+    return config_NOCOMMIT.PLEDGE_SERVICE_URL
 
   def render_template(self, template, **kwargs):
     if self.logged_in:
@@ -264,6 +263,10 @@ class AdminToTeam(db.Model):
   user = db.StringProperty(required=True)  # from current_user["user_id"]
   team = db.ReferenceProperty(Team, required=True)
 
+  @staticmethod
+  def memcacheKey(user_id, team):
+    return repr((str(user_id), str(team.key())))
+
 
 def require_login(fn):
   @functools.wraps(fn)
@@ -287,6 +290,17 @@ class NotFoundHandler(BaseHandler):
     self.notfound()
 
 
+def isUserAdmin(user_id, team):
+  return (memcache.get(AdminToTeam.memcacheKey(user_id, team)) or
+          (AdminToTeam.all().filter("team =", team).filter(
+              "user =", user_id).get() is not None))
+
+
+def makeUserAdmin(user_id, team):
+  AdminToTeam(user=user_id, team=team).put()
+  memcache.add(AdminToTeam.memcacheKey(user_id, team), True, 30)
+
+
 class TeamBaseHandler(BaseHandler):
   def validate(self, slug):
     s = Slug.get_by_key_name(slug)
@@ -302,8 +316,7 @@ class TeamBaseHandler(BaseHandler):
       primary = False
     is_admin = False
     if self.logged_in:
-      if AdminToTeam.all().filter("team =", team).filter(
-          "user =", self.current_user["user_id"]).get() is not None:
+      if isUserAdmin(self.current_user["user_id"], team):
         is_admin = True
     return team, primary, is_admin
 
@@ -357,19 +370,20 @@ class NewTeamHandler(BaseHandler):
     team.put()
     # TODO: can i reference a team before putting it in other reference
     # properties? should check
-    AdminToTeam(user=self.current_user["user_id"], team=team).put()
     team.primary_slug = Slug.new(team)
     team.put()
+    makeUserAdmin(self.current_user["user_id"], team)
     return self.redirect("/t/%s" % team.primary_slug)
 
 
-class NewFromPledgeHandler(BaseHandler):
+class FromPledgeBaseHandler(BaseHandler):
   def add_to_user(self, team):
     if self.logged_in:
-      if AdminToTeam.all().filter("user =", self.current_user["user_id"])\
-          .filter("team =", team).get() is None:
-        AdminToTeam(user=self.current_user["user_id"], team=team).put()
+      if not isUserAdmin(self.current_user["user_id"], team):
+        makeUserAdmin(self.current_user["user_id"], team)
 
+
+class NewFromPledgeHandler(FromPledgeBaseHandler):
   def get(self, user_token):
     team = Team.all().filter('user_token =', user_token).get()
     if team is None:
@@ -419,6 +433,19 @@ class NewFromPledgeHandler(BaseHandler):
     self.add_to_user(team)
     team.primary_slug = Slug.new(team)
     team.put()
+    if self.logged_in:
+      return self.redirect("/t/%s" % team.primary_slug)
+    return self.redirect("/dashboard/add_admin_from_pledge/%s" % user_token)
+
+
+class AddAdminFromPledgeHandler(FromPledgeBaseHandler):
+  def get(self, user_token):
+    team = Team.all().filter('user_token =', user_token).get()
+    if team is None:
+      return self.notfound()
+    if not self.logged_in:
+      return self.render_template("add_admin_login.html", team=team)
+    self.add_to_user(team)
     return self.redirect("/t/%s" % team.primary_slug)
 
 
@@ -457,5 +484,6 @@ app = webapp2.WSGIApplication(config_NOCOMMIT.auth_service.handlers() + [
   (r'/dashboard/?', DashboardHandler),
   (r'/dashboard/new/?', NewTeamHandler),
   (r'/dashboard/new_from_pledge/(\w+)', NewFromPledgeHandler),
+  (r'/dashboard/add_admin_from_pledge/(\w+)', AddAdminFromPledgeHandler),
   (r'/?', IndexHandler),
   (r'.*', NotFoundHandler)], debug=False)
