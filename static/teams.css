@@ -1,5 +1,5 @@
 .flag-header {
-  background: #204659 url(../../flag-header.jpg) -510px 0 no-repeat;
+  background: #204659 url(flag-header.jpg) -510px 0 no-repeat;
   height: 158px;
 }
 .flag-header * {
@@ -163,28 +163,28 @@
   left: 0;
 }
 .pledgepage #pledgecol-sidebar .social-icons a.twitter {
-  background-image: url(../../social/twitter.png);
+  background-image: url(social/twitter.png);
 }
 .pledgepage #pledgecol-sidebar .social-icons a.twitter:hover {
-  background-image: url(../../social/twitter_hover.png);
+  background-image: url(social/twitter_hover.png);
 }
 .pledgepage #pledgecol-sidebar .social-icons a.twitter:after {
   content: "Share with \A Twitter";
 }
 .pledgepage #pledgecol-sidebar .social-icons a.facebook {
-  background-image: url(../../social/facebook.png);
+  background-image: url(social/facebook.png);
 }
 .pledgepage #pledgecol-sidebar .social-icons a.facebook:hover {
-  background-image: url(../../social/facebook_hover.png);
+  background-image: url(social/facebook_hover.png);
 }
 .pledgepage #pledgecol-sidebar .social-icons a.facebook:after {
   content: "Share with \A Facebook";
 }
 .pledgepage #pledgecol-sidebar .social-icons a.email {
-  background-image: url(../../social/email.png);
+  background-image: url(social/email.png);
 }
 .pledgepage #pledgecol-sidebar .social-icons a.email:hover {
-  background-image: url(../../social/email_hover.png);
+  background-image: url(social/email_hover.png);
 }
 .pledgepage #pledgecol-sidebar .social-icons a.email:after {
   content: "Share with \A Email";
