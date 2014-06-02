@@ -79,6 +79,10 @@
   border: 0;
   padding-top: 50px;
 }
+.pledgepage #pledgecol-main img.avatar {
+  float: left;
+  margin: 20px 20px 20px 0;
+}
 .pledgepage #pledgecol-sidebar button {
   width: 100%;
   font-size: 30px;
