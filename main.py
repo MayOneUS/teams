@@ -285,7 +285,7 @@ class IndexHandler(BaseHandler):
   def get(self):
     if self.logged_in:
       return self.redirect("/dashboard")
-    return self.redirect("https://mayone.us")
+    return self.redirect("https://mayday.us")
 
 
 class NotFoundHandler(BaseHandler):
