@@ -48,10 +48,12 @@
   padding: 10px 24px;
   margin: 40px 0;
   transition: background 0.15s;
+    text-decoration:none;
 }
 .pledgepage button:hover {
   color: #fff;
   background: #db6365;
+  text-decoration:none;
 }
 .pledgepage #pledgecol-main {
   padding-right: 40px;
@@ -80,6 +82,7 @@
 .pledgepage #pledgecol-sidebar button {
   width: 100%;
   font-size: 30px;
+  text-decoration:none;
 }
 .pledgepage #pledgecol-sidebar .progress {
   border-radius: 0;
