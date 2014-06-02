@@ -30,96 +30,105 @@
   </script>
 {% endblock %}
 {% block body %}
-<div class="pledgepage">
-<div class="container">
+  <div class="pledgepage">
+    <div class="container">
 
-<div class="row">
-    <div class="col-md-8" id="pledgecol-main">
+      <div class="row">
+        <div class="col-md-8" id="pledgecol-main">
 
-        <!--&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&-->
-        <!-- links shown only if you're logged in -->
-       {% if edit_url and logged_in %}      
-        <div class="edit-menu">
-            <a href="#">Edit this page</a> |
-            <a href="/dashboard/new">Create another page</a> |
-            <a href="/dashboard">Dashboard</a>
-        </div>
-      {% endif %}
-        <!--&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&-->
-
-
-        <h2>{{team.title}}’s pledge page</h2>
-   {% if not team.youtube_id and not team.image_url %}
-        <h3>A word from Professor Lawrence Lessig about the Mayday PAC:</h3>
-
-        <div class="video-container">
-                    <iframe src="//player.vimeo.com/video/93299391" width="420" height="236" frameborder="0" webkitallowfullscreen mozallowfullscreen allowfullscreen></iframe>
-        </div>
-        
-   {% elif team.youtube_id %}
-        <div class="video-container">
-                    <iframe src="//www.youtube.com/embed/{{team.youtube_id}}" frameborder="0" allowfullscreen width="420"></iframe>
-        </div>
-   {% elif team.image_url %}
-        <div class="video-container">
-             <img src="{{team.image_url}}">
-        </div>
-        
-   {% endif %}
-
-
-
-     {% if team.gravatar %}
-        <img class="avatar" src="{{ team.gravatar }}" alt="Team Avatar"/>
-      {% endif %}
-      {% autoescape false %}{{description_rendered}}{% endautoescape %}
-
-            <a href="{{pledge_root_url}}/pledge?team={{team.key()}}"><button class="btn">Pledge Now</button></a>
-        </div>
- 
-   <div class="col-md-4" id="pledgecol-sidebar">
-
-         <a href="{{pledge_root_url}}/pledge?team={{team.key()}}"><button class="btn" href="{{pledge_root_url}}/pledge?team={{team.key()}}">Pledge Now</button></a>
-
-        <!-- progress bar -->
-        <div class="progress">
-            <div class="progress-bar" role="progressbar" aria-valuenow="60" aria-valuemin="0" aria-valuemax="100" style="width: 60%;">
-                <span class="sr-only">60% Complete</span>
+          <!--&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&-->
+          <!-- links shown only if you're logged in -->
+          {% if logged_in %}
+            <div class="edit-menu">
+              {% if edit_url %}
+                <a href="{{edit_url}}">Edit this page</a> |
+              {% endif %}
+              <a href="/dashboard/new">Create another page</a> |
+              <a href="/dashboard">Dashboard</a>
             </div>
+          {% endif %}
+
+          <!--&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&-->
+
+
+          <h2>{{team.title}}’s pledge page</h2>
+
+          {% if not team.youtube_id and not team.image_url %}
+            <h3>A word from Professor Lawrence Lessig about the Mayday PAC:</h3>
+
+            <div class="video-container">
+              <iframe src="//player.vimeo.com/video/93299391" width="420"
+                  height="236" frameborder="0" webkitallowfullscreen
+                  mozallowfullscreen allowfullscreen></iframe>
+            </div>
+
+          {% elif team.youtube_id %}
+            <div class="video-container">
+              <iframe src="//www.youtube.com/embed/{{team.youtube_id}}"
+                  frameborder="0" allowfullscreen width="420"></iframe>
+            </div>
+          {% elif team.image_url %}
+            <div class="video-container">
+              <img src="{{team.image_url}}" />
+            </div>
+
+          {% endif %}
+
+          {% if team.gravatar %}
+            <img class="avatar" src="{{ team.gravatar }}" alt="Team Avatar" />
+          {% endif %}
+
+          {% autoescape false %}{{description_rendered}}{% endautoescape %}
+
+          <a href="{{pledge_root_url}}/pledge?team={{team.key()}}">
+            <button class="btn">Pledge Now</button>
+          </a>
         </div>
-        <div class="progress-info">
+
+        <div class="col-md-4" id="pledgecol-sidebar">
+
+          <a href="{{pledge_root_url}}/pledge?team={{team.key()}}">
+            <button class="btn">Pledge Now</button>
+          </a>
+
+          <!-- progress bar -->
+          <div class="progress">
+            <div class="progress-bar" role="progressbar" aria-valuenow="60"
+                aria-valuemin="0" aria-valuemax="100" style="width: 60%;">
+              <span class="sr-only">60% Complete</span>
+            </div>
+          </div>
+          <div class="progress-info">
             <div class="raised pull-left">Raised: <span>$1,000,000</span></div>
             <div class="goal pull-right">Next Goal: <span>$2,000,000</span></div>
             <div class="clearfix"></div>
-        </div>
+          </div>
 
-        <!-- page stats -->
-        <div class="panel panel-default">
+          <!-- page stats -->
+          <div class="panel panel-default">
             <div class="panel-heading">
-                <h3 class="panel-title">Page Stats</h3>
+              <h3 class="panel-title">Page Stats</h3>
             </div>
             <div class="panel-body">
-                 <H6>AMOUNT RAISED</H6>
-                 <H5 class="amount" id="total_dollars"></h5>
+              <H6>AMOUNT RAISED</H6>
+              <H5 class="amount" id="total_dollars"></h5>
 
-                 <H6>PLEDGES</H6>
-                 <H5 class="pledges" id="total_pledges"></h5>
-                
-          
+              <H6>PLEDGES</H6>
+              <H5 class="pledges" id="total_pledges"></h5>
+
             </div>
-        </div>
+          </div>
 
-        <!-- social buttons -->
-        <div class="social-icons">
+          <!-- social buttons -->
+          <div class="social-icons">
             <a href="#" class="twitter"></a>
             <a href="#" class="facebook"></a>
             <a href="#" class="email"></a>
+          </div>
         </div>
+
+      </div>
+
     </div>
-
-
-</div>
-
-
-</div>
+  </div>
 {% endblock %}

@@ -189,6 +189,13 @@
 .pledgepage #pledgecol-sidebar .social-icons a.email:after {
   content: "Share with \A Email";
 }
+form ul.errors {
+  color: red;
+}
+p.markdown-note {
+  font-size: small;
+  font-style: italic;
+}
 .footer {
   background: #c6c8ca;
   text-align: center;
