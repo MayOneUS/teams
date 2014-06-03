@@ -190,9 +190,9 @@ class ZipcodeField(wtforms.Field):
 
 
 class TeamForm(wtforms.Form):
-  title = wtforms.StringField("Title", [
+  title = wtforms.StringField("Your Name", [
       wtforms.validators.Length(min=1, max=500)], default=DEFAULT_TITLE)
-  description = wtforms.TextAreaField("Description",
+  description = wtforms.TextAreaField("Your Personal Message",
       [wtforms.validators.Length(min=1)],
       default=DEFAULT_DESC.format(title=DEFAULT_TITLE))
 
