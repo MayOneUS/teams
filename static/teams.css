@@ -1,9 +1,23 @@
+@media all and (max-width: 650px) {
+  .flag-header {
+    text-align: center;
+  }
+  .flag-header .top-menu {
+    width: 100%;
+  }
+  .flag-header h1 {
+    font-size: 55px;
+  }
+  .flag-header h2 {
+    font-size: 18px;
+  }
+}
 .flag-header {
   background: #204659 url(flag-header.jpg) center top;
   height: 158px;
 }
 .flag-header * {
-  font-family: "HelveticaNeue", "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif;  
+  font-family: "HelveticaNeue", "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif;
 }
 .flag-header h1 {
   text-transform: uppercase;
@@ -22,27 +36,14 @@
   font-weight: 300;
   margin-top: 0;
 }
-
-@media all and (max-width: 650px) {
-    .flag-header {
-        text-align: center;
-    }
-    .flag-header .top-menu {
-        width: 100%;
-    }
-    .flag-header h1 {
-        font-size: 55px;
-    }
-    .flag-header h2 {
-        font-size: 18px;
-    }
-}
-
 .flag-header .top-menu a {
   color: #FFF;
   display: inline-block;
   margin: 1em;
   font-weight: 900;
+}
+.flag-header .top-menu a span {
+  font-weight: 300;
 }
 .flag-header .top-menu a:hover {
   color: #FFF;
@@ -57,11 +58,8 @@
   color: #fff;
   font: inherit;
 }
-.flag-header .top-menu a span {
-  font-weight: 300;
-}
 .pledgepage * {
-  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-family: "HelveticaNeue", "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif;
 }
 .pledgepage h2, .pledgepage h3 {
   font-weight: 700;

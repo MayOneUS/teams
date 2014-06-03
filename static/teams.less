@@ -5,7 +5,7 @@
 @PLEDGE_FOOTER_GRAY: #606062;
 
 .helv() {
-  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-family: "HelveticaNeue", "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif;
 }
 .noBoxShadow() {
   -webkit-box-shadow: none;
@@ -13,10 +13,25 @@
   box-shadow: none;
 }
 
+@media all and (max-width: 650px) {
+  .flag-header {
+    text-align: center;
+  }
+  .flag-header .top-menu {
+    width: 100%;
+  }
+  .flag-header h1 {
+    font-size: 55px;
+  }
+  .flag-header h2 {
+    font-size: 18px;
+  }
+}
+
 //---------------- HEADER
 
 .flag-header {
-  background: #204659 url(flag-header.jpg) -510px 0 no-repeat;
+  background: #204659 url(flag-header.jpg) center top;
   height: 158px;
   * { .helv() }
 
@@ -41,11 +56,25 @@
 
     a {
       color: #FFF;
-      color: rgba(255,255,255,0.6);
       display: inline-block;
       margin: 1em;
       font-weight: 900;
       span { font-weight: 300}
+    }
+
+    a:hover {
+      color: #FFF;
+      display: inline-block;
+      margin: 1em;
+      font-weight: 900;
+      text-decoration: none;
+    }
+
+    button {
+      background: transparent;
+      border: none;
+      color: #fff;
+      font: inherit;
     }
   }
 }
