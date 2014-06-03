@@ -6,6 +6,7 @@
         <dt>{{form.title.label}}</dt>
         <dd>
           <div>{{form.title}}</div>
+          <p class="markdown-note">This will show up on your page as &ldquo;[Your Name]'s pledge page:&rdquo;</p>
           {% if form.title.errors %}
             <ul class="errors">
               {% for error in form.title.errors %}

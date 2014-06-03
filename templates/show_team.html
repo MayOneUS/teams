@@ -3,6 +3,7 @@
 {% extends "includes/base.html" %}
 {% block head %}
   <!-- for facebook sharing -->
+  <meta property="og:image" content="https://redesign.mayday.us/images/share_preview.jpg"/>
   <meta property="og:title" content="{{team.title|escape}}'s pledge page"/>
   <meta property="og:type" content="website"/>
   <meta property="og:site_name" content="myMaydayPAC"/>
@@ -86,7 +87,7 @@
           <h2>{{team.title}}’s pledge page</h2>
 
           {% if not team.youtube_id and not team.image_url %}
-            <h3>A word from Professor Lawrence Lessig about the Mayday PAC:</h3>
+            <h3>A word from Lessig about the Mayday PAC:</h3>
 
             <div class="video-container">
               <iframe src="//player.vimeo.com/video/93299391" width="420"

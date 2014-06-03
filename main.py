@@ -33,7 +33,7 @@ SLUG_TOKEN_AMOUNT = 2
 DEFAULT_TITLE = "Team Awesome"
 
 DEFAULT_DESC = u"""\
-I recently joined Larry Lessig's citizen-funded MAYDAY.US campaign, an ambitious \
+I recently joined Lessig's citizen-funded MAYDAY.US campaign, an ambitious \
 experiment to win a Congress committed to ending corruption in 2016, and we did something amazing: \
 we raised $1 million dollars in 12 days. That's a ton of money, but it's not enough.
 
@@ -46,7 +46,7 @@ will you be one of those ten?
 """
 
 PREVIOUS_PLEDGE_DESC = u"""\
-I recently joined Larry Lessig's citizen-funded MAYDAY.US campaign, an ambitious \
+I recently joined Lessig's citizen-funded MAYDAY.US campaign, an ambitious \
 experiment to win a Congress committed to ending corruption in 2016, and we did something amazing: \
 We raised $1 million dollars in 12 days. That's a ton of money, but it's not enough.
 

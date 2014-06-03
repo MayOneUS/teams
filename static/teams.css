@@ -3,7 +3,7 @@
   height: 158px;
 }
 .flag-header * {
-  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-family: "HelveticaNeue", "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif;  
 }
 .flag-header h1 {
   text-transform: uppercase;
@@ -21,6 +21,10 @@
   font-size: 25px;
   font-weight: 300;
   margin-top: 0;
+}
+
+.highlight-link {
+    color:#fff;
 }
 
 @media all and (max-width: 650px) {
