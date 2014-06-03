@@ -3,7 +3,7 @@
 {% extends "includes/base.html" %}
 {% block head %}
   <!-- for facebook sharing -->
-  <meta property="og:image" content="https://redesign.mayday.us/images/share_preview.jpg"/>
+  <meta property="og:image" content="https://mayday.us/images/share_preview.jpg"/>
   <meta property="og:title" content="{{team.title|escape}}'s pledge page"/>
   <meta property="og:type" content="website"/>
   <meta property="og:site_name" content="myMaydayPAC"/>
@@ -22,13 +22,15 @@
       }
       return x1 + x2;
     }
-    var GOAL_DOLLARS = 2000000;
+    var ALREADY_BANKED = 1000000;
+    var GOAL_DOLLARS = 5000000;
     function updateTeam(total_cents, total_pledges) {
       $("#team_total_dollars").text("$" + addCommas(total_cents/100));
       $("#team_total_pledges").text("" + total_pledges);
     }
     function updateTotal(total_cents) {
       var total_dollars = total_cents/100;
+      total_dollars = total_dollars - ALREADY_BANKED;
       var progress = Math.floor((total_dollars * 100) / GOAL_DOLLARS);
       $("#total_dollars").text("$" + addCommas(total_dollars));
       $("#goal_dollars").text("$" + addCommas(GOAL_DOLLARS));
