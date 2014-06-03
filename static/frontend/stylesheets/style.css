@@ -28,7 +28,7 @@
 /*Bootstrapper only reaches 960px, so we need to wrap our rows in yet another div - one that reaches the full width of the page*/
 
 body {
-    font-family: 'Lato',  helvetica, arial, 'sans serif';
+    font-family: "HelveticaNeue", "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif;
 }
 
 .full-width {
@@ -43,7 +43,6 @@ body {
 }
 
 .topmenu {
-    font-family: 'Oswald', arial, helvetica, 'sans serif';
     color: white;
     font-size: 15px;
     background-color: #003366;
@@ -60,8 +59,7 @@ body {
 }
 
 
-.topmenu_red{
-   font-family: 'Oswald', arial, helvetica, 'sans serif';
+.topmenu_red {
     color: white;
     font-size: 15px;
     background-color: #800000;
@@ -126,7 +124,6 @@ background-color: #9e0b0f;
 
 
 .subhead {
-    font-family: "Oswald", arial, helvetica, "sans serif";
     color: #999999;
     font-size: 22px;
 }
@@ -142,7 +139,6 @@ background-color: #9e0b0f;
 }
 
 .herotext {
-  font-family: "Oswald", arial, helvetica, "sans serif";
   color:white;
   text-align:center;
   font-size:45px;
@@ -214,7 +210,6 @@ background-color: #9e0b0f;
   margin-right:auto;
   margin:10px 50px;
   padding:10px 20px;
-  font-family: "Oswald", arial, helvetica, "sans serif";
   text-align: center;
   font-size:50px;
   border: 3px solid white;
@@ -229,12 +224,10 @@ background-color: #9e0b0f;
 }
 
 .checkpoint-text{
-  font-family: "Lato", arial, helvetica, "sans serif";
   color:white;
   text-align:center;
 }
 #complete-total-raised {
-  font-family: "Lato", arial, helvetica, "sans serif";
   color:white;
   text-align:center;
 }
@@ -345,7 +338,6 @@ background-color: #9e0b0f;
 }
 
 .donation-share-text {
-  font-family: "Oswald", arial, helvetica, "sans serif";
   color:white;
   text-align:center;
   font-size:28px;
@@ -364,7 +356,6 @@ background-color: #9e0b0f;
 }
 
 .sign-up {
-  font-family: "Lato", arial, helvetica, "sans serif";
   color:white;
   text-align:center;
   font-size:16px;
@@ -375,7 +366,6 @@ background-color: #9e0b0f;
 }
 
 .sign-up-pledge{
-  font-family: "Oswald", arial, helvetica, "sans serif";
   color:#ffffcc;
   text-align:center;
   font-size:24px;
@@ -446,7 +436,6 @@ background-color: #9e0b0f;
 }
 
 .widgettext h1, .widgettext h2, .widgettext h3, .widgettext h4, .widgettext h5, .widgettext h6 {
-  font-family: "Oswald", arial, helvetica, "sans serif";
   color:#FFFF99;
   text-align:center;
   font-size:35px;
@@ -454,7 +443,6 @@ background-color: #9e0b0f;
 }
 
 .widgettext p {
-  font-family: "Lato", arial, helvetica, "sans serif";
   color:white;
   text-align:center;
   font-size:20px;
@@ -462,7 +450,6 @@ background-color: #9e0b0f;
 
 .pac_disclaimer {
   display: inline-block;
-  font-family: "Lato", arial, helvetica, "sans serif";
   color:white;
   text-align:center;
   font-size:16px;
@@ -487,7 +474,6 @@ background-color: #9e0b0f;
 
 
 .copyright{
-  font-family: "Lato", arial, helvetica, "sans serif";
   color:white;
 }
 
@@ -517,7 +503,6 @@ background-color: #9e0b0f;
 }
 
 .subpage-content {
-   font-family: "Lato", arial, helvetica, "sans serif";
    color:black;
    font-size:16px;
    padding:20px;
@@ -530,7 +515,6 @@ background-color: #9e0b0f;
 .subpage-content h4,
 .subpage-content h5,
 .subpage-content h6{
-  font-family: "Oswald", arial, helvetica, "sans serif";
   color:#003366;
   text-align:center;
   font-size:30px;
@@ -541,7 +525,6 @@ background-color: #9e0b0f;
 }
 
 .sidebar {
-   font-family: "Lato", arial, helvetica, "sans serif";
    color:white;
    font-size:14px;
    padding:20px;
@@ -568,7 +551,6 @@ display:inline;
 .sidebar  .pledgebutton {
     margin:10px 20px;
     padding:5px 10px;
-    font-family: "Oswald", arial, helvetica, "sans serif";
     text-align: center;
     font-size:40px;
     border: 3px solid white;
@@ -582,7 +564,6 @@ display:inline;
 .sidebar h4,
 .sidebar h5,
 .sidebar h6{
-  font-family: "Oswald", arial, helvetica, "sans serif";
   color:white;
   text-align:center;
   font-size:30px;
@@ -636,7 +617,6 @@ display:inline;
   .pledgebutton{
     margin:25px 20px;
     padding:5px 10px;
-    font-family: "Oswald", arial, helvetica, "sans serif";
     text-align: center;
     font-size:40px;
     border: 3px solid white;
@@ -653,7 +633,6 @@ display:inline;
      margin-right:auto;
      margin:10px 50px;
      padding:10px 20px;
-     font-family: "Oswald", arial, helvetica, "sans serif";
      text-align: center;
      font-size:50px;
      border: 3px solid white;
@@ -667,7 +646,6 @@ display:inline;
   .pledgebutton{
      margin:25px 20px;
      padding:5px 10px;
-     font-family: "Oswald", arial, helvetica, "sans serif";
      text-align: center;
      font-size:40px;
      border: 3px solid white;
@@ -741,14 +719,12 @@ display:inline;
 }
 
 .description {
-  font-family: "Oswald", arial, helvetica, "sans serif";
   color:white;
   font-weight:300;
   padding-bottom:30px;
 }
 
 .description p{
-  font-family: "Oswald", arial, helvetica, "sans serif";
   color:white;
   font-weight:300;
 }
@@ -765,7 +741,6 @@ display:inline;
 
 .word-note{
   position:relative;
-  font-family: "Oswald", arial, helvetica, "sans serif";
   color:white;
   font-weight:300;
   font-size:25px;

@@ -1,5 +1,5 @@
 .flag-header {
-  background: #204659 url(flag-header.jpg) -510px 0 no-repeat;
+  background: #204659 url(flag-header.jpg) center top;
   height: 158px;
 }
 .flag-header * {
@@ -31,10 +31,10 @@
         width: 100%;
     }
     .flag-header h1 {
-        font-size: 65px;
+        font-size: 55px;
     }
     .flag-header h2 {
-        font-size: 21px;
+        font-size: 18px;
     }
 }
 
@@ -43,6 +43,19 @@
   display: inline-block;
   margin: 1em;
   font-weight: 900;
+}
+.flag-header .top-menu a:hover {
+  color: #FFF;
+  display: inline-block;
+  margin: 1em;
+  font-weight: 900;
+  text-decoration: none;
+}
+.flag-header .top-menu button {
+  background: transparent;
+  border: none;
+  color: #fff;
+  font: inherit;
 }
 .flag-header .top-menu a span {
   font-weight: 300;
