@@ -23,10 +23,6 @@
   margin-top: 0;
 }
 
-.highlight-link {
-    color:#fff;
-}
-
 @media all and (max-width: 650px) {
     .flag-header {
         text-align: center;
@@ -44,7 +40,6 @@
 
 .flag-header .top-menu a {
   color: #FFF;
-  color: rgba(255, 255, 255, 0.6);
   display: inline-block;
   margin: 1em;
   font-weight: 900;
