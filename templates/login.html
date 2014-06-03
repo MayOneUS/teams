@@ -1,5 +1,8 @@
 {% extends "includes/base.html" %}
 {% block body %}
+  <div class="login_text">
+    To create or manage your pledge page, log in with one of the options below.
+  </div>
   <div class="login_options">
     <ul>
       {% for service, service_link in login_links.iteritems() %}
