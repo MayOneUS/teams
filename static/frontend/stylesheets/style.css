@@ -25,10 +25,19 @@
     margin:0;
 }
 
+p {
+  font-size: 15px;
+  line-height: 1.61em;
+}
+
 /*Bootstrapper only reaches 960px, so we need to wrap our rows in yet another div - one that reaches the full width of the page*/
 
 body {
     font-family: "HelveticaNeue", "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif;
+}
+body, html {
+  height: 100%;
+  background: #c6c8ca;
 }
 
 .full-width {
@@ -135,17 +144,11 @@ background-color: #9e0b0f;
 /* Hero Text Row */
 
 .herotext-row {
-  background-color: black;
 }
 
 .herotext {
-  color:white;
-  text-align:center;
-  font-size:45px;
-  line-height:45px;
-  background-color:black;
-  padding-top:20px;
-  padding-bottom:20px;
+  font-weight: bold;
+  font-size: 1.1em;
 }
 
 /*Hero Area*/
@@ -471,7 +474,9 @@ background-color: #9e0b0f;
   color:#ffffcc;
 }
 
-
+#main_body {
+  background: #fff;
+}
 
 .copyright{
   color:white;
@@ -687,7 +692,6 @@ display:inline;
 }
 
 .page-header{
-  color:white;
   border-bottom:0;
   padding:0;
   margin-top:0;
@@ -746,27 +750,23 @@ display:inline;
   font-size:25px;
 }
 
-.btn-cta {
-  color:#fff;
-  background-color:#428bca;
-  border-color:#357cbd;
-  font-size:30px;
-  margin-bottom:50px;
-  margin-top:10px;
-  padding:10px 20px;
-
-    -webkit-border-radius: 4px;
-    -moz-border-radius: 4px;
-    border-radius: 4px;
-  width:50%;
-  text-align:center;
-  margin-left:auto;
-  margin-right:auto;
+.btn-cta, .btn-cta:visited {
+  background-color: #d53a38;
+  border-radius: 5px;
+  color: #FFF;
+  font-weight: bold;
+  text-align: center;
+  border: none;
+  display: block;
+  margin: 20px auto 0;
+  width: 270px;
+  padding: 20px;
 }
 .btn-cta:hover {
-    background-color:#8EB9DF;
-    text-decoration:none;
-  }
+  background: #b73230;
+  text-decoration: none;
+  color: #fff;
+}
 
 .teamslist li{
   font-size:30px;

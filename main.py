@@ -30,7 +30,7 @@ INVALID_SLUG_CHARS = re.compile(r'[^\w-]')
 MULTIDASH_RE = re.compile(r'-+')
 SLUG_TOKEN_AMOUNT = 2
 
-DEFAULT_TITLE = "Team Awesome"
+DEFAULT_TITLE = ""
 
 DEFAULT_DESC = u"""\
 I recently joined Lessig's citizen-funded MAYDAY.US campaign, an ambitious \

@@ -22,7 +22,7 @@
 
     {% include "includes/login_modal.html" %}
 
-    <div class="full-width">
+    <div class="full-width" id="wrapper">
 
       <!--&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&-->
       <div class="row flag-header">
@@ -39,7 +39,7 @@
           <h2>An experiment to reclaim our democracy</h2>
         </div>
       </div>
-      <div class="{{body_class}}">
+      <div class="{{body_class}}" id="main_body">
         <div class="container">
           {% block body %}{% endblock %}
         </div>
@@ -48,8 +48,8 @@
         <div class="footer row">
 
           <div class="pac_disclaimer">
-            Paid for by Mayday PAC<br/>
-            Not authorized by any candidate or candidate's committee<br/>
+            Paid for by Mayday PAC. 
+            Not authorized by any candidate or candidate's committee. 
             <a href="/">www.mayday.us</a>
           </div>
 
