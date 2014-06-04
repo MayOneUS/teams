@@ -234,6 +234,13 @@ p.markdown-note {
   font-style: italic;
 }
 
+.login_text {
+  width: 275px;
+  margin: 0 auto;
+  padding: 30px 0 10px 0;
+  text-align: center;
+  color: #555;
+}
 
 .login_options {
   text-align: center;
