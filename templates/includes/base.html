@@ -7,7 +7,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <script src="//code.jquery.com/jquery-1.11.0.min.js"></script>
     <script src="//netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script>
-
+    <script src="//cdn.optimizely.com/js/210578001.js"></script>
+    
     <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">
     <link rel="stylesheet" id="googlefonts-css" type="text/css" media="all" href="https://fonts.googleapis.com/css?family=Oswald:300,400,700|Lato:400,700&amp;amp;subset=latin">
     <link rel="stylesheet" type="text/css" href="/static/frontend/stylesheets/entypo-social.css">
@@ -23,6 +24,8 @@
   })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
 
   ga('create', 'UA-50367295-1', 'mayday.us');
+  window.optimizely = window.optimizely || [];
+  window.optimizely.push("activateUniversalAnalytics");
   ga('require', 'displayfeatures');
   ga('send', 'pageview');
 
