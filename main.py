@@ -477,24 +477,32 @@ class SiteAdminIndex(AdminHandler):
 
 class SiteAdminCSV(AdminHandler):
   def get(self):
-    self.response.headers.add_header("Content-Type", "text/csv")
-    self.response.headers.add_header("Content-Disposition",
-        "attachment; filename=teams.csv;")
-    out = csv.DictWriter(self.response,
-        ["key", "title", "slug", "url", "zip_code", "user_token", "crtime",
-         "mtime", "version"])
-    out.writeheader()
-    for team in Team.all():
-      out.writerow({
+    self.render_template("site_csv.html")
+
+
+class SiteAdminTeams(AdminHandler):
+  def get(self):
+    query = Team.all()
+    cursor = self.request.get("cursor")
+    if cursor:
+      query.with_cursor(cursor)
+    teams = []
+    for team in query.fetch(int(self.request.get("amount", 100))):
+      teams.append({
           "key": str(team.key()),
           "title": team.title,
           "slug": team.primary_slug,
           "url": "%s/t/%s" % (self.request.application_url, team.primary_slug),
           "zip_code": team.zip_code,
           "user_token": team.user_token,
-          "crtime": team.creation_time,
-          "mtime": team.modification_time,
+          "crtime": str(team.creation_time),
+          "mtime": str(team.modification_time),
           "version": team.team_version})
+    cursor = query.cursor()
+    self.response.write(json.dumps({
+        "next_cursor": cursor,
+        "teams": teams}))
+
 
 app = webapp2.WSGIApplication(config_NOCOMMIT.auth_service.handlers() + [
   (r'/t/([^/]+)/?', TeamHandler),
@@ -506,5 +514,6 @@ app = webapp2.WSGIApplication(config_NOCOMMIT.auth_service.handlers() + [
   (r'/dashboard/add_admin_from_pledge/(\w+)', AddAdminFromPledgeHandler),
   (r'/site-admin/?', SiteAdminIndex),
   (r'/site-admin/csv/?', SiteAdminCSV),
+  (r'/site-admin/teams.json', SiteAdminTeams),
   (r'/?', IndexHandler),
   (r'.*', NotFoundHandler)], debug=False)

@@ -1,0 +1,122 @@
+{% extends "includes/base.html" %}
+
+{% block head %}
+<script>
+var BATCH_AMOUNT = 100;
+function escape_val(val) {
+  if (val === null) { return ""; }
+  val = val.toString();
+  val = val.replace(/"/g, '""');
+  if (val.search(/("|,|\n)/g) >= 0) {
+    val = '"' + val + '"';
+  }
+  return val;
+}
+function make_csv(data) {
+  if (data.length == 0) {
+    return "\n";
+  }
+  var output = "";
+  var keys = [];
+  $.each(data[0], function(key) { keys.push(key); });
+  var first = true;
+  $.each(keys, function(_, key) {
+    if (!first) {
+      output += ",";
+    } else {
+      first = false;
+    }
+    output += escape_val(key);
+  });
+  output += "\n";
+  $.each(data, function(_, row) {
+    first = true;
+    $.each(keys, function(_, key) {
+      if (!first) {
+        output += ",";
+      } else {
+        first = false;
+      }
+      output += escape_val(row[key]);
+    });
+    output += "\n";
+  });
+  return output;
+}
+function process_team(team, processed_cb) {
+  $.getJSON("https://pledge.mayone.us/r/total", {
+    "team": team["key"]
+  }, function(data) {
+    team["pledges"] = data["teamPledges"];
+    team["dollars"] = data["teamTotalCents"] / 100;
+    if (team["user_token"] === null || team["user_token"].length == 0) {
+      team["user_token_name"] = "";
+      team["user_token_email"] = "";
+      return processed_cb(team);
+    }
+
+    $.getJSON("https://pledge.mayone.us/user-info/" + team["user_token"])
+    .done(function(data) {
+      team["user_token_name"] = data["user"]["name"];
+      team["user_token_email"] = data["user"]["email"];
+      return processed_cb(team);
+    })
+    .fail(function() {
+      team["user_token_name"] = "";
+      team["user_token_email"] = "";
+      return processed_cb(team);
+    });
+  });
+
+}
+function process_teams(unprocessed, processed, all_done_cb) {
+  if (unprocessed.length == 0) {
+    return all_done_cb(processed);
+  }
+  var next = unprocessed.shift();
+  $("#status").text("Processing page " + (processed.length + 1) +
+                    " of " + (processed.length + 1 + unprocessed.length));
+  process_team(next, function(team) {
+    processed.push(next);
+    process_teams(unprocessed, processed, all_done_cb);
+  });
+}
+function finish(all_teams) {
+  process_teams(all_teams, [], function(all_teams) {
+    var csv = make_csv(all_teams);
+    $("#status").text("All done loading");
+    $("#download").attr("href", "data:text/csv;charset=utf-8," +
+        encodeURIComponent(csv));
+    $("#download").attr("download", "teams.csv");
+    $("#download").show();
+  });
+}
+function loadNext(cursor, all_teams) {
+  var options = {"amount": BATCH_AMOUNT};
+  if (cursor.length != 0) {
+    options["cursor"] = cursor;
+  }
+  $.getJSON("/site-admin/teams.json", options, function(data) {
+    var count = 0;
+    $.each(data["teams"], function(_, value) {
+      all_teams.push(value);
+      count += 1;
+    });
+    $("#status").text("Loaded " + all_teams.length + " pages");
+    if (count == BATCH_AMOUNT) {
+      loadNext(data["next_cursor"], all_teams);
+    } else {
+      finish(all_teams);
+    }
+  });
+}
+$(function() {
+  loadNext("", []);
+});
+</script>
+{% endblock %}
+
+{% block body %}
+<div id="status"></div>
+<a id="download" style="display: none;">Download</a>
+{% endblock %}
