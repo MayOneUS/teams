@@ -44,7 +44,7 @@ function make_csv(data) {
   return output;
 }
 function process_team(team, processed_cb) {
-  $.getJSON("https://pledge.mayone.us/r/total", {
+  $.getJSON("https://pledge.mayday.us/r/total", {
     "team": team["key"]
   }, function(data) {
     team["pledges"] = data["teamPledges"];
@@ -55,7 +55,7 @@ function process_team(team, processed_cb) {
       return processed_cb(team);
     }
 
-    $.getJSON("https://pledge.mayone.us/user-info/" + team["user_token"])
+    $.getJSON("https://pledge.mayday.us/user-info/" + team["user_token"])
     .done(function(data) {
       team["user_token_name"] = data["user"]["name"];
       team["user_token_email"] = data["user"]["email"];
