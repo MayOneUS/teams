@@ -1,3 +1,4 @@
+import csv
 import functools
 import hashlib
 import json
@@ -119,6 +120,8 @@ class BaseHandler(webapp2.RequestHandler):
 
 
 class Team(db.Model):
+  CURRENT_VERSION = 2
+
   primary_slug = db.StringProperty()
   title = db.StringProperty(required=True)
   description = db.TextProperty(required=True)
@@ -132,6 +135,18 @@ class Team(db.Model):
   gravatar = db.StringProperty()
 
   user_token = db.StringProperty()
+
+  team_version = db.IntegerProperty(default=1)
+
+  creation_time = db.DateTimeProperty(auto_now_add=True)
+  modification_time = db.DateTimeProperty(auto_now=True)
+
+  @classmethod
+  def create(cls, **kwargs):
+    kwargs["team_version"] = cls.CURRENT_VERSION
+    team = cls(**kwargs)
+    team.put()
+    return team
 
 
 class YoutubeIdField(wtforms.Field):
@@ -335,10 +350,11 @@ class NewTeamHandler(BaseHandler):
     form = TeamForm(self.request.POST)
     if not form.validate():
       return self.render_template("new_team.html", form=form)
-    team = Team(title=form.title.data, description=form.description.data,
-                goal_dollars=form.goal_dollars.data,
-                youtube_id=form.youtube_id.data, zip_code=form.zip_code.data)
-    team.put()
+    team = Team.create(title=form.title.data,
+                       description=form.description.data,
+                       goal_dollars=form.goal_dollars.data,
+                       youtube_id=form.youtube_id.data,
+                       zip_code=form.zip_code.data)
     # TODO: can i reference a team before putting it in other reference
     # properties? should check
     team.primary_slug = Slug.new(team)
@@ -395,10 +411,11 @@ class NewFromPledgeHandler(FromPledgeBaseHandler):
       gravatar = "https://secure.gravatar.com/avatar/%s?%s" % (
         hashlib.md5(user_info['email'].lower()).hexdigest(),
         urllib.urlencode({'s': str('120')}))
-      team = Team(title=form.title.data, description=form.description.data,
-                  zip_code=form.zip_code.data, user_token=user_token,
-                  gravatar=gravatar)
-      team.put()
+      team = Team.create(title=form.title.data,
+                         description=form.description.data,
+                         zip_code=form.zip_code.data,
+                         user_token=user_token,
+                         gravatar=gravatar)
     else:
       form.populate_obj(team)
     self.add_to_user(team)
@@ -448,6 +465,51 @@ class EditTeamHandler(TeamBaseHandler):
     self.redirect("/t/%s" % team.primary_slug)
 
 
+class AdminHandler(webapp2.RequestHandler):
+  def render_template(self, template, **data):
+    self.response.write(JINJA.get_template(template).render(data))
+
+
+class SiteAdminIndex(AdminHandler):
+  def get(self):
+    self.render_template("site_admin.html")
+
+
+class SiteAdminCSV(AdminHandler):
+  def get(self):
+    self.response.headers.add_header("Content-Type", "text/csv")
+    self.response.headers.add_header("Content-Disposition",
+        "attachment; filename=teams.csv;")
+    out = csv.DictWriter(self.response,
+        ["key", "title", "slug", "url", "zip_code", "user_token",
+         "user_token_name", "user_token_email", "crtime", "mtime", "version",
+         "dollars", "pledges"])
+    out.writeheader()
+    for team in Team.all():
+      dollars, pledges = config_NOCOMMIT.pledge_service.getTeamTotal(team)
+      if team.user_token:
+        user_info = config_NOCOMMIT.pledge_service.loadPledgeInfo(
+            team.user_token)
+        user_token_name = user_info["name"]
+        user_token_email = user_info["email"]
+      else:
+        user_token_name = None
+        user_token_email = None
+      out.writerow({
+          "key": str(team.key()),
+          "title": team.title,
+          "slug": team.primary_slug,
+          "url": "%s/t/%s" % (self.request.application_url, team.primary_slug),
+          "zip_code": team.zip_code,
+          "user_token": team.user_token,
+          "user_token_name": user_token_name,
+          "user_token_email": user_token_email,
+          "crtime": team.creation_time,
+          "mtime": team.modification_time,
+          "version": team.team_version,
+          "dollars": dollars,
+          "pledges": pledges})
+
 app = webapp2.WSGIApplication(config_NOCOMMIT.auth_service.handlers() + [
   (r'/t/([^/]+)/?', TeamHandler),
   (r'/t/([^/]+)/edit?', EditTeamHandler),
@@ -456,5 +518,7 @@ app = webapp2.WSGIApplication(config_NOCOMMIT.auth_service.handlers() + [
   (r'/dashboard/new/?', NewTeamHandler),
   (r'/dashboard/new_from_pledge/(\w+)', NewFromPledgeHandler),
   (r'/dashboard/add_admin_from_pledge/(\w+)', AddAdminFromPledgeHandler),
+  (r'/site-admin/?', SiteAdminIndex),
+  (r'/site-admin/csv/?', SiteAdminCSV),
   (r'/?', IndexHandler),
   (r'.*', NotFoundHandler)], debug=False)
