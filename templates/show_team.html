@@ -24,37 +24,28 @@
     }
     var ALREADY_BANKED = 1000000;
     var GOAL_DOLLARS = 5000000;
-    function updateTeam(total_cents, total_pledges) {
-      $("#team_total_dollars").text("$" + addCommas(total_cents/100));
-      $("#team_total_pledges").text("" + total_pledges);
-    }
-    function updateTotal(total_cents) {
-      var total_dollars = total_cents/100;
-      total_dollars = total_dollars - ALREADY_BANKED;
-      var progress = Math.floor((total_dollars * 100) / GOAL_DOLLARS);
-      $("#total_dollars").text("$" + addCommas(total_dollars));
-      $("#goal_dollars").text("$" + addCommas(GOAL_DOLLARS));
-      $("#progressbar-bar").width(progress + "%");
-      $("#progressbar-bar").attr("aria-valuenow", "" + progress);
-      $("#progressbar-text").text(progress + "% Complete");
-    }
     $(function() {
       var reload = function() {
-        $.ajax({
-          dataType: "jsonp",
-          // TODO: we're doing a crazy thing where we pass multiple arguments
-          // back via jsonp, and jquery doesn't know how to handle it. once
-          // the pledge service has a better endpoint we'll use it.
-          callback: "ignored_callback",
-          url: "{{pledge_root_url}}/total?team={{team.key()}}&callback=updateTeam"
-        });
-        $.ajax({
-          dataType: "jsonp",
-          // TODO: we're doing a crazy thing where we pass multiple arguments
-          // back via jsonp, and jquery doesn't know how to handle it. once
-          // the pledge service has a better endpoint we'll use it.
-          callback: "ignored_callback",
-          url: "{{pledge_root_url}}/total?callback=updateTotal"
+        $.getJSON("https://pledge.mayday.us/r/total",
+                  {"team": "{{team.key()}}"})
+        .done(function(data) {
+          $("#team_total_dollars").text("$" + addCommas(
+              data["teamTotalCents"]/100));
+          $("#team_total_pledges").text("" + data["teamPledges"]);
+          var total_dollars = total_data["totalCents"]/100;
+          total_dollars = total_dollars - ALREADY_BANKED;
+          var progress = Math.floor((total_dollars * 100) / GOAL_DOLLARS);
+          $("#total_dollars").text("$" + addCommas(total_dollars));
+          $("#goal_dollars").text("$" + addCommas(GOAL_DOLLARS));
+          $("#progressbar-bar").width(progress + "%");
+          $("#progressbar-bar").attr("aria-valuenow", "" + progress);
+          $("#progressbar-text").text(progress + "% Complete");
+        })
+        .fail(function() {
+          $("#team_total_dollars").text("-");
+          $("#team_total_pledges").text("-");
+          $("#total_dollars").text("ERROR LOADING");
+          $("#goal_dollars").text("");
         });
       };
       reload();
@@ -108,7 +99,7 @@
             </div>
 
           {% endif %}
-          
+
           <H2>A word from {{team.title}}:</H2>
 
           {{description_rendered|safe}}
