@@ -3,6 +3,7 @@
 {% block head %}
 <script>
 var BATCH_AMOUNT = 100;
+var PARALLELISM = 10;
 function escape_val(val) {
   if (val === null) { return ""; }
   val = val.toString();
@@ -43,46 +44,67 @@ function make_csv(data) {
   });
   return output;
 }
-function process_team(team, processed_cb) {
-  $.getJSON("https://pledge.mayday.us/r/total", {
-    "team": team["key"]
-  }, function(data) {
+function fill_amounts(team, done_cb) {
+  $.getJSON("https://pledge.mayday.us/r/total", {"team": team["key"]})
+  .done(function(data) {
     team["pledges"] = data["teamPledges"];
     team["dollars"] = data["teamTotalCents"] / 100;
-    if (team["user_token"] === null || team["user_token"].length == 0) {
-      team["user_token_name"] = "";
-      team["user_token_email"] = "";
-      return processed_cb(team);
-    }
-
-    $.getJSON("https://pledge.mayday.us/user-info/" + team["user_token"])
-    .done(function(data) {
-      team["user_token_name"] = data["user"]["name"];
-      team["user_token_email"] = data["user"]["email"];
-      return processed_cb(team);
-    })
-    .fail(function() {
-      team["user_token_name"] = "";
-      team["user_token_email"] = "";
-      return processed_cb(team);
-    });
+    done_cb();
+  })
+  .fail(function() {
+    team["pledges"] = "";
+    team["dollars"] = "";
+    done_cb();
   });
-
 }
-function process_teams(unprocessed, processed, all_done_cb) {
-  if (unprocessed.length == 0) {
-    return all_done_cb(processed);
+function fill_user(team, done_cb) {
+  if (team["user_token"] === null || team["user_token"].length == 0) {
+    team["user_token_name"] = "";
+    team["user_token_email"] = "";
+    return done_cb();
   }
-  var next = unprocessed.shift();
-  $("#status").text("Processing page " + (processed.length + 1) +
-                    " of " + (processed.length + 1 + unprocessed.length));
-  process_team(next, function(team) {
-    processed.push(next);
-    process_teams(unprocessed, processed, all_done_cb);
+  $.getJSON("https://pledge.mayday.us/user-info/" + team["user_token"])
+  .done(function(data) {
+    team["user_token_name"] = data["user"]["name"];
+    team["user_token_email"] = data["user"]["email"];
+    return done_cb();
+  })
+  .fail(function() {
+    team["user_token_name"] = "";
+    team["user_token_email"] = "";
+    return done_cb();
   });
+}
+function process_team(team, processed_cb) {
+  fill_amounts(team, function() {
+    fill_user(team, processed_cb);
+  });
+}
+function process_teams_worker(teams, done_cb) {
+  var team = teams.shift();
+  process_team(team, function() {
+    $("#status").text(teams.length + " remaining pages to process");
+    if (teams.length == 0) {
+      done_cb();
+    } else {
+      return process_teams_worker(teams, done_cb);
+    }
+  });
+};
+function process_teams(teams, all_done_cb) {
+  var remaining_workers = PARALLELISM;
+  var teams_copy = teams.slice(0);
+  for (var i = 0; i < PARALLELISM; i++) {
+    process_teams_worker(teams_copy, function() {
+      remaining_workers -= 1;
+      if (remaining_workers == 0) {
+        all_done_cb();
+      }
+    });
+  }
 }
 function finish(all_teams) {
-  process_teams(all_teams, [], function(all_teams) {
+  process_teams(all_teams, function() {
     var csv = make_csv(all_teams);
     $("#status").text("All done loading");
     $("#download").attr("href", "data:text/csv;charset=utf-8," +
@@ -117,6 +139,7 @@ $(function() {
 {% endblock %}
 
 {% block body %}
+<h2>CSV</h2>
 <div id="status"></div>
 <a id="download" style="display: none;">Download</a>
 {% endblock %}
