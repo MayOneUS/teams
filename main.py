@@ -481,20 +481,10 @@ class SiteAdminCSV(AdminHandler):
     self.response.headers.add_header("Content-Disposition",
         "attachment; filename=teams.csv;")
     out = csv.DictWriter(self.response,
-        ["key", "title", "slug", "url", "zip_code", "user_token",
-         "user_token_name", "user_token_email", "crtime", "mtime", "version",
-         "dollars", "pledges"])
+        ["key", "title", "slug", "url", "zip_code", "user_token", "crtime",
+         "mtime", "version"])
     out.writeheader()
     for team in Team.all():
-      dollars, pledges = config_NOCOMMIT.pledge_service.getTeamTotal(team)
-      if team.user_token:
-        user_info = config_NOCOMMIT.pledge_service.loadPledgeInfo(
-            team.user_token)
-        user_token_name = user_info["name"]
-        user_token_email = user_info["email"]
-      else:
-        user_token_name = None
-        user_token_email = None
       out.writerow({
           "key": str(team.key()),
           "title": team.title,
@@ -502,13 +492,9 @@ class SiteAdminCSV(AdminHandler):
           "url": "%s/t/%s" % (self.request.application_url, team.primary_slug),
           "zip_code": team.zip_code,
           "user_token": team.user_token,
-          "user_token_name": user_token_name,
-          "user_token_email": user_token_email,
           "crtime": team.creation_time,
           "mtime": team.modification_time,
-          "version": team.team_version,
-          "dollars": dollars,
-          "pledges": pledges})
+          "version": team.team_version})
 
 app = webapp2.WSGIApplication(config_NOCOMMIT.auth_service.handlers() + [
   (r'/t/([^/]+)/?', TeamHandler),
