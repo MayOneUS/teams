@@ -36,9 +36,9 @@
                   {"team": "{{team.key()}}"})
         .done(function(data) {
           $("#team_total_dollars").text("$" + addCommas(
-              data["teamTotalCents"]/100));
+              Math.floor(data["teamTotalCents"]/100)));
           $("#team_total_pledges").text("" + data["teamPledges"]);
-          var total_dollars = data["totalCents"]/100;
+          var total_dollars = Math.floor(data["totalCents"]/100);
           total_dollars = total_dollars - ALREADY_BANKED;
           var progress = Math.floor((total_dollars * 100) / GOAL_DOLLARS);
           $("#total_dollars").text("$" + addCommas(total_dollars));
