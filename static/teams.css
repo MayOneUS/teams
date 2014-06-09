@@ -135,6 +135,7 @@
   border: 1px solid #9dbbc8;
   padding: 4px;
   height: 40px;
+  margin-top: 20px;
   margin-bottom: 0;
   -webkit-box-shadow: none;
   -moz-box-shadow: none;
@@ -197,7 +198,7 @@
   background: 50% 0 no-repeat;
   background-size: contain;
   position: relative;
-  margin-bottom: 100px;
+  margin-bottom: 50px;
 }
 .pledgepage #pledgecol-sidebar .social-icons a:after {
   position: absolute;
@@ -225,6 +226,40 @@
 }
 .pledgepage #pledgecol-sidebar .social-icons a.email:after {
   content: "Share with \A Email";
+}
+.pledgepage #pledgecol-sidebar .input-group {
+  width: 100%;
+  margin-left: 0;
+  margin-right: 0;
+}
+.pledgepage #pledgecol-sidebar .input-group .input-group-addon {
+  float: left;
+  width: 10%;
+}
+.pledgepage #pledgecol-sidebar .input-group input {
+  width: 90%;
+}
+@media all and (max-width: 420px) {
+  .pledgepage #pledgecol-sidebar .input-group input {
+    width: 85%;
+  }
+}
+.pledgepage #pledgecol-sidebar #donation-type {
+  clear: both;
+}
+.pledgepage #pledgecol-sidebar .spinner {
+  position: absolute;
+  top: -40px;
+  right:0;
+  bottom: 0;
+  left: 0;
+  background-image: url(/static/danger-spinner.gif);
+  background-repeat: no-repeat;
+  background-position: center;
+}
+.pledgepage #pledgecol-sidebar form button {
+  margin-top: 0px;
+  height: 63px;
 }
 form ul.errors {
   color: red;
@@ -320,4 +355,3 @@ p.markdown-note {
   text-decoration: none;
   color: #fff;
 }
-
