@@ -323,6 +323,22 @@ class TeamHandler(TeamBaseHandler):
         description_rendered=markdown.markdown(
             jinja2.escape(team.description)))
 
+class TeamHandler2(TeamBaseHandler):
+  def get(self, slug):
+    team, primary, is_admin = self.validate(slug)
+    if team is None:
+      return
+    if not primary:
+      return self.redirect("/t/%s" % team.primary_slug, permanent=True)
+    if is_admin:
+      edit_url = "/t/%s/edit" % team.primary_slug
+    else:
+      edit_url = None
+    self.render_template(
+        "show_team2.html", team=team, edit_url=edit_url,
+        description_rendered=markdown.markdown(
+            jinja2.escape(team.description)))
+
 
 class LoginHandler(BaseHandler):
   def get(self):
@@ -506,6 +522,7 @@ class SiteAdminTeams(AdminHandler):
 
 app = webapp2.WSGIApplication(config_NOCOMMIT.auth_service.handlers() + [
   (r'/t/([^/]+)/?', TeamHandler),
+  (r'/t2/([^/]+)/?', TeamHandler2),  
   (r'/t/([^/]+)/edit?', EditTeamHandler),
   (r'/login/?', LoginHandler),
   (r'/dashboard/?', DashboardHandler),
