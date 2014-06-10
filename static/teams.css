@@ -13,7 +13,7 @@
   }
 }
 .flag-header {
-  background: #204659 url(flag-header.jpg) center top;
+  background: #005983;
   height: 158px;
 }
 .flag-header * {
@@ -191,7 +191,7 @@
   font-size: 36px;
   margin-top: 0;
 }
-.pledgepage #pledgecol-sidebar .social-icons a, .share-page .social-icons a{
+.pledgepage #pledgecol-sidebar .social-icons a {
   display: inline-block;
   width: 32%;
   padding-top: 65px;
@@ -200,7 +200,7 @@
   position: relative;
   margin-bottom: 50px;
 }
-.pledgepage #pledgecol-sidebar .social-icons a:after, .share-page .social-icons a:after {
+.pledgepage #pledgecol-sidebar .social-icons a:after, {
   position: absolute;
   top: 100%;
   color: #8eb0bf;
@@ -209,22 +209,22 @@
   white-space: pre;
   left: 0;
 }
-.pledgepage #pledgecol-sidebar .social-icons a.twitter, .share-page .social-icons a.twitter {
+.pledgepage #pledgecol-sidebar .social-icons a.twitter, {
   background-image: url(social/twitter.png);
 }
-.pledgepage #pledgecol-sidebar .social-icons a.twitter:after, .share-page .social-icons a.twitter:after {
+.pledgepage #pledgecol-sidebar .social-icons a.twitter:after,  {
   content: "Share with \A Twitter";
 }
-.pledgepage #pledgecol-sidebar .social-icons a.facebook, .share-page .social-icons a.facebook {
+.pledgepage #pledgecol-sidebar .social-icons a.facebook, {
   background-image: url(social/facebook.png);
 }
-.pledgepage #pledgecol-sidebar .social-icons a.facebook:after, .share-page .social-icons a.facebook:after {
+.pledgepage #pledgecol-sidebar .social-icons a.facebook:after,  {
   content: "Share with \A Facebook";
 }
-.pledgepage #pledgecol-sidebar .social-icons a.email, .share-page .social-icons a.email {
+.pledgepage #pledgecol-sidebar .social-icons a.email, {
   background-image: url(social/email.png);
 }
-.pledgepage #pledgecol-sidebar .social-icons a.email:after, .share-page .social-icons a.email:after {
+.pledgepage #pledgecol-sidebar .social-icons a.email:after,  {
   content: "Share with \A Email";
 }
 .pledgepage #pledgecol-sidebar .input-group {
@@ -354,4 +354,107 @@ p.markdown-note {
   background: #b73230;
   text-decoration: none;
   color: #fff;
+}
+
+.share-page .social-icons{
+  margin: 25px 0 0 0;
+  text-align:center;
+}
+
+.share-page .social-icons a.twitter {
+  width: 270px;
+  height: 60px;
+  line-height: 58px;
+  font-size: 20px;
+  display: inline-block;
+  color: #fff;
+  margin: 0 0 10px 0;
+  border-radius: 5px;
+  text-align: center;
+  background: rgb(145,208,247); /* Old browsers */
+  background: -moz-linear-gradient(top,  rgba(145,208,247,1) 0%, rgba(64,151,204,1) 68%); /* FF3.6+ */
+  background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,rgba(145,208,247,1)), color-stop(68%,rgba(64,151,204,1))); /* Chrome,Safari4+ */
+  background: -webkit-linear-gradient(top,  rgba(145,208,247,1) 0%,rgba(64,151,204,1) 68%); /* Chrome10+,Safari5.1+ */
+  background: -o-linear-gradient(top,  rgba(145,208,247,1) 0%,rgba(64,151,204,1) 68%); /* Opera 11.10+ */
+  background: -ms-linear-gradient(top,  rgba(145,208,247,1) 0%,rgba(64,151,204,1) 68%); /* IE10+ */
+  background: linear-gradient(to bottom,  rgba(145,208,247,1) 0%,rgba(64,151,204,1) 68%); /* W3C */
+  filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#91d0f7', endColorstr='#4097cc',GradientType=0 ); /* IE6-9 */
+}
+
+.share-page .social-icons a.email {
+  width: 270px;
+  height: 60px;
+  line-height: 58px;
+  font-size: 20px;
+  display: inline-block;
+  color: #fff;
+  margin: 0 0 10px 0;
+  border-radius: 5px;
+  text-align: center;
+  background: rgb(125,126,125); /* Old browsers */
+  background: -moz-linear-gradient(top,  rgba(125,126,125,1) 0%, rgba(14,14,14,1) 100%); /* FF3.6+ */
+  background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,rgba(125,126,125,1)), color-stop(100%,rgba(14,14,14,1))); /* Chrome,Safari4+ */
+  background: -webkit-linear-gradient(top,  rgba(125,126,125,1) 0%,rgba(14,14,14,1) 100%); /* Chrome10+,Safari5.1+ */
+  background: -o-linear-gradient(top,  rgba(125,126,125,1) 0%,rgba(14,14,14,1) 100%); /* Opera 11.10+ */
+  background: -ms-linear-gradient(top,  rgba(125,126,125,1) 0%,rgba(14,14,14,1) 100%); /* IE10+ */
+  background: linear-gradient(to bottom,  rgba(125,126,125,1) 0%,rgba(14,14,14,1) 100%); /* W3C */
+  filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#7d7e7d', endColorstr='#0e0e0e',GradientType=0 ); /* IE6-9 */
+
+}
+
+.share-page .social-icons a.facebook {
+  width: 270px;
+  height: 60px;
+  line-height: 58px;
+  font-size: 20px;
+  display: inline-block;
+  background: #3664a2;
+  color: #fff;
+  margin: 0 0 10px 0;
+  border-radius: 5px;
+  text-align: center;
+}
+
+.share-page-header {
+  font-size: 20px;
+  max-width: 600px;
+  text-align: center;
+  margin-left:auto;
+  margin-right:auto;
+  line-height:1.5;
+}
+
+.copybox{
+  font-family:Courier New, Courier, Mono;
+  font-size: 12px;
+  padding:3px;
+  margin:3px;
+  border:inset 2px #888888;
+
+}
+
+@media all and (max-width: 450px){
+  .copybox {
+  font-family:Courier New, Courier, Mono;
+  font-size: 12px;
+  padding:3px;
+  margin:3px;
+  border:solid 1px #888888;
+}
+}
+
+.copy-clipboard {
+  background: #dcdcdc url(../static/social/clipboard.png) no-repeat scroll 5px center;
+  padding:10px 10px 10px 35px;
+  font-size:10px;
+  text-decoration:none;
+  border:inset 1px #000;
+  color:#000;
+  -webkit-border-radius: 3px;
+  -moz-border-radius: 3px;
+  border-radius: 3px;
+}
+.copy-clipboard:hover {
+  text-decoration:none;
+  color:#000;
 }

@@ -14,14 +14,18 @@
     <h1>Share your Pledge Page</h1>
   </div>
   <div class="page-body share-page">
-        <h2>The URL for your pledge page is: {{team_url}}</h2>
+      <P class="share-page-header">Your Pledge Page URL: <BR />
+          <span name="copytext" class="copybox">{{team_url}}</span>
+          <!-- function clipBoard(); not yet written -->
+          <a class="copy-clipboard" href="#" onClick="clipBoard(); return false;">Copy&nbsp;to&nbsp;Clipboard</a></P>
+      </h2>
           <!-- social buttons -->
           <div class="social-icons">
-            <a href="https://twitter.com/intent/tweet?text={{
+            <a class="twitter" href="https://twitter.com/intent/tweet?text={{
               ("Money has corrupted our democracy. I pledged to fix it. Check out my #MAYDAYUS page -- " + team_url) | urlencode }}"
-                class="twitter" target="_blank"></a>
-            <a href="http://www.facebook.com/sharer.php?u={{team_url|urlencode}}" class="facebook" target="_blank"></a>
-            <a href="mailto:?to=&subject={{"Money has corrupted our democracy"|urlencode}}&body={{("""Friend,
+                class="twitter" target="_blank">Share on Twitter</a><BR />
+            <a class="facebook" href="http://www.facebook.com/sharer.php?u={{team_url|urlencode}}" class="facebook" target="_blank">Share on Facebook</a><BR />
+            <a class="email" href="mailto:?to=&subject={{"Money has corrupted our democracy"|urlencode}}&body={{("""Friend,
 
 Money has corrupted our democracy. Now what?
 
@@ -33,7 +37,7 @@ Visit my page at MAYDAY.US -- A grassroots political experiment created to fix g
 Please join me and other Americans who want to shift the influence of money in politics.
 
 Thank you,
-""" + team.title)|urlencode}}" class="email" target="_blank"></a>
+""" + team.title)|urlencode}}" class="email" target="_blank">Share via Email</a>
           </div>
         </div>    
   </div>
