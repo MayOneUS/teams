@@ -37,9 +37,9 @@
                   {"team": "{{team.key()}}"})
         .done(function(data) {
           $("#team_total_dollars").text("$" + addCommas(
-              data["teamTotalCents"]/100));
+              Math.round(data["teamTotalCents"]/100)));
           $("#team_total_pledges").text("" + data["teamPledges"]);
-          var total_dollars = data["totalCents"]/100;
+          var total_dollars = Math.floor(data["totalCents"]/100);
           total_dollars = total_dollars - ALREADY_BANKED;
           var progress = Math.floor((total_dollars * 100) / GOAL_DOLLARS);
           $("#total_dollars").text("$" + addCommas(total_dollars));
@@ -121,6 +121,23 @@
         </div>
 
         <div class="col-md-4" id="pledgecol-sidebar">
+        
+
+          <!-- page stats -->
+          <div class="panel panel-default">
+            <div class="panel-heading">
+              <h3 class="panel-title">This page</h3>
+            </div>
+            <div class="panel-body">
+              <H6>AMOUNT RAISED</H6>
+              <H5 class="amount" id="team_total_dollars"></h5>
+
+              <H6>PLEDGES</H6>
+              <H5 class="pledges" id="team_total_pledges"></h5>
+
+            </div>
+          </div>
+          
           <!-- progress bar -->
           <div class="progress">
             <div class="progress-bar" role="progressbar" aria-valuenow="0"
@@ -135,23 +152,9 @@
             <div class="clearfix"></div>
           </div>
 
-          <!-- page stats -->
-          <div class="panel panel-default">
-            <div class="panel-heading">
-              <h3 class="panel-title">Page Stats</h3>
-            </div>
-            <div class="panel-body">
-              <H6>AMOUNT RAISED</H6>
-              <H5 class="amount" id="team_total_dollars"></h5>
-
-              <H6>PLEDGES</H6>
-              <H5 class="pledges" id="team_total_pledges"></h5>
-
-            </div>
-          </div>
-
           <!-- social buttons -->
-          <div class="social-icons">
+          <!-- style is here only while this is a test page.  Then move to css file -->
+          <div class="social-icons" style="margin-top:20px">
             <a href="https://twitter.com/intent/tweet?text={{
               ("Money has corrupted our democracy. I pledged to fix it. Check out my #MAYDAYUS page -- " + current_url) | urlencode }}"
                 class="twitter" target="_blank"></a>
@@ -171,10 +174,10 @@ Thank you,
 """ + team.title)|urlencode}}" class="email" target="_blank"></a>
           </div>
           <form role="form" method="POST" ng-submit="ctrl.pledge()">
-            <div class="form-group col-sm-6"><label class="control-label">Email</label><input type="email" required placeholder="smith@example.com" ng-model="ctrl.form.email" class="form-control input-lg"></div>
-            <div class="form-group col-sm-6"><label class="control-label">Phone Number <span class="label label-default">Optional</span></label><input type="tel" placeholder="(212) 867-5309" ng-model="ctrl.form.phone" class="form-control input-lg"></div>
-            <div class="form-group col-sm-6"><label class="control-label">Occupation</label><input type="text" required placeholder="Gardener, Railroad Worker, etc" ng-model="ctrl.form.occupation" class="form-control input-lg"></div>
-            <div class="form-group col-sm-6"><label class="control-label">Employer</label><input type="text" required placeholder="Nintendo, UPS, Self, etc" ng-model="ctrl.form.employer" class="form-control input-lg"></div>
+            <div class="form-group col-sm-12"><label class="control-label">Email</label><input type="email" required placeholder="smith@example.com" ng-model="ctrl.form.email" class="form-control input-lg"></div>
+            <div class="form-group col-sm-12"><label class="control-label">Phone Number <span class="label label-default">Optional</span></label><input type="tel" placeholder="(212) 867-5309" ng-model="ctrl.form.phone" class="form-control input-lg"></div>
+            <div class="form-group col-sm-12"><label class="control-label">Occupation</label><input type="text" required placeholder="Gardener, Railroad Worker, etc" ng-model="ctrl.form.occupation" class="form-control input-lg"></div>
+            <div class="form-group col-sm-12"><label class="control-label">Employer</label><input type="text" required placeholder="Nintendo, UPS, Self, etc" ng-model="ctrl.form.employer" class="form-control input-lg"></div>
             <div class="form-group col-sm-12">
               <label class="control-label">Who to Fund?</label>
               <select ng-model="ctrl.form.target" class="form-control input-lg">
