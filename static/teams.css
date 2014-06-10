@@ -191,7 +191,7 @@
   font-size: 36px;
   margin-top: 0;
 }
-.pledgepage #pledgecol-sidebar .social-icons a {
+.pledgepage #pledgecol-sidebar .social-icons a, .share-page .social-icons a{
   display: inline-block;
   width: 32%;
   padding-top: 65px;
@@ -200,7 +200,7 @@
   position: relative;
   margin-bottom: 50px;
 }
-.pledgepage #pledgecol-sidebar .social-icons a:after {
+.pledgepage #pledgecol-sidebar .social-icons a:after, .share-page .social-icons a:after {
   position: absolute;
   top: 100%;
   color: #8eb0bf;
@@ -209,22 +209,22 @@
   white-space: pre;
   left: 0;
 }
-.pledgepage #pledgecol-sidebar .social-icons a.twitter {
+.pledgepage #pledgecol-sidebar .social-icons a.twitter, .share-page .social-icons a.twitter {
   background-image: url(social/twitter.png);
 }
-.pledgepage #pledgecol-sidebar .social-icons a.twitter:after {
+.pledgepage #pledgecol-sidebar .social-icons a.twitter:after, .share-page .social-icons a.twitter:after {
   content: "Share with \A Twitter";
 }
-.pledgepage #pledgecol-sidebar .social-icons a.facebook {
+.pledgepage #pledgecol-sidebar .social-icons a.facebook, .share-page .social-icons a.facebook {
   background-image: url(social/facebook.png);
 }
-.pledgepage #pledgecol-sidebar .social-icons a.facebook:after {
+.pledgepage #pledgecol-sidebar .social-icons a.facebook:after, .share-page .social-icons a.facebook:after {
   content: "Share with \A Facebook";
 }
-.pledgepage #pledgecol-sidebar .social-icons a.email {
+.pledgepage #pledgecol-sidebar .social-icons a.email, .share-page .social-icons a.email {
   background-image: url(social/email.png);
 }
-.pledgepage #pledgecol-sidebar .social-icons a.email:after {
+.pledgepage #pledgecol-sidebar .social-icons a.email:after, .share-page .social-icons a.email:after {
   content: "Share with \A Email";
 }
 .pledgepage #pledgecol-sidebar .input-group {
