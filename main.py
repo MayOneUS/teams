@@ -339,6 +339,15 @@ class TeamHandler2(TeamBaseHandler):
         description_rendered=markdown.markdown(
             jinja2.escape(team.description)))
 
+class ShareTeamHandler(TeamBaseHandler):
+  def get(self, slug):
+    team, primary, is_admin = self.validate(slug)
+    if team is None:
+      return
+    else:
+      team_url = "https://my.mayday.us/t/" + team.primary_slug
+      self.render_template(
+          "share_team.html", team=team, team_url=team_url)
 
 class LoginHandler(BaseHandler):
   def get(self):
@@ -524,6 +533,7 @@ app = webapp2.WSGIApplication(config_NOCOMMIT.auth_service.handlers() + [
   (r'/t/([^/]+)/?', TeamHandler),
   (r'/t2/([^/]+)/?', TeamHandler2),  
   (r'/t/([^/]+)/edit?', EditTeamHandler),
+  (r'/t/([^/]+)/share?', ShareTeamHandler),  
   (r'/login/?', LoginHandler),
   (r'/dashboard/?', DashboardHandler),
   (r'/dashboard/new/?', NewTeamHandler),
