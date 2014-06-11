@@ -14,8 +14,16 @@
 }
 .flag-header {
   background: #005983;
+  background-image:url(flag-header.jpg);
+  background-position: top center;
   height: 158px;
 }
+
+.flag-header-share {
+  background: #005983;
+  height: 158px;
+}
+
 .flag-header * {
   font-family: "HelveticaNeue", "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif;
 }
@@ -381,6 +389,12 @@ p.markdown-note {
   filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#91d0f7', endColorstr='#4097cc',GradientType=0 ); /* IE6-9 */
 }
 
+.share-page .social-icons a.twitter:hover{
+   -moz-box-shadow:    inset 0 0 10px #FFFF99;
+   -webkit-box-shadow: inset 0 0 10px #FFFF99;
+   box-shadow:         inset 0 0 10px #FFFF99;
+}
+
 .share-page .social-icons a.email {
   width: 270px;
   height: 60px;
@@ -401,6 +415,12 @@ background: linear-gradient(to bottom, rgba(59,103,158,1) 0%,rgba(43,136,217,1) 
 filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#3b679e', endColorstr='#7db9e8',GradientType=0 ); /* IE6-9 */
 }
 
+.share-page .social-icons a.email:hover{
+   -moz-box-shadow:    inset 0 0 10px #FFFF99;
+   -webkit-box-shadow: inset 0 0 10px #FFFF99;
+   box-shadow:         inset 0 0 10px #FFFF99;
+}
+
 .share-page .social-icons a.facebook {
   width: 270px;
   height: 60px;
@@ -412,6 +432,12 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#3b679e', end
   margin: 0 0 10px 0;
   border-radius: 5px;
   text-align: center;
+}
+
+.share-page .social-icons a.facebook:hover{
+   -moz-box-shadow:    inset 0 0 10px #FFFF99;
+   -webkit-box-shadow: inset 0 0 10px #FFFF99;
+   box-shadow:         inset 0 0 10px #FFFF99;
 }
 
 .share-page-header {
@@ -428,19 +454,10 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#3b679e', end
   font-size: 12px;
   padding:3px;
   margin:3px;
-  border:inset 2px #888888;
-
+  width:270px;
+  text-align:center;
 }
 
-@media all and (max-width: 450px){
-  .copybox {
-  font-family:Courier New, Courier, Mono;
-  font-size: 12px;
-  padding:3px;
-  margin:3px;
-  border:solid 1px #888888;
-}
-}
 
 .copy-clipboard {
   background: #dcdcdc url(../static/social/clipboard.png) no-repeat scroll 5px center;

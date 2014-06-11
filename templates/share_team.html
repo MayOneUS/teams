@@ -1,4 +1,4 @@
-{% extends "includes/base.html" %}
+{% extends "includes/sharebase.html" %}
 {% block head %}
   <!-- for facebook sharing -->
   <meta property="og:image" content="https://mayday.us/images/share_preview.jpg"/>
@@ -10,12 +10,12 @@
 {% endblock %}        
 
 {% block body %}
-  <div class="page-header">
-    <h1>Share your Pledge Page</h1>
+  <div class="share-page-header">
+    <h2>Share your Pledge Page</h2>
   </div>
   <div class="page-body share-page">
       <P class="share-page-header">Your Pledge Page URL: <BR />
-          <span name="copytext" class="copybox">{{team_url}}</span>
+          <input type="text" name="copytext" value="{{team_url}}" class="copybox"></span>
           <!-- function clipBoard(); not yet written 
           <a class="copy-clipboard" href="#" onClick="clipBoard(); return false;">Copy&nbsp;to&nbsp;Clipboard</a>--></P>
       </h2>
@@ -23,8 +23,8 @@
           <div class="social-icons">
             <a class="twitter" href="https://twitter.com/intent/tweet?text={{
               ("Money has corrupted our democracy. I pledged to fix it. Check out my #MAYDAYUS page -- " + team_url) | urlencode }}"
-                class="twitter" target="_blank">Share on Twitter</a><BR />
-            <a class="facebook" href="http://www.facebook.com/sharer.php?u={{team_url|urlencode}}" class="facebook" target="_blank">Share on Facebook</a><BR />
+                class="twitter" target="_blank"><img src="/static/social/share_twitter.png"></a><BR />
+            <a class="facebook" href="http://www.facebook.com/sharer.php?u={{team_url|urlencode}}" class="facebook" target="_blank"><img src="/static/social/share_facebook.png"></a><BR />
             <a class="email" href="mailto:?to=&subject={{"Money has corrupted our democracy"|urlencode}}&body={{("""Friend,
 
 Money has corrupted our democracy. Now what?
@@ -37,7 +37,7 @@ Visit my page at MAYDAY.US -- A grassroots political experiment created to fix g
 Please join me and other Americans who want to shift the influence of money in politics.
 
 Thank you,
-""" + team.title)|urlencode}}" class="email" target="_blank">Share via Email</a>
+""" + team.title)|urlencode}}" class="email" target="_blank"><img src="/static/social/share_email.png"></a>
           </div>
         </div>    
   </div>
