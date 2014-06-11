@@ -7,6 +7,7 @@ import re
 import urllib
 import urlparse
 
+import requests
 import jinja2
 import markdown
 import webapp2
@@ -58,6 +59,12 @@ But I'd like to see if I can recruit ten of my friends to donate. So my question
 will you be one of those ten?
 
 {signature}
+"""
+
+DEFAULT_THANKYOU_SUBJECT = u"""
+"""
+
+DEFAULT_THANKYOU_MESSAGE = u"""
 """
 
 
@@ -217,6 +224,17 @@ class TeamForm(wtforms.Form):
   zip_code = ZipcodeField("Zip Code", [wtforms.validators.optional()])
 
 
+class ThankYouForm(wtforms.Form):
+  reply_to = wtforms.StringField("Reply-To Email Address", [
+      wtforms.validators.Length(min=1, max=100)], default=DEFAULT_THANKYOU_SUBJECT)
+  subject = wtforms.StringField("Message Subject", [
+      wtforms.validators.Length(min=1, max=150)], default=DEFAULT_THANKYOU_SUBJECT)
+  message_body = wtforms.TextAreaField("Message Body",
+      [wtforms.validators.Length(min=1, max=500)],
+      default=DEFAULT_THANKYOU_MESSAGE)
+  new_members = wtforms.BooleanField("New Members Only", [], default=True)
+
+
 class Slug(db.Model):
   # the key is the slug name
   team = db.ReferenceProperty(Team, required=True)
@@ -316,10 +334,12 @@ class TeamHandler(TeamBaseHandler):
       return self.redirect("/t/%s" % team.primary_slug, permanent=True)
     if is_admin:
       edit_url = "/t/%s/edit" % team.primary_slug
+      thank_url = "/t/%s/thank" % team.primary_slug
     else:
       edit_url = None
+      thank_url = None
     self.render_template(
-        "show_team.html", team=team, edit_url=edit_url,
+        "show_team.html", team=team, edit_url=edit_url, thank_url=thank_url,
         description_rendered=markdown.markdown(
             jinja2.escape(team.description)))
 
@@ -332,10 +352,12 @@ class TeamHandler2(TeamBaseHandler):
       return self.redirect("/t/%s" % team.primary_slug, permanent=True)
     if is_admin:
       edit_url = "/t/%s/edit" % team.primary_slug
+      thank_url = "/t/%s/thank" % team.primary_slug
     else:
       edit_url = None
+      thank_url = None
     self.render_template(
-        "show_team2.html", team=team, edit_url=edit_url,
+        "show_team2.html", team=team, edit_url=edit_url, thank_url=thank_url,
         description_rendered=markdown.markdown(
             jinja2.escape(team.description)))
 
@@ -490,6 +512,41 @@ class EditTeamHandler(TeamBaseHandler):
     self.redirect("/t/%s" % team.primary_slug)
 
 
+class ThankTeamHandler(TeamBaseHandler):
+  # require_login unneeded because we do the checking ourselves with validate
+  def get(self, slug):
+    team, primary, is_admin = self.validate(slug)
+    if team is None:
+      return
+    if not primary:
+      return self.redirect("/t/%s/edit" % team.primary_slug, permanent=True)
+    if not is_admin:
+      return self.redirect("/t/%s" % team.primary_slug)
+    self.render_template("thank_team.html", form=ThankYouForm(obj=team))
+
+  # require_login unneeded because we do the checking ourselves with validate
+  def post(self, slug):
+    team, _, is_admin = self.validate(slug)
+    if team is None:
+      return
+    if not is_admin:
+      return self.redirect("/t/%s" % team.primary_slug)
+    form = ThankYouForm(self.request.POST)
+    if not form.validate():
+      return self.render_template("thank_team.html", form=form)
+
+    import pdb; pdb.trace()
+
+    data = form.data.copy()
+    data["team"] = team.key()
+    print data
+    r = requests.post("https://pledge.mayday.us/r/thank", data=json.dumps(data))
+    if r.ok:
+      self.redirect("/t/%s" % team.primary_slug)
+    else:
+      return self.render_template("thank_team.html", form=form)
+
+
 class AdminHandler(webapp2.RequestHandler):
   def render_template(self, template, **data):
     self.response.write(JINJA.get_template(template).render(data))
@@ -531,9 +588,10 @@ class SiteAdminTeams(AdminHandler):
 
 app = webapp2.WSGIApplication(config_NOCOMMIT.auth_service.handlers() + [
   (r'/t/([^/]+)/?', TeamHandler),
-  (r'/t2/([^/]+)/?', TeamHandler2),  
+  (r'/t2/([^/]+)/?', TeamHandler2),
   (r'/t/([^/]+)/edit?', EditTeamHandler),
-  (r'/t/([^/]+)/share?', ShareTeamHandler),  
+  (r'/t/([^/]+)/share?', ShareTeamHandler),
+  (r'/t/([^/]+)/thank?', ThankTeamHandler),
   (r'/login/?', LoginHandler),
   (r'/dashboard/?', DashboardHandler),
   (r'/dashboard/new/?', NewTeamHandler),
