@@ -376,7 +376,7 @@ p.markdown-note {
   font-size: 20px;
   display: inline-block;
   color: #fff;
-  margin: 0 0 10px 0;
+  margin: 0 0 20px 0;
   border-radius: 5px;
   text-align: center;
   background: rgb(145,208,247); /* Old browsers */
@@ -402,7 +402,7 @@ p.markdown-note {
   font-size: 20px;
   display: inline-block;
   color: #fff;
-  margin: 0 0 10px 0;
+  margin: 0 0 20px 0;
   border-radius: 5px;
   text-align: center;
 background: rgb(59,103,158); /* Old browsers */
@@ -429,7 +429,7 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#3b679e', end
   display: inline-block;
   background: #3664a2;
   color: #fff;
-  margin: 0 0 10px 0;
+  margin: 0 0 20px 0;
   border-radius: 5px;
   text-align: center;
 }
