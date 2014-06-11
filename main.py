@@ -7,7 +7,6 @@ import re
 import urllib
 import urlparse
 
-import requests
 import jinja2
 import markdown
 import webapp2
@@ -535,15 +534,23 @@ class ThankTeamHandler(TeamBaseHandler):
     if not form.validate():
       return self.render_template("thank_team.html", form=form)
 
-    import pdb; pdb.trace()
-
     data = form.data.copy()
     data["team"] = team.key()
-    print data
-    r = requests.post("https://pledge.mayday.us/r/thank", data=json.dumps(data))
-    if r.ok:
+
+    payload = urllib.urlencode(data)
+
+    url = "https://pledge.mayday.us/r/thank"
+    # url = "https://localhost:54995/r/thank"
+
+    result = urlfetch.fetch(url=url,
+      payload=payload,
+      method=urlfetch.POST,
+      validate_certificate=False)
+
+    if result.status_code == 200:
       self.redirect("/t/%s" % team.primary_slug)
     else:
+      form.errors = result.content
       return self.render_template("thank_team.html", form=form)
 
 
