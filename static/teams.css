@@ -474,3 +474,8 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#3b679e', end
   text-decoration:none;
   color:#000;
 }
+
+#loginButtons .btn {
+  font-size:24px;
+  margin-top: 2px;
+}

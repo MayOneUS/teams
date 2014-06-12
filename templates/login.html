@@ -5,7 +5,7 @@
   </div>
   <div class="login_options">
     <div class="text-center">
-      <div class="btn-group-vertical">
+      <div class="btn-group-vertical" id="loginButtons">
         {% if login_links %}
           {% for service, service_link in login_links.iteritems() %}
             <a class="btn btn-social btn-{{service}}" id="btn-{{service}}" href="{{service_link}}">
