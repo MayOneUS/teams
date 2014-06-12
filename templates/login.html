@@ -4,10 +4,17 @@
     To create or manage your pledge page, log in with one of the options below.
   </div>
   <div class="login_options">
-    <ul>
-      {% for service, service_link in login_links.iteritems() %}
-        <li><a href="{{service_link}}">Log in with {{service}}</a></li>
-      {% endfor %}
-    </ul>
+    <div class="text-center">
+      <div class="btn-group-vertical">
+        {% if login_links %}
+          {% for service, service_link in login_links.iteritems() %}
+            <a class="btn btn-social btn-{{service}}" id="btn-{{service}}" href="{{service_link}}">
+              <i class="fa fa-{{service}}"></i>  Log in with {{service|title}}
+            </a>
+          {% endfor %}       
+        {% endif %}
+        <!-- IDs must match what is returned from the auth service in links -->       
+      </div>
+    </div>
   </div>
 {% endblock %}
