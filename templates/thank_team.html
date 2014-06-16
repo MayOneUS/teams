@@ -7,6 +7,11 @@
   <div class="page-body">
     <form method="post">
       <div class="container">
+        {% if error %}
+        <div class='alert alert-danger'>
+          {{error}}
+        </div>
+        {% endif %}
         <dl>
           <dt>{{form.reply_to.label}}*</dt>
           <dd>

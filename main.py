@@ -563,7 +563,6 @@ class ThankTeamHandler(TeamBaseHandler):
     payload = urllib.urlencode(data)
 
     url = self.pledge_root_url + "/r/thank"
-    # url = "https://localhost:54995/r/thank"
 
     result = urlfetch.fetch(url=url,
       payload=payload,
@@ -574,7 +573,7 @@ class ThankTeamHandler(TeamBaseHandler):
       return self.render_template("thank_team_success.html", num_sent=result.content,
         team_url="/t/%s" % team.primary_slug)
     else:
-      return self.render_template("thank_team.html", form=form)
+      return self.render_template("thank_team.html", form=form, error=result.content)
 
 
 class AdminHandler(webapp2.RequestHandler):
