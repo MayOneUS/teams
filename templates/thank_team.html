@@ -10,7 +10,7 @@
         <dl>
           <dt>{{form.reply_to.label}}*</dt>
           <dd>
-            <div>{{form.reply_to}}</div>
+            <div>{{form.reply_to(style="width: 300px; min-width: 50%; max-width: 100%;")}}</div>
             {% if form.reply_to.errors %}
               <ul class="errors">
                 {% for error in form.reply_to.errors %}
@@ -37,7 +37,7 @@
         <dl>
           <dt>{{form.subject.label}}*</dt>
           <dd>
-            <div>{{form.subject}}</div>
+            <div>{{form.subject(style="width: 300px; min-width: 50%; max-width: 100%;")}}</div>
             {% if form.subject.errors %}
               <ul class="errors">
                 {% for error in form.subject.errors %}
@@ -50,7 +50,7 @@
         <dl>
           <dt>{{form.message_body.label}}*</dt>
           <dd>
-            <div>{{form.message_body(rows=10, style="width: 100%;")}}</div>
+            <div>{{form.message_body(rows=5, style="width: 100%;")}}</div>
             {% if form.message_body.errors %}
               <ul class="errors">
                 {% for error in form.message_body.errors %}

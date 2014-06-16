@@ -61,9 +61,11 @@ will you be one of those ten?
 """
 
 DEFAULT_THANKYOU_SUBJECT = u"""
+Thank Your For Pledging to My Mayday PAC Page
 """
 
 DEFAULT_THANKYOU_MESSAGE = u"""
+Thank you for pledging in support of Mayday's campaign to get money out of politics. \
 """
 
 
@@ -224,14 +226,15 @@ class TeamForm(wtforms.Form):
 
 
 class ThankYouForm(wtforms.Form):
-  reply_to = wtforms.StringField("Reply-To Email Address", [
-      wtforms.validators.Length(min=1, max=100)], default=DEFAULT_THANKYOU_SUBJECT)
+  reply_to = wtforms.StringField("Your Email Address", [
+      wtforms.validators.Length(min=1, max=100)])
   subject = wtforms.StringField("Message Subject", [
       wtforms.validators.Length(min=1, max=150)], default=DEFAULT_THANKYOU_SUBJECT)
   message_body = wtforms.TextAreaField("Message Body",
       [wtforms.validators.Length(min=1, max=500)],
       default=DEFAULT_THANKYOU_MESSAGE)
-  new_members = wtforms.BooleanField("New Members Only", [], default=True)
+  new_members = wtforms.BooleanField("Send to new contributors only (have not \
+    previsously received a thank you message)", [], default=True)
 
 
 class Slug(db.Model):
