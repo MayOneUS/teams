@@ -1,7 +1,8 @@
 import json
+import logging
 
+import urllib
 from google.appengine.api import urlfetch
-
 
 class TestPledgeService(object):
   def loadPledgeInfo(self, user_token):
@@ -22,7 +23,15 @@ class ProdPledgeService(object):
 
   def fetcher(self, url):
     return urlfetch.fetch(url, follow_redirects=False,
-                          validate_certificate=True)
+                          validate_certificate=True)      
+                        
+  def poster(self, url, post_data):
+    post_data_encoded = urllib.urlencode(post_data)
+    return urlfetch.fetch(url, follow_redirects=False,
+                          validate_certificate=False, 
+                          method=urlfetch.POST, 
+                          payload=post_data_encoded,
+                          headers={'Content-Type': 'application/x-www-form-urlencoded'}) 
 
   def loadPledgeInfo(self, user_token):
     resp = self.fetcher("%s/user-info/%s" % (self.url, user_token))
@@ -39,3 +48,19 @@ class ProdPledgeService(object):
           resp.content)
     return tuple(map(int,
         resp.content.replace("(", "").replace(")", "").split(",")))
+     
+  def updateMailchimp(self, team):
+    user_info = self.loadPledgeInfo(team.user_token)       
+    #logging.info("UT: " + str(team.user_token))
+    #logging.info("UI: " + str(user_info))
+    if user_info:
+      form_fields = {
+        "email": user_info['email'],
+        "pledgePageSlug": team.primary_slug,
+      }
+      url="%s/r/subscribe" % self.url
+      #logging.info("OK we are posting:" + str(form_fields))      
+      result = self.poster(url=url, post_data=form_fields)
+      return result
+    else:
+      return None

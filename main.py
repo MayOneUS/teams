@@ -6,11 +6,14 @@ import os
 import re
 import urllib
 import urlparse
+import logging
+import traceback
 
 import jinja2
 import markdown
 import webapp2
 import wtforms
+
 from wtforms.fields.html5 import IntegerField
 from wtforms.widgets.html5 import URLInput
 
@@ -382,7 +385,13 @@ class NewTeamHandler(BaseHandler):
                        zip_code=form.zip_code.data)
     # TODO: can i reference a team before putting it in other reference
     # properties? should check
-    team.primary_slug = Slug.new(team)
+    team.primary_slug = Slug.new(team)    
+    try:
+      result = config_NOCOMMIT.pledge_service.updateMailchimp(team) 
+    except Exception as e:
+      logging.error('Exception updating mailChimp: ' + str(e))
+      logging.info(traceback.format_exc())
+
     team.put()
     makeUserAdmin(self.current_user["user_id"], team)
     return self.redirect("/t/%s" % team.primary_slug)
@@ -444,7 +453,12 @@ class NewFromPledgeHandler(FromPledgeBaseHandler):
     else:
       form.populate_obj(team)
     self.add_to_user(team)
-    team.primary_slug = Slug.new(team)
+    team.primary_slug = Slug.new(team)  
+    try:
+      result = config_NOCOMMIT.pledge_service.updateMailchimp(team) 
+    except Exception as e:
+      logging.error('Exception updating mailChimp: ' + str(e))
+      logging.info(traceback.format_exc())
     team.put()
     if self.logged_in:
       return self.redirect("/t/%s" % team.primary_slug)
@@ -486,6 +500,12 @@ class EditTeamHandler(TeamBaseHandler):
       return self.render_template("edit_team.html", form=form)
     form.populate_obj(team)
     team.primary_slug = Slug.new(team)
+    try:
+      result = config_NOCOMMIT.pledge_service.updateMailchimp(team) 
+    except Exception as e:
+      logging.error('Exception updating mailChimp: ' + str(e))
+      logging.info(traceback.format_exc())
+  
     team.put()
     self.redirect("/t/%s" % team.primary_slug)
 
