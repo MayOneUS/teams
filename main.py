@@ -548,7 +548,8 @@ class ThankTeamHandler(TeamBaseHandler):
       validate_certificate=False)
 
     if result.status_code == 200:
-      self.redirect("/t/%s" % team.primary_slug)
+      return self.render_template("thank_team_success.html", num_sent=result.content,
+        team_url="/t/%s" % team.primary_slug)
     else:
       form.errors = result.content
       return self.render_template("thank_team.html", form=form)
