@@ -12,11 +12,11 @@
             {% if login_links %}
               {% for service, service_link in login_links.iteritems() %}
                 <a class="btn btn-social btn-{{service}}" id="btn-{{service}}" href="{{service_link}}">
-                  <i class="fa fa-{{service}}"></i>  Log in with {{service|title}}
+                  <i class="fa fa-{{service}}"></i> Log in with {{service|title}}
                 </a>
-              {% endfor %}       
+              {% endfor %}
             {% endif %}
-            <!-- IDs must match what is returned from the auth service in links -->          
+            <!-- IDs must match what is returned from the auth service in links -->
           </div>
         </div>
       </div>
