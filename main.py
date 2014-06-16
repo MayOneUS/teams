@@ -562,7 +562,7 @@ class ThankTeamHandler(TeamBaseHandler):
 
     payload = urllib.urlencode(data)
 
-    url = "https://pledge.mayday.us/r/thank"
+    url = self.pledge_root_url + "/r/thank"
     # url = "https://localhost:54995/r/thank"
 
     result = urlfetch.fetch(url=url,
