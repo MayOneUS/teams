@@ -574,7 +574,6 @@ class ThankTeamHandler(TeamBaseHandler):
       return self.render_template("thank_team_success.html", num_sent=result.content,
         team_url="/t/%s" % team.primary_slug)
     else:
-      form.errors = result.content
       return self.render_template("thank_team.html", form=form)
 
 
