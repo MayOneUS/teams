@@ -229,8 +229,9 @@ class TeamForm(wtforms.Form):
 
 
 class ThankYouForm(wtforms.Form):
-  reply_to = wtforms.EmailField("Your Email Address", [
-      wtforms.validators.Length(min=1, max=100)])
+  reply_to = wtforms.StringField("Your Email Address", [
+    wtforms.validators.Email(message='Please enter a valid email.'),
+    wtforms.validators.Length(min=1, max=100)])
   subject = wtforms.StringField("Message Subject", [
       wtforms.validators.Length(min=1, max=150)], default=DEFAULT_THANKYOU_SUBJECT)
   message_body = wtforms.TextAreaField("Message Body",
