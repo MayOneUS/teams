@@ -1,0 +1,29 @@
+{% extends "includes/base.html" %}
+
+{% block body %}
+  <div class="page-header">
+    <h2>Leaderboard</h2>
+  </div>
+  <div class="page-body">
+
+    {% if logged_in %}
+      <div class="edit-menu">
+        <a href="/dashboard">Dashboard</a> |
+        <a href="/dashboard/new">New Page</a>
+      </div>
+    {% endif %}
+
+    <div class="herotext full-width">Leaderboard</div>
+
+      <ul class="teamslist">
+        {% for team in teams %}
+          <li>{{team.position}}. <a href="/t/{{team.primary_slug}}/">{{team.title}}</a> - {{team.amount}}</li>
+        {% endfor %}
+      </ul>
+
+      {% if prev_link %}<a href="{{prev_link}}">Previous</a> {% if next_link %} | {% endif %}{% endif %}
+      {% if next_link %}<a href="{{next_link}}">Next</a>{% endif %}
+
+    </div>
+  </div>
+{% endblock %}
