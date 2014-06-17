@@ -69,6 +69,8 @@ Thank Your For Pledging to My Mayday PAC Page
 
 DEFAULT_THANKYOU_MESSAGE = u"""
 Thank you for pledging in support of Mayday's campaign to get money out of politics. \
+
+You can reach me by replying to this email.
 """
 
 
