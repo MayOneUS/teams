@@ -27,7 +27,8 @@ JINJA = jinja2.Environment(
   loader=jinja2.FileSystemLoader('templates/'),
   extensions=['jinja2.ext.autoescape'],
   autoescape=True)
-JINJA.filters["urlencode"] = lambda s: urllib.quote(s, safe="")
+JINJA.filters["urlencode"] = \
+    lambda s: urllib.quote(s.encode('ascii', errors='ignore'), safe="")
 
 YOUTUBE_ID_VALIDATOR = re.compile(r'^[\w\-]+$')
 INVALID_SLUG_CHARS = re.compile(r'[^\w-]')
