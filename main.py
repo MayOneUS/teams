@@ -295,7 +295,38 @@ class IndexHandler(BaseHandler):
   def get(self):
     if self.logged_in:
       return self.redirect("/dashboard")
+    # TODO: once we're happy with the leaderboard, change the /login redirect
+    #  to a leaderboard redirect
     return self.redirect("/login")
+
+
+class LeaderboardHandler(BaseHandler):
+  def get(self):
+    offset = int(self.request.get("offset") or 0)
+    limit = int(self.request.get("limit") or 25)
+    leaderboard = config_NOCOMMIT.pledge_service.getLeaderboard(
+        offset=offset, limit=limit)
+    teams = []
+    for idx, team_data in enumerate(leaderboard):
+      team = Team.get(db.Key(team_data["team"]))
+      if team is None:
+        continue
+      teams.append({
+          "amount": int(team_data["total_cents"] / 100),
+          "title": team.title,
+          "primary_slug": team.primary_slug,
+          "position": 1 + offset + idx})
+    prev_link, next_link = None, None
+    if offset > 0:
+      prev_link = "?%s" % urllib.urlencode({
+          "offset": max(offset - limit, 0),
+          "limit": limit})
+    if len(teams) == limit:
+      next_link = "?%s" % urllib.urlencode({
+          "offset": offset + limit,
+          "limit": limit})
+    self.render_template("leaderboard.html", teams=teams,
+        prev_link=prev_link, next_link=next_link)
 
 
 class NotFoundHandler(BaseHandler):
@@ -634,4 +665,5 @@ app = webapp2.WSGIApplication(config_NOCOMMIT.auth_service.handlers() + [
   (r'/site-admin/csv/?', SiteAdminCSV),
   (r'/site-admin/teams.json', SiteAdminTeams),
   (r'/?', IndexHandler),
+  (r'/leaderboard/?', LeaderboardHandler),
   (r'.*', NotFoundHandler)], debug=False)

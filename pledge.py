@@ -16,6 +16,13 @@ class TestPledgeService(object):
   def getTeamTotal(self, team):
     return (51800, 7)
 
+  def getLeaderboard(self, offset=None, limit=None):
+    return [{"total_cents": 100,
+             "team": "ahRkZXZ-bWF5ZGF5LXBhYy10ZWFtc3IRCxIEVGVhbRiAgICAgICACgw"}] * limit
+
+  def updateMailchimp(self, team):
+    return None
+
 
 class ProdPledgeService(object):
   def __init__(self, url):
@@ -48,7 +55,20 @@ class ProdPledgeService(object):
           resp.content)
     return tuple(map(int,
         resp.content.replace("(", "").replace(")", "").split(",")))
-     
+
+  def getLeaderboard(self, offset=None, limit=None):
+    params = {}
+    if offset is not None:
+      params["offset"] = offset
+    if limit is not None:
+      params["limit"] = limit
+    resp = self.fetcher("%s/r/leaderboard?%s" % (
+        self.url, urllib.urlencode(params)))
+    if resp.status_code != 200:
+      raise Exception("unexpected leaderboard error %d: %s", resp.status_code,
+          resp.content)
+    return json.loads(resp.content)["teams"]
+
   def updateMailchimp(self, team):
     user_info = self.loadPledgeInfo(team.user_token)       
     #logging.info("UT: " + str(team.user_token))
