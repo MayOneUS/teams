@@ -17,7 +17,7 @@
 
       <ul class="teamslist">
         {% for team in teams %}
-          <li>{{team.position}}. <a href="/t/{{team.primary_slug}}/">{{team.title}}</a> - {{team.amount}}</li>
+          <li>{{team.position}}. <a href="/t/{{team.primary_slug}}/">{{team.title}}</a> - ${{team.amount}}</li>
         {% endfor %}
       </ul>
 

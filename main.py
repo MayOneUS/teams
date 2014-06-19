@@ -295,9 +295,7 @@ class IndexHandler(BaseHandler):
   def get(self):
     if self.logged_in:
       return self.redirect("/dashboard")
-    # TODO: once we're happy with the leaderboard, change the /login redirect
-    #  to a leaderboard redirect
-    return self.redirect("/login")
+    return self.redirect("/leaderboard")
 
 
 class LeaderboardHandler(BaseHandler):
@@ -308,6 +306,8 @@ class LeaderboardHandler(BaseHandler):
         offset=offset, limit=limit)
     teams = []
     for idx, team_data in enumerate(leaderboard):
+      if team_data["total_cents"] == 0:
+          continue
       team = Team.get(db.Key(team_data["team"]))
       if team is None:
         continue
