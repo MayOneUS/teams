@@ -295,7 +295,7 @@ class IndexHandler(BaseHandler):
   def get(self):
     if self.logged_in:
       return self.redirect("/dashboard")
-    return self.redirect("/leaderboard")
+    return self.redirect("/login")
 
 
 class LeaderboardHandler(BaseHandler):
