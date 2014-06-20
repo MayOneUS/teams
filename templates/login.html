@@ -1,20 +1,38 @@
 {% extends "includes/base.html" %}
 {% block body %}
+  
   <div class="login_text">
-    To create or manage your pledge page, log in with one of the options below.
-  </div>
-  <div class="login_options">
-    <div class="text-center">
-      <div class="btn-group-vertical" id="loginButtons">
-        {% if login_links %}
-          {% for service, service_link in login_links.iteritems() %}
-            <a class="btn btn-social btn-{{service}}" id="btn-{{service}}" href="{{service_link}}">
-              <i class="fa fa-{{service}}"></i>  Log in with {{service|title}}
-            </a>
-          {% endfor %}       
-        {% endif %}
-        <!-- IDs must match what is returned from the auth service in links -->       
+    <h1>This is <u>your</u> SuperPAC.</h1> 
+    <h2>We're going to fix american democracy only if we do it together. Create your own pledge page and put your personal story of why you're interested in this issue and share it through your network. </h2>
+    <h2 class="call-to-login">Log in now to create or manage your pledge page:</h2>
+
+      <div class="login_options">
+          <div class="btn-group-vertical" id="loginButtons">
+            {% if login_links %}
+              {% for service, service_link in login_links.iteritems() %}
+                <a class="login-btn btn-social btn-{{service}}" id="btn-{{service}}" href="{{service_link}}">
+                  <i class="fa fa-{{service}}"></i> with {{service|title}}
+                </a>
+              {% endfor %}       
+            {% endif %}
+            <!-- IDs must match what is returned from the auth service in links -->       
+          </div>
       </div>
-    </div>
+
+
+
+
+  </div>
+
+  <div class="login_leaderboard">
+    <h2>Top 5 pledge pages:</h2>
+    <ol>
+      <li><a href="#">/v\atthew</a><span>$10000</span></li>
+      <li><a href="#">David Bergendahl</a><span>$5600</span></li>
+      <li><a href="#">Curtis Cole </a><span>$2500</span></li>
+      <li><a href="#">Jan Avent</a><span>$1375</span></li>
+      <li><a href="#">William S. Smillie</a><span>$1280</span></li>
+    </ol>
+    <p>Check out top 5 most succesful pledge pages</p>
   </div>
 {% endblock %}

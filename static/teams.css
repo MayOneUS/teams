@@ -281,18 +281,68 @@ p.markdown-note {
   font-style: italic;
 }
 
-.login-text {
-  width: 275px;
-  margin: 0 auto;
-  padding: 30px 0 10px 0;
-  text-align: center;
-  color: #555;
+
+/* LOG IN */
+
+
+.login_text { 
+  float: left;
+  width: 750px;
+  margin: 50px 30px 0 0;
 }
 
-.login_options {
-  text-align: center;
-  padding: 30px 11px 50px;
+.login_leaderboard {
+  float: left;
+  width: 360px;
+  margin: 158px 0 75px 0;
 }
+
+
+.login_text h1 { 
+  font-weight: bold;
+  font-size: 35px;
+  margin-bottom: 50px;
+}
+
+.login_text h2,
+.login_leaderboard h2 { 
+  font-size: 25px;
+  line-height: 33px;
+  margin: 0 20px 30px 0;
+}
+
+.login_text h2.call-to-login { 
+  font-weight: bold;
+  color: #d2393c;
+  letter-spacing: -0.01em;
+}
+
+
+
+
+.login-btn {
+  width: 269px;
+  border-radius: 3px;
+  color: white;
+  font-weight: bold;
+  font-size: 23px;
+  padding: 10px;
+  float: left; 
+  margin: 4px;
+  text-align: left
+}
+
+.login-btn:hover {
+  text-decoration: none;
+}
+
+.login-btn i { 
+  float: left;
+  margin: 6px 16px 0 8px;
+  width: 25px;
+  text-align: center;
+}
+
 
 .login_options h2 {
   font-size: 1.5em;
@@ -327,6 +377,42 @@ p.markdown-note {
 .login_options ul a:hover {
   text-decoration: none;
 }
+
+
+.login_leaderboard ol {
+  margin: 0 0 20px;
+  padding: 0;
+  font-size: 23px;
+  list-style-position:inside;
+}
+
+
+.login_leaderboard ol li {
+  border-bottom: solid 1px #eaebec;
+  padding: 6px 0;
+}
+
+.login_leaderboard ol li a {
+  font-weight: bold;
+  display: inline-block;
+  width: 230px;
+}
+
+.login_leaderboard ol li span {
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
 
 .footer {
   background: #c6c8ca;
