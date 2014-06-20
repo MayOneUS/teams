@@ -247,6 +247,7 @@
 .pledgepage #pledgecol-sidebar .input-group .input-group-addon {
   float: left;
   width: 10%;
+  line-height: 1.4 !important;
 }
 .pledgepage #pledgecol-sidebar .input-group input {
   width: 90%;
