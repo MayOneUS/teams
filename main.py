@@ -238,7 +238,7 @@ class ThankYouForm(wtforms.Form):
   subject = wtforms.StringField("Message Subject", [
       wtforms.validators.Length(min=1, max=150)], default=DEFAULT_THANKYOU_SUBJECT)
   message_body = wtforms.TextAreaField("Message Body",
-      [wtforms.validators.Length(min=1, max=5000)],
+      [wtforms.validators.Length(min=1, max=10000)],
       default=DEFAULT_THANKYOU_MESSAGE)
   new_members = wtforms.BooleanField("Send to new contributors only (have not \
     previsously received a thank you message)", [], default=True)
