@@ -18,21 +18,18 @@
             <!-- IDs must match what is returned from the auth service in links -->       
           </div>
       </div>
-
-
-
-
   </div>
-
-  <div class="login_leaderboard">
-    <h2>Top 5 pledge pages:</h2>
-    <ol>
-      <li><a href="#">/v\atthew</a><span>$10000</span></li>
-      <li><a href="#">David Bergendahl</a><span>$5600</span></li>
-      <li><a href="#">Curtis Cole </a><span>$2500</span></li>
-      <li><a href="#">Jan Avent</a><span>$1375</span></li>
-      <li><a href="#">William S. Smillie</a><span>$1280</span></li>
-    </ol>
-    <p>Check out top 5 most succesful pledge pages</p>
-  </div>
+  {% if teams %}
+    <div class="login_leaderboard">
+      <h2>Top pledge pages:</h2>
+      {% for team in teams %}
+        <li>{{team.position}}. <a href="/t/{{team.primary_slug}}/">{{team.title}}</a><span>${{team.amount}}</span></li>
+      {% endfor %}
+      <p>Check out the most succesful pledge pages</p>
+      <p>
+        {% if prev_link %}<a href="{{prev_link}}">Previous</a> {% if next_link %} | {% endif %}{% endif %}
+        {% if next_link %}<a href="{{next_link}}">Next</a>{% endif %}
+      </p>
+    </div>
+  {% endif %}
 {% endblock %}
