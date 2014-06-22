@@ -22,9 +22,11 @@
   {% if teams %}
     <div class="login_leaderboard">
       <h2>Top pledge pages:</h2>
-      {% for team in teams %}
-        <li>{{team.position}}. <a href="/t/{{team.primary_slug}}/">{{team.title}}</a><span>${{team.amount}}</span></li>
-      {% endfor %}
+      <ol>
+        {% for team in teams %}
+          <li>{{team.position}}. <a href="/t/{{team.primary_slug}}/">{{team.title}}</a><span>${{team.amount}}</span></li>
+        {% endfor %}
+      </ol>
       <p>Check out the most succesful pledge pages</p>
       <p>
         {% if prev_link %}<a href="{{prev_link}}">Previous</a> {% if next_link %} | {% endif %}{% endif %}

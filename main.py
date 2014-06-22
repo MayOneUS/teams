@@ -661,8 +661,8 @@ class SiteAdminTeams(AdminHandler):
 
 
 app = webapp2.WSGIApplication(config_NOCOMMIT.auth_service.handlers() + [
-  (r'/t/([^/]+)/?', TeamHandler),
-  (r'/t2/([^/]+)/?', TeamHandler2),
+  (r'/t2/([^/]+)/?', TeamHandler),
+  (r'/t/([^/]+)/?', TeamHandler2),
   (r'/t/([^/]+)/edit?', EditTeamHandler),
   (r'/t/([^/]+)/share?', ShareTeamHandler),
   (r'/t/([^/]+)/thank?', ThankTeamHandler),
