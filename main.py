@@ -615,8 +615,8 @@ class ThankTeamHandler(TeamBaseHandler):
       validate_certificate=False)
 
 
-    if result.status_code == 200:
-      if result.content_type == 'application/json':
+    if result.status_code == 200:        
+      if result.headers["Content-Type"]  == 'application/json':
         response_data = json.loads(result.content)
         num_emailed = response_data["num_emailed"]
         total_pledges = response_data["total_pledges"]
