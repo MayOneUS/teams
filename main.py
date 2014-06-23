@@ -65,7 +65,7 @@ will you be one of those ten?
 """
 
 DEFAULT_THANKYOU_SUBJECT = u"""
-Thank Your For Pledging to My Mayday PAC Page
+Thank You For Pledging to My Mayday PAC Page
 """
 
 DEFAULT_THANKYOU_MESSAGE = u"""
