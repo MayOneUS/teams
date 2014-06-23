@@ -616,13 +616,9 @@ class ThankTeamHandler(TeamBaseHandler):
 
 
     if result.status_code == 200:        
-      if result.headers["Content-Type"]  == 'application/json':
-        response_data = json.loads(result.content)
-        num_emailed = response_data["num_emailed"]
-        total_pledges = response_data["total_pledges"]
-      else:
-        num_emailed = result.content
-        total_pledges = None
+      response_data = json.loads(result.content)
+      num_emailed = response_data["num_emailed"]
+      total_pledges = response_data["total_pledges"]
 
       return self.render_template("thank_team_success.html",
         num_emailed=num_emailed,
