@@ -56,7 +56,30 @@
         });
       };
       reload();
-      setInterval(reload, 15000);
+      // this genrates too many requests for not much reason
+      // setInterval(reload, 15000);
+      
+      var update_pledgers = function() {
+        $.getJSON("https://pledge.mayday.us/r/pledgers",
+                  {"team": "{{team.key()}}"})
+        .done(function(data) {
+          if (data["pledgers"].length == 0) {
+            $("#pledger-list").hide();
+            return;
+          }
+          $("#pledger-list").show();
+          var html = "";
+          $.each(data["pledgers"], function(_, name) {
+            html += "<li>" + $('<div/>').text(name).html() + "</li>";
+          });
+          $("#pledger-list ul").html(html);
+        });
+      };
+
+      $("#pledger-list").hide();
+      {% if edit_url %}
+        update_pledgers();
+      {% endif %}      
     });
   </script>
   <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.2.15/angular.min.js"></script>
@@ -119,6 +142,15 @@
               class="pledge-link">
             <button class="btn">Pledge Now</button>
           </a>
+          
+            <div id="pledger-list">
+              <h3>Pledgers</h3>
+              <ul>
+                <!-- filled in with js -->
+              </ul>
+            </div>
+          </div>
+          
         </div>
 
         <div class="col-md-4" id="pledgecol-sidebar">
