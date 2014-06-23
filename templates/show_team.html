@@ -56,6 +56,28 @@
       };
       reload();
       setInterval(reload, 15000);
+
+      var update_pledgers = function() {
+        $.getJSON("https://pledge.mayday.us/r/pledgers",
+                  {"team": "{{team.key()}}"})
+        .done(function(data) {
+          if (data["pledgers"].length == 0) {
+            $("#pledger-list").hide();
+            return;
+          }
+          $("#pledger-list").show();
+          var html = "";
+          $.each(data["pledgers"], function(_, name) {
+            html += "<li>" + $('<div/>').text(name).html() + "</li>";
+          });
+          $("#pledger-list ul").html(html);
+        });
+      };
+
+      $("#pledger-list").hide();
+      {% if edit_url %}
+        update_pledgers();
+      {% endif %}
     });
   </script>
 {% endblock %}
@@ -172,6 +194,13 @@ Please join me and other Americans who want to shift the influence of money in p
 
 Thank you,
 """ + team.title)|urlencode}}" class="email" target="_blank"></a>
+          </div>
+
+          <div id="pledger-list">
+            <h3>Pledgers</h3>
+            <ul>
+              <!-- filled in with js -->
+            </ul>
           </div>
         </div>
 
