@@ -614,8 +614,19 @@ class ThankTeamHandler(TeamBaseHandler):
       method=urlfetch.POST,
       validate_certificate=False)
 
+
     if result.status_code == 200:
-      return self.render_template("thank_team_success.html", num_sent=result.content,
+      if result.content_type == 'application/json':
+        response_data = json.loads(result.content)
+        num_emailed = response_data["num_emailed"]
+        total_pledges = response_data["total_pledges"]
+      else:
+        num_emailed = result.content
+        total_pledges = None
+
+      return self.render_template("thank_team_success.html",
+        num_emailed=num_emailed,
+        total_pledges=total_pledges,
         team_url="/t/%s" % team.primary_slug)
     else:
       return self.render_template("thank_team.html", form=form, error=result.content)
