@@ -590,3 +590,7 @@ p.markdown-note {
   font-size: 24px;
   margin-top: 2px;
 }
+
+#rules {
+  padding:10px;
+}
