@@ -298,9 +298,9 @@ class IndexHandler(BaseHandler):
     return self.redirect("/login")
 
 
-def leaderboardGetter(offset, limit):
+def leaderboardGetter(offset, limit, orderBy):
   leaderboard = config_NOCOMMIT.pledge_service.getLeaderboard(
-      offset=offset, limit=limit)
+      offset=offset, limit=limit, orderBy=orderBy)
   teams = []
   for idx, team_data in enumerate(leaderboard):
     if team_data["total_cents"] == 0:
@@ -317,19 +317,22 @@ def leaderboardGetter(offset, limit):
   if offset > 0:
     prev_link = "?%s" % urllib.urlencode({
         "offset": max(offset - limit, 0),
-        "limit": limit})
+        "limit": limit,
+        "orderBy": orderBy})
   if len(teams) == limit:
     next_link = "?%s" % urllib.urlencode({
         "offset": offset + limit,
-        "limit": limit})
+        "limit": limit,
+        "orderBy": orderBy})
   return teams, prev_link, next_link
           
 class LeaderboardHandler(BaseHandler):
   def get(self):
     offset = int(self.request.get("offset") or 0)
     limit = int(self.request.get("limit") or 25)
-    
-    teams, prev_link, next_link = leaderboardGetter(offset, limit)
+    orderBy = self.request.get("orderBy") or "-totalCents"
+        
+    teams, prev_link, next_link = leaderboardGetter(offset, limit, orderBy)
     self.render_template("leaderboard.html", teams=teams,
         prev_link=prev_link, next_link=next_link)
 
@@ -424,7 +427,7 @@ class LoginHandler(BaseHandler):
     offset = int(self.request.get("offset") or 0)
     limit = int(self.request.get("limit") or 5)
     
-    teams, prev_link, next_link = leaderboardGetter(offset, limit)
+    teams, prev_link, next_link = leaderboardGetter(offset, limit, '-num_pledges')
     self.render_template("login.html", teams=teams,
         prev_link=prev_link, next_link=next_link) 
 

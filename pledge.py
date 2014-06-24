@@ -56,12 +56,15 @@ class ProdPledgeService(object):
     return tuple(map(int,
         resp.content.replace("(", "").replace(")", "").split(",")))
 
-  def getLeaderboard(self, offset=None, limit=None):
+  def getLeaderboard(self, offset=None, limit=None, orderBy=None):
     params = {}
     if offset is not None:
       params["offset"] = offset
     if limit is not None:
       params["limit"] = limit
+    if orderBy is not None:
+      params["orderBy"] = orderBy
+    
     resp = self.fetcher("%s/r/leaderboard?%s" % (
         self.url, urllib.urlencode(params)))
     if resp.status_code != 200:
