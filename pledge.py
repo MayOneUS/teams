@@ -16,8 +16,9 @@ class TestPledgeService(object):
   def getTeamTotal(self, team):
     return (51800, 7)
 
-  def getLeaderboard(self, offset=None, limit=None):
+  def getLeaderboard(self, offset=None, limit=None, orderBy=None):
     return [{"total_cents": 100,
+             "num_pledges": 2,
              "team": "ahRkZXZ-bWF5ZGF5LXBhYy10ZWFtc3IRCxIEVGVhbRiAgICAgICACgw"}] * limit
 
   def updateMailchimp(self, team):
