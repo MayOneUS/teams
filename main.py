@@ -310,6 +310,7 @@ def leaderboardGetter(offset, limit, orderBy):
       continue
     teams.append({
         "amount": int(team_data["total_cents"] / 100),
+        "num_pledges":int(team_data["num_pledges"]),
         "title": team.title,
         "primary_slug": team.primary_slug,
         "position": 1 + offset + idx})
