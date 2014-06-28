@@ -260,6 +260,7 @@ class Slug(db.Model):
   @staticmethod
   def new(team):
     slug_name = MULTIDASH_RE.sub('-', INVALID_SLUG_CHARS.sub('-', team.title))
+    slug_name = slug_name.rstrip('-')
     token_amount = SLUG_TOKEN_AMOUNT
     while True:
       slug_prefix = os.urandom(token_amount).encode('hex')
