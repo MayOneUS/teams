@@ -22,15 +22,30 @@
   {% if teams %}
     <div class="login_leaderboard">
       <h2>Top pledge pages:</h2>
+      <div class="choice_by_what">
+        <span {% if orderBy == '-totalCents' %}class="active"{% endif %}>
+          {% if orderBy == '-num_pledges' %}
+            <a href='/login?orderBy=-totalCents'>By raised amount</a>
+          {% else %}
+            By raised amount
+          {% endif %}
+        </span>
+        <span {% if orderBy == '-num_pledges' %}class="active"{% endif %}>
+          {% if orderBy == '-totalCents' %}      
+            <a href='/login?orderBy=-num_pledges'>By number of contributions</a>
+          {% else %}
+            By number of contributions
+          {% endif %}
+        </span>
+      </div>
       <ol>
         {% for team in teams %}
           <li>{{team.position}}. <a href="/t/{{team.primary_slug}}/">{{team.title}}</a><span>${{team.amount}}</span></li>
         {% endfor %}
       </ol>
-      <p>Check out the most succesful pledge pages</p>
       <p>
-        {% if prev_link %}<a href="{{prev_link}}">Previous</a> {% if next_link %} | {% endif %}{% endif %}
-        {% if next_link %}<a href="{{next_link}}">Next</a>{% endif %}
+        {% if prev_link %}<a href="{{prev_link}}">Previous</a> {% endif %}
+        {% if next_link %}<a href="{{next_link}}" class="next">Next</a>{% endif %}
       </p>
     </div>
   {% endif %}

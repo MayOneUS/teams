@@ -307,6 +307,7 @@ def leaderboardGetter(offset, limit, orderBy):
         continue
     team = Team.get(db.Key(team_data["team"]))
     if team is None:
+
       continue
     teams.append({
         "amount": int(team_data["total_cents"] / 100),
@@ -324,7 +325,9 @@ def leaderboardGetter(offset, limit, orderBy):
     next_link = "?%s" % urllib.urlencode({
         "offset": offset + limit,
         "limit": limit,
-        "orderBy": orderBy})
+        "orderBy": orderBy}) 
+  logging.info('T1')
+  logging.info(teams)
   return teams, prev_link, next_link
           
 class LeaderboardHandler(BaseHandler):
@@ -335,8 +338,22 @@ class LeaderboardHandler(BaseHandler):
         
     teams, prev_link, next_link = leaderboardGetter(offset, limit, orderBy)
     self.render_template("leaderboard.html", teams=teams,
-        prev_link=prev_link, next_link=next_link)
+        prev_link=prev_link, next_link=next_link, orderBy=orderBy)
 
+
+class LoginHandler(BaseHandler):
+  def get(self):    
+    if self.logged_in:
+      return self.redirect("/dashboard")
+    
+    offset = int(self.request.get("offset") or 0)
+    limit = int(self.request.get("limit") or 5)
+    orderBy = self.request.get("orderBy") or "-num_pledges"
+    
+    teams, prev_link, next_link = leaderboardGetter(offset, limit, orderBy)
+
+    self.render_template("login.html", teams=teams,
+        prev_link=prev_link, next_link=next_link, orderBy=orderBy)
 
 class NotFoundHandler(BaseHandler):
   def get(self):
@@ -420,17 +437,6 @@ class ShareTeamHandler(TeamBaseHandler):
       self.render_template(
           "share_team.html", team=team, team_url=team_url)
 
-class LoginHandler(BaseHandler):
-  def get(self):    
-    if self.logged_in:
-      return self.redirect("/dashboard")
-    
-    offset = int(self.request.get("offset") or 0)
-    limit = int(self.request.get("limit") or 5)
-    
-    teams, prev_link, next_link = leaderboardGetter(offset, limit, '-num_pledges')
-    self.render_template("login.html", teams=teams,
-        prev_link=prev_link, next_link=next_link) 
 
 class DashboardHandler(BaseHandler):
   @require_login

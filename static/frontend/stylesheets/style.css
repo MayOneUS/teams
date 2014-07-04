@@ -722,6 +722,91 @@ display:inline;
 
 }
 
+.teamslist {
+  margin: 0;
+  padding: 0;
+}
+ 
+.teamslist li{
+  font-size: 30px;
+  list-style-type: none;
+  padding: 3px 0;
+  margin: 0;
+  border-bottom: solid 1px #f1f1f1;
+}
+ 
+.teamslist li a {
+  width: 45%;
+  display: inline-block;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
+  vertical-align: top;
+}
+ 
+.teamslist li span:first-child {
+  width: 120px;
+  text-align: left;
+}
+ 
+.teamslist li span:last-child {
+  float: right;
+  font-size: 19px;
+  line-height: 35px;
+}
+ 
+.leaderboard_choice_by_what {
+  margin: 21px 0px;
+}
+ 
+ .leaderboard_choice_by_what span {
+  margin-right: 20px;
+  color: #428bca;
+  border-bottom: dashed 1px blue;
+  cursor: pointer;
+}
+ 
+ .leaderboard_choice_by_what span:hover {
+  border-bottom-style: solid;
+}
+ 
+.leaderboard_choice_by_what span.active {
+  color: black;
+  border: 0;
+  cursor: default;
+}
+ 
+p.prevnext a {
+  display: inline-block;
+  padding: 8px 15px;
+  background: #F1F1F1;
+  border-radius: 3px;
+  margin-top: 15px;
+  font-size: 22px;
+}
+ 
+p.prevnext a.next {
+  float: right;
+}
+ 
+.teamslist li:first-child{
+  margin-top:20px;
+}
+ 
+.teamslist li:hover {
+  background: #fdfdfd;
+}
+ 
+.teamslist {
+  margin-bottom:20px;
+}
+ 
+.dashboard-intro{
+  margin-top:20px;
+  font-size:20px;
+}
+
+
 .description {
   color:white;
   font-weight:300;
