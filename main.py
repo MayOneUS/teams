@@ -308,7 +308,6 @@ def leaderboardGetter(offset, limit, orderBy):
         continue
     team = Team.get(db.Key(team_data["team"]))
     if team is None:
-
       continue
     teams.append({
         "amount": int(team_data["total_cents"] / 100),
@@ -326,9 +325,7 @@ def leaderboardGetter(offset, limit, orderBy):
     next_link = "?%s" % urllib.urlencode({
         "offset": offset + limit,
         "limit": limit,
-        "orderBy": orderBy}) 
-  logging.info('T1')
-  logging.info(teams)
+        "orderBy": orderBy})
   return teams, prev_link, next_link
           
 class LeaderboardHandler(BaseHandler):

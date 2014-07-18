@@ -377,20 +377,22 @@ p.markdown-note {
   text-decoration: none;
 }
 
+
 .login_leaderboard ol {
   margin: 0 0 20px;
   padding: 0;
   font-size: 23px;
   list-style-type: none;
 }
- 
- 
+
+
 .login_leaderboard ol li {
   border-bottom: solid 1px #eaebec;
   padding: 14px 0;
   line-height: 22px;
 }
  
+
 .login_leaderboard ol li a {
   font-weight: bold;
   display: inline-block;
@@ -401,8 +403,7 @@ p.markdown-note {
   height: 22px;
   vertical-align: top;
 }
- 
- 
+
 .login_leaderboard ol li span {
   float: right;
 }
@@ -424,6 +425,7 @@ p.markdown-note {
 .login_leaderboard p a.next {
   float: right;
 }
+
 
 
 
