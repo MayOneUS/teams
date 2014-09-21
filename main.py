@@ -140,6 +140,7 @@ class Team(db.Model):
   title = db.StringProperty(required=True)
   description = db.TextProperty(required=True)
 
+  total_people_joined = db.IntegerProperty(default=0)
   goal_dollars = db.IntegerProperty()
   youtube_id = db.StringProperty()
   zip_code = db.StringProperty()

@@ -70,7 +70,7 @@ class ProdPledgeService(object):
         self.url, urllib.urlencode(params)))
     if resp.status_code != 200:
       raise Exception("unexpected leaderboard error %d: %s", resp.status_code,
-          resp.content)
+                      resp.content)
     return json.loads(resp.content)["teams"]
 
   def updateMailchimp(self, team):
@@ -82,7 +82,7 @@ class ProdPledgeService(object):
         "email": user_info['email'],
         "pledgePageSlug": team.primary_slug,
       }
-      url="%s/r/subscribe" % self.url
+      url = "%s/r/subscribe" % self.url
       #logging.info("OK we are posting:" + str(form_fields))      
       result = self.poster(url=url, post_data=form_fields)
       return result
