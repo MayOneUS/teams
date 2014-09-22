@@ -305,6 +305,7 @@ p.markdown-note {
   font-size: 25px;
   color: white;
   text-align: center;
+  cursor: pointer;
 }
 
 .action_options a:hover {
